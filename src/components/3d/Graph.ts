@@ -10,13 +10,11 @@ import {
   MeshBasicMaterial,
   PlaneGeometry,
   SphereGeometry,
-  Sprite,
-  SpriteMaterial,
   SRGBColorSpace,
   Vector3,
 } from 'three';
 import { fitDistance, type SceneFactory } from './engine';
-import { disposeTree, glowSprite } from './common';
+import { disposeTree, glowSprite, makeLabel } from './common';
 import { ATHENA_PROFILE, SHIELD_RINGS, meanderPath } from './athena-emblem';
 
 /** An investigation as a network: subject → identifiers → findings that analysts confirm or reject. */
@@ -30,31 +28,6 @@ const PENDING = new Color(0xeab308);
 const CONFIRMED = new Color(0x22c55e);
 const REJECTED = new Color(0xef4444);
 const CYCLE = 9;
-
-function label(text: string): Sprite {
-  const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 64;
-  const g = c.getContext('2d')!;
-  g.font = '500 26px sans-serif';
-  const w = Math.min(248, g.measureText(text).width + 28);
-  g.fillStyle = 'rgba(10,16,34,0.85)';
-  g.beginPath();
-  g.roundRect((256 - w) / 2, 10, w, 42, 21);
-  g.fill();
-  g.strokeStyle = 'rgba(129,140,248,0.6)';
-  g.lineWidth = 2;
-  g.stroke();
-  g.fillStyle = '#e0e7ff';
-  g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  g.fillText(text, 128, 32);
-  const tex = new CanvasTexture(c);
-  tex.colorSpace = SRGBColorSpace;
-  const s = new Sprite(new SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
-  s.scale.set(1.1, 0.275, 1);
-  return s;
-}
 
 /** Athena's shield drawn once to a canvas: either its rim (rings + Greek key) or the goddess emblem. */
 function shieldTexture(size: number, part: 'rim' | 'emblem'): CanvasTexture {
@@ -139,7 +112,7 @@ const create: SceneFactory = (ctx) => {
     const p = new Vector3(Math.cos(th) * r * 2.1, y * 1.5, Math.sin(th) * r * 2.1);
     const node = new Mesh(nodeGeo, new MeshBasicMaterial({ color: 0xc7d2fe }));
     node.position.copy(p);
-    const tag = label(LABELS[lang][i]);
+    const tag = makeLabel(LABELS[lang][i]).sprite;
     tag.position.copy(p).add(new Vector3(0, 0.32, 0));
     net.add(node, tag, link(new Vector3(), p, 0.55));
 

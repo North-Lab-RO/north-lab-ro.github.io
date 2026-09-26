@@ -1,7 +1,12 @@
 ---
+/**
+ * Card art for each product: a ~14 s looping miniature of what the product does, in SVG and CSS only.
+ * Timing: every animated part runs on the same loop (--T) and starts at its own point in it (--at, a fraction).
+ */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { ATHENA_PROFILE, SHIELD_RINGS, meanderPath } from '../3d/athena-emblem';
+import type { Lang } from '../../i18n/ui';
 
 interface Props {
   scene: 'none' | 'globe' | 'board' | 'radar' | 'ledger' | 'graph';
@@ -9,8 +14,52 @@ interface Props {
   coverAlt?: string;
   logo?: ImageMetadata;
   gallery?: { src: ImageMetadata; alt: string }[];
+  lang?: Lang;
 }
-const { scene, cover, coverAlt = '', logo, gallery = [] } = Astro.props;
+const { scene, cover, coverAlt = '', logo, gallery = [], lang = 'en' } = Astro.props;
+
+const TXT = {
+  en: {
+    politics: 'Politics',
+    health: 'Health',
+    rising: '▲ Rising',
+    alert: '⚠ Alert · 72',
+    briefing: 'Briefing 07:00',
+    vpn: 'VPN',
+    report: 'Report',
+    ledger: 'Ledger',
+    cats: ['Groceries', 'Housing', 'Pharmacy', 'Salary', 'Transport'],
+    fill: '⚠ you fill it in',
+    budget: 'Groceries budget · 78%',
+    frame: '50 / 30 / 20',
+    local: 'Local · offline',
+    heard: 'heard ✓',
+    day: 'Day 3 / 10',
+    lab: 'DNA',
+    verdict: 'CONVICTED',
+  },
+  ro: {
+    politics: 'Politică',
+    health: 'Sănătate',
+    rising: '▲ În creștere',
+    alert: '⚠ Alertă · 72',
+    briefing: 'Sinteză 07:00',
+    vpn: 'VPN',
+    report: 'Raport',
+    ledger: 'Registru',
+    cats: ['Alimente', 'Locuință', 'Farmacie', 'Salariu', 'Transport'],
+    fill: '⚠ completezi tu',
+    budget: 'Buget alimente · 78%',
+    frame: '50 / 30 / 20',
+    local: 'Local · offline',
+    heard: 'auzit ✓',
+    day: 'Ziua 3 / 10',
+    lab: 'ADN',
+    verdict: 'CONDAMNAT',
+  },
+}[lang];
+// Width of a text chip in user units, for mono text of the given size.
+const chipW = (s: string, size = 10) => Math.round([...s].length * size * 0.62 + 14);
 
 // Deterministic "globe" dots for the SVG card art.
 const dots: { x: number; y: number; o: number }[] = [];
@@ -22,13 +71,20 @@ for (let i = 0; i < 420; i++) {
   if (z < -0.1) continue;
   dots.push({ x: 200 + Math.cos(th) * r * 130, y: 150 + y * 130, o: 0.15 + z * 0.7 });
 }
+// COUNSELOR: the lead story (politics) and other stories in their real category colours.
 const story = { x: 236, y: 104 };
+const otherStories = [
+  { x: 150, y: 118, c: '#4dffb8' }, // health
+  { x: 292, y: 168, c: '#fbbf24' }, // economy
+  { x: 178, y: 206, c: '#ff5a6a' }, // military
+  { x: 118, y: 186, c: '#fb923c' }, // energy
+];
 const sources = [
   [98, 180], [130, 62], [300, 190], [210, 250], [320, 96], [150, 230], [262, 38],
 ];
 const polaroids = gallery.slice(0, 3);
-// Ledger rows for the Banky art: widths of the description and amount bars, and whether the guard passed them.
-// Network art for ATHENA: subject in the middle, identifiers around it, findings on the outside.
+
+// ATHENA: subject in the middle, identifiers around it, findings on the outside.
 const netNodes = Array.from({ length: 8 }, (_, i) => {
   const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
   return { x: 200 + Math.cos(a) * 92, y: 150 + Math.sin(a) * 76, a };
@@ -41,14 +97,38 @@ const netFinds = netNodes.flatMap((n, i) =>
     state: (i + k) % 4 === 1 ? 'rej' : (i + k) % 3 === 0 ? 'pend' : 'ok',
   })),
 );
+// collectors in the corners send their searches to the nearest identifier
+const collectors = [
+  { label: 'Web', x: 40, y: 26 },
+  { label: 'DNS', x: 360, y: 26 },
+  { label: 'Social', x: 40, y: 276 },
+  { label: 'Image', x: 360, y: 276 },
+].map((c) => {
+  const n = netNodes.reduce((a, b) => (Math.hypot(b.x - c.x, b.y - c.y) < Math.hypot(a.x - c.x, a.y - c.y) ? b : a));
+  return { ...c, dx: Math.round(n.x - c.x), dy: Math.round(n.y - c.y) };
+});
+
+// BANKY: rows of a scanned statement: description width, amount width, and whether the guard passed them.
 const ledgerRows = [
-  [0.46, 0.18, true],
-  [0.3, 0.14, true],
-  [0.52, 0.2, false],
-  [0.38, 0.16, true],
-  [0.44, 0.22, true],
-  [0.28, 0.12, true],
+  [0.62, 0.3, true],
+  [0.4, 0.22, true],
+  [0.7, 0.34, false],
+  [0.5, 0.26, true],
+  [0.58, 0.3, true],
+  [0.36, 0.2, true],
 ] as const;
+let okIndex = -1;
+const ledgerPlan = ledgerRows.map(([, , ok], i) => ({ ok, slot: ok ? ++okIndex : -1, at: 0.06 + i * 0.07 }));
+
+// AI_ATC: traffic coloured by wake category, as on the product's map.
+const wake = { heavy: '#f87171', medium: '#60a5fa', light: '#4ade80', super: '#e879f9' };
+const blips: [number, number, string][] = [
+  [70, 96, wake.heavy],
+  [220, 70, wake.medium],
+  [238, 208, wake.medium],
+  [96, 222, wake.light],
+  [196, 112, wake.super],
+];
 ---
 
 <div class:list={['visual', `v-${scene}`]}>
@@ -68,25 +148,94 @@ const ledgerRows = [
             <circle cx={x} cy={y} r="3" fill="var(--color-frost)" />
           </>
         ))}
-        <circle cx={story.x} cy={story.y} r="6" fill="var(--color-aurora)" class="story" />
+        {otherStories.map((s) => (
+          <circle cx={s.x} cy={s.y} r="4.5" fill={s.c} class="soft" />
+        ))}
+        {/* trends rising: the lead story's spike grows as sources join */}
+        <line x1={story.x} y1={story.y} x2={story.x} y2={story.y - 48} stroke="#9a8cff" stroke-width="3" stroke-linecap="round" class="anim growY" style="--at:.04" />
+        <circle cx={story.x} cy={story.y} r="6" fill="#9a8cff" class="story" />
+        {/* alert: importance crosses the threshold */}
+        <circle cx={story.x} cy={story.y} r="12" fill="none" stroke="#ff5a6a" stroke-width="2" class="anim ring" style="--at:.44" />
+        <circle cx={story.x} cy={story.y} r="12" fill="none" stroke="#ff5a6a" stroke-width="2" class="anim ring" style="--at:.52" />
+        <g class="t">
+          <rect x={story.x + 12} y={story.y - 11} width={chipW(TXT.politics)} height="18" rx="9" class="chip" stroke="#9a8cff" />
+          <text x={story.x + 12 + chipW(TXT.politics) / 2} y={story.y + 2} fill="#9a8cff">{TXT.politics}</text>
+          <rect x={150 - chipW(TXT.health) / 2} y="92" width={chipW(TXT.health)} height="18" rx="9" class="chip" stroke="#4dffb8" />
+          <text x="150" y="105" fill="#4dffb8">{TXT.health}</text>
+          <g class="anim show40" style="--at:.14">
+            <rect x={story.x - chipW(TXT.rising) / 2} y={story.y - 76} width={chipW(TXT.rising)} height="18" rx="9" class="chip" stroke="#4dffb8" />
+            <text x={story.x} y={story.y - 63} fill="#4dffb8">{TXT.rising}</text>
+          </g>
+          <g class="anim show25" style="--at:.46">
+            <rect x={story.x - chipW(TXT.alert) / 2} y={story.y + 16} width={chipW(TXT.alert)} height="18" rx="9" class="chip" stroke="#ff5a6a" />
+            <text x={story.x} y={story.y + 29} fill="#ff5a6a">{TXT.alert}</text>
+          </g>
+        </g>
+        {/* reporting: the briefing fills with the top stories */}
+        <g class="anim show40" style="--at:.6">
+          <rect x="10" y="206" width="90" height="72" rx="6" fill="#e8f3ff" />
+          <text x="18" y="222" class="t doc-title">{TXT.briefing}</text>
+          {['#9a8cff', '#4dffb8', '#fbbf24', '#ff5a6a'].map((c, i) => (
+            <g class="anim grow40" style={`--at:${0.62 + i * 0.04}`}>
+              <rect x="18" y={232 + i * 11} width="5" height="5" rx="1" fill={c} />
+              <rect x="27" y={233 + i * 11} width={52 - (i % 2) * 12} height="3" rx="1.5" fill="#0a1426" opacity=".5" />
+            </g>
+          ))}
+        </g>
       </svg>
     )
   }
   {
     scene === 'radar' && (
-      <div class="radar" aria-hidden="true">
-        <div class="sweep" />
-        <svg viewBox="0 0 300 300" class="scope">
-          {[40, 80, 120, 146].map((r) => (
-            <circle cx="150" cy="150" r={r} fill="none" stroke="var(--color-aurora)" stroke-opacity={r === 146 ? 0.5 : 0.18} />
-          ))}
-          <path d="M4 150H296M150 4V296" stroke="var(--color-aurora)" stroke-opacity=".15" />
-          <rect x="128" y="147" width="44" height="5" fill="var(--color-frost)" transform="rotate(-8 150 150)" />
-          {[[70, 96], [220, 70], [238, 208], [96, 222], [182, 118]].map(([x, y], i) => (
-            <circle cx={x} cy={y} r="3.5" fill="var(--color-aurora)" class="blip" style={`--i:${i}`} />
-          ))}
+      <>
+        <div class="radar" aria-hidden="true">
+          <div class="sweep" />
+          <svg viewBox="0 0 300 300" class="scope">
+            {[40, 80, 120, 146].map((r) => (
+              <circle cx="150" cy="150" r={r} fill="none" stroke="var(--color-aurora)" stroke-opacity={r === 146 ? 0.5 : 0.18} />
+            ))}
+            <path d="M4 150H296M150 4V296" stroke="var(--color-aurora)" stroke-opacity=".15" />
+            <rect x="124" y="147" width="52" height="6" fill="var(--color-frost)" transform="rotate(-8 150 150)" />
+            {/* the control tower beside the runway, with its beacon */}
+            <g transform="translate(160 162)">
+              <rect x="-2" y="0" width="4" height="16" fill="#0a1426" stroke="var(--color-aurora)" stroke-width="1.2" />
+              <rect x="-7" y="-6" width="14" height="6" rx="1" fill="var(--color-aurora)" fill-opacity=".35" stroke="var(--color-aurora)" stroke-width="1.2" />
+              <circle cx="0" cy="-9" r="2.2" fill="#ff5a6a" class="beacon" />
+            </g>
+            {blips.map(([x, y, c], i) => (
+              <circle cx={x} cy={y} r="4" fill={c} class="blip" style={`--i:${i}`} />
+            ))}
+          </svg>
+        </div>
+        {/* one radio exchange, as the product handles it: heard, understood, checked, answered */}
+        <svg viewBox="0 0 400 84" class="radio t" aria-hidden="true">
+          <g class="anim show60" style="--at:.02">
+            <rect x="8" y="8" width="172" height="24" rx="12" class="bubble" />
+            <text x="94" y="24">NLB204, request taxi</text>
+          </g>
+          <g class="anim show60" style="--at:.1">
+            <rect x="188" y="10" width={chipW(TXT.heard)} height="20" rx="10" class="chip" stroke="#8be9ff" />
+            <text x={188 + chipW(TXT.heard) / 2} y="24" fill="#8be9ff">{TXT.heard}</text>
+          </g>
+          <g class="anim show60" style="--at:.17">
+            <rect x="262" y="10" width="46" height="20" rx="10" class="chip" stroke="#fbbf24" />
+            <text x="285" y="24" fill="#fbbf24">TAXI</text>
+          </g>
+          <g class="anim show60" style="--at:.24">
+            <rect x="316" y="10" width="72" height="20" rx="10" class="chip" stroke="#4dffb8" />
+            <text x="352" y="24" fill="#4dffb8">✓ ✓ ✓</text>
+          </g>
+          <g class="anim show60" style="--at:.32">
+            <rect x="8" y="46" width="300" height="26" rx="13" class="bubble atc" />
+            <text x="158" y="63">NLB204, taxi via B, hold short 08R</text>
+          </g>
+          <g class="anim show60" style="--at:.34">
+            {Array.from({ length: 9 }, (_, i) => (
+              <rect x={318 + i * 8} y="50" width="4" height="18" rx="2" fill="#4dffb8" class="bar" style={`--i:${i}`} />
+            ))}
+          </g>
         </svg>
-      </div>
+      </>
     )
   }
   {
@@ -97,6 +246,28 @@ const ledgerRows = [
             <Image src={p.src} alt="" widths={[360, 540]} sizes="(min-width: 960px) 20vw, 40vw" />
           </figure>
         ))}
+        {/* the investigation: a red string between the clues, the clock, the lab, then the verdict */}
+        <svg viewBox="0 0 400 300" class="overlay t">
+          <path d="M112 36 Q160 74 208 66 Q252 46 296 27" class="anim string" style="--at:.04" />
+          <g transform="translate(14 256)">
+            <rect width={chipW(TXT.day) + 28} height="26" rx="13" class="chip dark" stroke="#e9e4d8" />
+            <circle cx="15" cy="13" r="7" fill="none" stroke="#e9e4d8" stroke-width="1.4" />
+            <line x1="15" y1="13" x2="15" y2="8" stroke="#e9e4d8" stroke-width="1.4" stroke-linecap="round" class="hand" />
+            <text x={28 + chipW(TXT.day) / 2} y="17" fill="#e9e4d8">{TXT.day}</text>
+          </g>
+          <g transform="translate(168 256)">
+            <rect width="118" height="26" rx="13" class="chip dark" stroke="#8be9ff" />
+            <text x="22" y="17" fill="#8be9ff">{TXT.lab}</text>
+            <rect x="44" y="10" width="62" height="6" rx="3" fill="#8be9ff" opacity=".2" />
+            <rect x="44" y="10" width="62" height="6" rx="3" fill="#8be9ff" class="anim grow40" style="--at:.24" />
+          </g>
+          <g class="anim stamp" style="--at:.7">
+            <g transform="translate(262 196) rotate(-12)">
+              <rect x={-chipW(TXT.verdict, 18) / 2} y="-18" width={chipW(TXT.verdict, 18)} height="36" rx="4" fill="rgba(10,6,8,0.55)" stroke="#ff5a6a" stroke-width="3" />
+              <text x="0" y="7" class="verdict">{TXT.verdict}</text>
+            </g>
+          </g>
+        </svg>
       </div>
     )
   }
@@ -126,27 +297,90 @@ const ledgerRows = [
         ))}
         <circle cx="200" cy="150" r="30" fill="#818cf8" fill-opacity=".15" class="halo" />
         <circle cx="200" cy="150" r="14" fill="#818cf8" />
+        {/* collect: each collector sends its search to an identifier */}
+        <g class="t">
+          {collectors.map((c, k) => (
+            <>
+              <circle cx={c.x} cy={c.y} r="3.5" fill="#fbbf24" class="anim travel" style={`--at:${0.02 + k * 0.04};--dx:${c.dx}px;--dy:${c.dy}px`} />
+              <circle cx={c.x} cy={c.y} r="3.5" fill="#fbbf24" class="anim travel" style={`--at:${0.2 + k * 0.04};--dx:${c.dx}px;--dy:${c.dy}px`} />
+              <rect x={c.x - chipW(c.label) / 2} y={c.y - 9} width={chipW(c.label)} height="18" rx="9" class="chip" stroke="#a5b4fc" />
+              <text x={c.x} y={c.y + 4} fill="#c7d2fe">{c.label}</text>
+            </>
+          ))}
+          <g transform="translate(200 20)">
+            <rect x="-26" y="-9" width="52" height="18" rx="9" class="chip" stroke="#4dffb8" />
+            <circle cx="-14" cy="0" r="3" fill="#4dffb8" class="beacon" />
+            <text x="6" y="4" fill="#4dffb8">{TXT.vpn}</text>
+          </g>
+          {/* report: confirmed findings go into the PDF; rejected ones never do */}
+          {[0, 1, 2].map((k) => (
+            <circle cx="200" cy="150" r="3.5" fill="#22c55e" class="anim travel" style={`--at:${0.6 + k * 0.05};--dx:162px;--dy:${-4 + k * 4}px`} />
+          ))}
+          <g transform="translate(346 124)">
+            <rect width="40" height="52" rx="4" fill="#e8f3ff" />
+            <text x="20" y="13" class="doc-title" text-anchor="middle">PDF</text>
+            {[0, 1, 2, 3].map((i) => (
+              <rect x="7" y={20 + i * 7} width={26 - (i % 2) * 8} height="3" rx="1.5" fill="#0a1426" opacity=".5" class="anim grow40" style={`--at:${0.66 + i * 0.04}`} />
+            ))}
+          </g>
+          <text x="366" y="190" fill="#c7d2fe" class="small">{TXT.report}</text>
+        </g>
       </svg>
     )
   }
   {
     scene === 'ledger' && (
-      <svg viewBox="0 0 400 300" class="art ledger" aria-hidden="true">
-        <rect x="92" y="26" width="216" height="252" rx="6" fill="var(--color-panel)" stroke="var(--color-line)" />
-        <rect x="112" y="44" width="80" height="8" rx="2" fill="var(--color-mist)" opacity=".5" />
-        <rect x="244" y="44" width="44" height="8" rx="2" fill="var(--color-violet)" opacity=".7" />
+      <svg viewBox="0 0 400 300" class="art ledger t" aria-hidden="true">
+        {/* the scanned statement */}
+        <rect x="20" y="22" width="200" height="206" rx="6" fill="var(--color-panel)" stroke="var(--color-line)" />
+        <rect x="36" y="36" width="70" height="7" rx="2" fill="var(--color-mist)" opacity=".5" />
+        <rect x="170" y="36" width="36" height="7" rx="2" fill="var(--color-violet)" opacity=".7" />
         {ledgerRows.map(([d, a, ok], i) => (
-          <g class="row" style={`--i:${i}`}>
-            <rect x="112" y={80 + i * 30} width={d * 216} height="6" rx="2" fill="var(--color-frost)" opacity=".35" />
-            <rect x={288 - a * 216} y={80 + i * 30} width={a * 216} height="6" rx="2" fill={ok ? 'var(--color-frost)' : 'var(--color-ember)'} opacity=".75" />
+          <g>
+            <rect x="36" y={62 + i * 26} width={d * 120} height="6" rx="2" fill="var(--color-frost)" opacity=".35" />
+            <rect x={206 - a * 120} y={62 + i * 26} width={a * 120} height="6" rx="2" fill={ok ? 'var(--color-frost)' : 'var(--color-ember)'} opacity=".75" />
             {ok ? (
-              <path class="mark" d={`M322 ${83 + i * 30}l5 5 9-10`} fill="none" stroke="var(--color-aurora)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+              <path class="anim tick" style={`--at:${ledgerPlan[i].at}`} d={`M226 ${64 + i * 26}l4 4 8-9`} fill="none" stroke="var(--color-aurora)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
             ) : (
-              <path class="mark" d={`M323 ${77 + i * 30}l10 10m0-10l-10 10`} fill="none" stroke="var(--color-ember)" stroke-width="2.4" stroke-linecap="round" />
+              <>
+                <line x1={200 - a * 120} y1={65 + i * 26} x2="212" y2={65 + i * 26} stroke="var(--color-ember)" stroke-width="1.6" class="anim grow40" style={`--at:${ledgerPlan[i].at}`} />
+                <path class="anim tick" style={`--at:${ledgerPlan[i].at}`} d={`M226 ${60 + i * 26}l9 9m0-9l-9 9`} fill="none" stroke="var(--color-ember)" stroke-width="2.4" stroke-linecap="round" />
+              </>
             )}
           </g>
         ))}
-        <rect class="beam" x="86" y="60" width="228" height="3" rx="1.5" fill="var(--color-violet)" />
+        <rect class="beam" x="16" y="50" width="208" height="3" rx="1.5" fill="var(--color-violet)" />
+        {/* the ledger: confirmed rows arrive with their category; the doubtful one waits for you */}
+        <text x="262" y="40" class="head" fill="var(--color-mist)">{TXT.ledger}</text>
+        {ledgerPlan.map((r, i) =>
+          r.ok ? (
+            <g class="anim slide" style={`--at:${r.at + 0.05}`}>
+              <rect x="262" y={50 + r.slot * 30} width="120" height="24" rx="5" fill="var(--color-panel)" stroke="var(--color-line)" />
+              <rect x="270" y={59 + r.slot * 30} width="28" height="5" rx="2" fill="var(--color-frost)" opacity=".7" />
+              <rect x="304" y={55 + r.slot * 30} width={chipW(TXT.cats[r.slot], 8)} height="14" rx="7" fill="none" stroke="var(--color-violet)" />
+              <text x={304 + chipW(TXT.cats[r.slot], 8) / 2} y={65 + r.slot * 30} class="small" fill="#c4bcff">{TXT.cats[r.slot]}</text>
+            </g>
+          ) : (
+            <g class="anim show40" style={`--at:${r.at + 0.04}`}>
+              {/* the doubtful row stays on the statement, waiting for you: it never reaches the ledger */}
+              <rect x="36" y="206" width={chipW(TXT.fill, 8)} height="15" rx="7.5" class="chip" stroke="#fbbf24" />
+              <text x={36 + chipW(TXT.fill, 8) / 2} y="217" class="small" fill="#fbbf24">{TXT.fill}</text>
+            </g>
+          ),
+        )}
+        <g transform="translate(262 14)">
+          <rect width={chipW(TXT.local, 8)} height="15" rx="7.5" class="chip" stroke="#4dffb8" />
+          <text x={chipW(TXT.local, 8) / 2} y="11" class="small" fill="#4dffb8">{TXT.local}</text>
+        </g>
+        {/* budgets: the category budget fills and turns amber past 75%; the 50/30/20 split fills */}
+        <text x="20" y="250" class="small left" fill="var(--color-mist)">{TXT.budget}</text>
+        <rect x="20" y="256" width="360" height="8" rx="4" fill="var(--color-line)" />
+        <rect x="20" y="256" width="281" height="8" rx="4" fill="var(--color-aurora)" class="anim grow40" style="--at:.42" />
+        <rect x="20" y="256" width="281" height="8" rx="4" fill="#fbbf24" class="anim show25" style="--at:.5" />
+        <text x="20" y="280" class="small left" fill="var(--color-mist)">{TXT.frame}</text>
+        <rect x="96" y="274" width="142" height="7" rx="3" fill="var(--color-violet)" class="anim grow40" style="--at:.56" />
+        <rect x="240" y="274" width="85" height="7" rx="3" fill="var(--color-ice)" class="anim grow40" style="--at:.6" />
+        <rect x="327" y="274" width="53" height="7" rx="3" fill="var(--color-aurora)" class="anim grow40" style="--at:.64" />
       </svg>
     )
   }
@@ -156,6 +390,7 @@ const ledgerRows = [
 
 <style>
   .visual {
+    --T: 14s;
     position: relative;
     aspect-ratio: 4 / 3;
     border-radius: 18px;
@@ -165,12 +400,166 @@ const ledgerRows = [
       radial-gradient(70% 70% at 50% 45%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
       var(--color-deep);
   }
+  /* reduced motion: the same story, told at half speed and without flashing */
+  @media (prefers-reduced-motion: reduce) {
+    .visual {
+      --T: 28s;
+    }
+    .bar,
+    .beacon {
+      animation: none !important;
+    }
+  }
   .art,
   .cover {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
+
+  /* text and chips drawn in SVG */
+  .t text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-anchor: middle;
+    fill: var(--color-frost);
+  }
+  .t .small {
+    font-size: 8px;
+  }
+  .t .left {
+    text-anchor: start;
+  }
+  .t .head {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-anchor: start;
+    text-transform: uppercase;
+  }
+  .chip {
+    fill: rgba(10, 16, 34, 0.86);
+    stroke-width: 1.2;
+  }
+  .chip.dark {
+    fill: rgba(10, 6, 8, 0.72);
+  }
+  .doc-title {
+    font-size: 8px !important;
+    font-weight: 600;
+    text-anchor: start !important;
+    fill: #0a1426 !important;
+  }
+
+  /* one loop for every animated part; --at is where in the loop it starts */
+  .anim {
+    animation-duration: var(--T);
+    animation-delay: calc(var(--T) * var(--at, 0));
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+    animation-timing-function: ease-out;
+    transform-box: fill-box;
+  }
+  .show25 {
+    animation-name: show25;
+  }
+  .show40 {
+    animation-name: show40;
+  }
+  .show60 {
+    animation-name: show60;
+  }
+  .grow40 {
+    animation-name: grow40;
+    transform-origin: left center;
+  }
+  .growY {
+    animation-name: growY;
+    transform-origin: center bottom;
+  }
+  .ring {
+    animation-name: ring;
+    transform-origin: center;
+  }
+  .travel {
+    animation-name: travel;
+  }
+  .slide {
+    animation-name: slide;
+  }
+  .tick {
+    animation-name: tick;
+    stroke-dasharray: 24;
+  }
+  .string {
+    animation-name: string;
+    fill: none;
+    stroke: #d33a3a;
+    stroke-width: 2;
+    stroke-dasharray: 240;
+  }
+  .stamp {
+    animation-name: stamp;
+    transform-origin: 262px 196px;
+    transform-box: view-box;
+  }
+  @keyframes show25 {
+    0% { opacity: 0; }
+    4%, 25% { opacity: 1; }
+    30%, 100% { opacity: 0; }
+  }
+  @keyframes show40 {
+    0% { opacity: 0; }
+    4%, 40% { opacity: 1; }
+    46%, 100% { opacity: 0; }
+  }
+  @keyframes show60 {
+    0% { opacity: 0; }
+    3%, 57% { opacity: 1; }
+    61%, 100% { opacity: 0; }
+  }
+  @keyframes grow40 {
+    0% { transform: scaleX(0); opacity: 1; }
+    10%, 40% { transform: scaleX(1); opacity: 1; }
+    46%, 100% { transform: scaleX(1); opacity: 0; }
+  }
+  @keyframes growY {
+    0% { transform: scaleY(0.1); opacity: 0.4; }
+    30%, 70% { transform: scaleY(1); opacity: 1; }
+    90%, 100% { transform: scaleY(0.1); opacity: 0.4; }
+  }
+  @keyframes ring {
+    0% { transform: scale(0.4); opacity: 0; }
+    2% { opacity: 0.9; }
+    12%, 100% { transform: scale(3); opacity: 0; }
+  }
+  @keyframes travel {
+    0% { transform: translate(0, 0); opacity: 0; }
+    2% { opacity: 1; }
+    12% { transform: translate(var(--dx), var(--dy)); opacity: 1; }
+    15%, 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+  }
+  @keyframes slide {
+    0% { transform: translateX(-40px); opacity: 0; }
+    6%, 60% { transform: translateX(0); opacity: 1; }
+    66%, 100% { transform: translateX(0); opacity: 0; }
+  }
+  @keyframes tick {
+    0% { stroke-dashoffset: 24; opacity: 1; }
+    6%, 60% { stroke-dashoffset: 0; opacity: 1; }
+    66%, 100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+  @keyframes string {
+    0% { stroke-dashoffset: 240; opacity: 1; }
+    20%, 85% { stroke-dashoffset: 0; opacity: 1; }
+    92%, 100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+  @keyframes stamp {
+    0% { opacity: 0; transform: scale(1.8); }
+    3%, 22% { opacity: 1; transform: scale(1); }
+    26%, 100% { opacity: 0; transform: scale(1); }
+  }
+
+  /* COUNSELOR */
   .arc {
     fill: none;
     stroke: var(--color-ice);
@@ -182,8 +571,12 @@ const ledgerRows = [
     animation-delay: calc(var(--i) * -0.45s);
   }
   .story {
-    filter: drop-shadow(0 0 8px var(--color-aurora));
+    filter: drop-shadow(0 0 8px #9a8cff);
     animation: pulse 2.2s ease-in-out infinite;
+  }
+  .soft {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px currentColor);
   }
   @keyframes flow {
     to {
@@ -198,9 +591,11 @@ const ledgerRows = [
     height: auto;
     opacity: 0.9;
   }
+
+  /* AI_ATC */
   .radar {
     position: absolute;
-    inset: 8%;
+    inset: 4% 12% 30% 12%;
     display: grid;
     place-items: center;
   }
@@ -221,6 +616,35 @@ const ledgerRows = [
     animation: blip 4s linear infinite;
     animation-delay: calc(var(--i) * -0.8s);
   }
+  .beacon {
+    animation: beacon 1.6s ease-in-out infinite;
+  }
+  .radio {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    bottom: 3%;
+    width: 94%;
+    height: auto;
+  }
+  .bubble {
+    fill: rgba(139, 233, 255, 0.12);
+    stroke: rgba(139, 233, 255, 0.6);
+  }
+  .bubble.atc {
+    fill: rgba(77, 255, 184, 0.12);
+    stroke: rgba(77, 255, 184, 0.6);
+  }
+  .bar {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: wave 0.7s ease-in-out infinite alternate;
+    animation-delay: calc(var(--i) * -0.09s);
+  }
+  @keyframes wave {
+    from { transform: scaleY(0.3); }
+    to { transform: scaleY(1); }
+  }
   @keyframes spin {
     to {
       transform: rotate(360deg);
@@ -235,80 +659,108 @@ const ledgerRows = [
       opacity: 1;
     }
   }
+  @keyframes beacon {
+    0%, 60%, 100% { opacity: 0.25; }
+    70%, 85% { opacity: 1; }
+  }
+
+  /* ATHENA */
   .graph .find {
     fill: #eab308;
-    animation: review 6s ease-in-out infinite;
-    animation-delay: calc(var(--i) * -0.37s);
+    animation: review var(--T) ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.08s);
   }
   .graph .find.ok {
     --end: #22c55e;
   }
   .graph .find.rej {
     --end: #ef4444;
+    animation-name: reject;
   }
   .graph .find.pend {
     --end: #eab308;
   }
   @keyframes review {
     0%,
-    40% {
+    30% {
       fill: #eab308;
       opacity: 1;
     }
-    55%,
+    42%,
     100% {
       fill: var(--end);
       opacity: 0.95;
     }
   }
+  /* a rejected finding turns red and fades: it never reaches the report */
+  @keyframes reject {
+    0%,
+    30% {
+      fill: #eab308;
+      opacity: 1;
+    }
+    42% {
+      fill: #ef4444;
+      opacity: 1;
+    }
+    58%,
+    100% {
+      fill: #ef4444;
+      opacity: 0.15;
+    }
+  }
   .graph .halo {
     animation: pulse 2.6s ease-in-out infinite;
   }
+
+  /* BANKY */
   .ledger .beam {
     filter: drop-shadow(0 0 8px var(--color-violet));
-    animation: scan 4.8s var(--ease-out) infinite;
-  }
-  .ledger .mark {
-    stroke-dasharray: 24;
-    stroke-dashoffset: 24;
-    animation: tick 4.8s linear infinite;
-    animation-delay: calc(var(--i) * 0.45s + 0.3s);
+    animation: scan var(--T) var(--ease-out) infinite;
   }
   @keyframes scan {
     0% {
       transform: translateY(0);
       opacity: 0;
     }
-    8% {
+    3% {
       opacity: 1;
     }
-    70% {
-      transform: translateY(190px);
+    44% {
+      transform: translateY(160px);
       opacity: 1;
     }
-    85%,
+    50%,
     100% {
-      transform: translateY(190px);
+      transform: translateY(160px);
       opacity: 0;
     }
   }
-  @keyframes tick {
-    0%,
-    6% {
-      stroke-dashoffset: 24;
-    }
-    14%,
-    88% {
-      stroke-dashoffset: 0;
-    }
-    100% {
-      stroke-dashoffset: 24;
-    }
-  }
+
+  /* CASES */
   .board {
     position: absolute;
     inset: 0;
     perspective: 900px;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+  }
+  /* the clock hand turns around its lower end, the clock's centre */
+  .hand {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: spin 3s linear infinite;
+  }
+  .verdict {
+    font-size: 18px !important;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    fill: #ff5a6a !important;
   }
   .polaroid {
     position: absolute;

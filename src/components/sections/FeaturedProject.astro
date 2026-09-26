@@ -19,7 +19,7 @@ const href = projectHref(lang, project.slug);
   <div class="stage">
     {d.scene !== 'none' && <Scene name={d.scene} class="scene-desk" label={d.title} />}
     <div class="art-mob">
-      <ProjectVisual scene={d.scene} cover={d.cover} coverAlt={d.coverAlt} logo={d.logo} gallery={d.gallery} />
+      <ProjectVisual scene={d.scene} cover={d.cover} coverAlt={d.coverAlt} logo={d.logo} gallery={d.gallery} lang={lang} />
     </div>
   </div>
   <div class="text">

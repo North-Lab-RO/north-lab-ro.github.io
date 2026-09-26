@@ -11,6 +11,7 @@ import {
   SpriteMaterial,
   Color,
   Line,
+  SRGBColorSpace,
 } from 'three';
 
 /** Soft radial glow, drawn once on a canvas. */
@@ -97,3 +98,64 @@ export function disposeTree(root: Object3D) {
 }
 
 export const hex = (css: string) => new Color(css);
+
+export interface LabelStyle {
+  color?: string;
+  border?: string;
+  bg?: string;
+  /** Height of the chip in world units. */
+  height?: number;
+  bold?: boolean;
+  /** Draw on top of everything (ignore depth). */
+  overlay?: boolean;
+}
+export interface Label {
+  sprite: Sprite;
+  /** Redraw the chip; only call when the text or colour actually changes. */
+  set(text: string, style?: Pick<LabelStyle, 'color' | 'border'>): void;
+}
+
+/** A text chip drawn once on a canvas and shown as a camera-facing sprite. */
+export function makeLabel(text: string, style: LabelStyle = {}): Label {
+  const W = 512;
+  const H = 96;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  const sprite = new Sprite(
+    new SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: !style.overlay }),
+  );
+  const h = style.height ?? 0.275;
+  sprite.scale.set((h * W) / H, h, 1);
+  let color = style.color ?? '#e0e7ff';
+  let border = style.border ?? 'rgba(129,140,248,0.6)';
+  const draw = (t: string) => {
+    g.clearRect(0, 0, W, H);
+    g.font = `${style.bold ? 600 : 500} 40px sans-serif`;
+    const w = Math.min(W - 8, g.measureText(t).width + 44);
+    g.fillStyle = style.bg ?? 'rgba(10,16,34,0.86)';
+    g.beginPath();
+    g.roundRect((W - w) / 2, 14, w, 68, 34);
+    g.fill();
+    g.strokeStyle = border;
+    g.lineWidth = 3;
+    g.stroke();
+    g.fillStyle = color;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(t, W / 2, 50);
+    tex.needsUpdate = true;
+  };
+  draw(text);
+  return {
+    sprite,
+    set(t, next) {
+      if (next?.color) color = next.color;
+      if (next?.border) border = next.border;
+      draw(t);
+    },
+  };
+}

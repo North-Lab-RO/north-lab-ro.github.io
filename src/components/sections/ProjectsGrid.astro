@@ -35,6 +35,7 @@ const [featured, ...rest] = await getProjects(lang);
                 coverAlt={pr.data.coverAlt}
                 logo={pr.data.logo}
                 gallery={pr.data.gallery}
+                lang={lang}
               />
             </div>
             <p class="label cat">
