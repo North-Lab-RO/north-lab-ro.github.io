@@ -55,14 +55,29 @@ const ogImage = new URL(image, Astro.site);
       import Lenis from 'lenis';
 
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const NAV_OFFSET = 88;
+      let lenis: Lenis | null = null;
       if (!reduce) {
-        const lenis = new Lenis({ lerp: 0.12, anchors: { offset: -80 } });
+        lenis = new Lenis({ lerp: 0.12 });
         const raf = (t: number) => {
-          lenis.raf(t);
+          lenis!.raf(t);
           requestAnimationFrame(raf);
         };
         requestAnimationFrame(raf);
       }
+
+      // In-page links (#work or /#work while on the home page) scroll smoothly, clearing the fixed nav.
+      document.addEventListener('click', (e) => {
+        const a = (e.target as Element).closest<HTMLAnchorElement>('a[href*="#"]');
+        if (!a || a.origin !== location.origin || a.pathname !== location.pathname || !a.hash) return;
+        const target = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+        if (!target) return;
+        e.preventDefault();
+        history.pushState(null, '', a.hash);
+        const y = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+        if (lenis) lenis.scrollTo(y, { duration: 1.2 });
+        else window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+      });
 
       const io = new IntersectionObserver(
         (entries) => {
