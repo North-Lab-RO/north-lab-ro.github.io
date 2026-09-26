@@ -4,16 +4,16 @@ category: Voice AI · aviation
 tagline: "AI_ATC adds realistic, spoken air traffic control to X-Plane 12: you talk on the radio, and a controller answers in proper ICAO phraseology, from clearance to landing."
 summary: >-
   AI_ATC replaces the simulator's scripted ATC with a controller that actually listens. A plugin streams the
-  aircraft's live state to a local server. The pilot speaks, and speech recognition, a specialist controller agent and
-  speech synthesis produce a realistic radio reply. Every instruction is checked against real navigation data and
-  safety rules before it is spoken. No cloud, no subscription, no per-minute cost.
+  aircraft's live state to a local server. The pilot speaks; speech recognition turns it into text, a local model
+  works out what was asked, and a rules engine builds the controller's answer from real navigation data. Every
+  transmission is checked before it is spoken in a controller's voice. No cloud, no subscription, no per-minute cost.
 order: 4
 accent: aurora
 scene: radar
 logo: ../../../assets/projects/ai-atc/logo.jpg
 metrics:
-  - value: '5'
-    label: specialist controllers, chosen by flight phase
+  - value: '14'
+    label: kinds of pilot request understood
   - value: 2–4 s
     label: target for a complete radio reply
   - value: 0.61 s
@@ -23,20 +23,19 @@ metrics:
 features:
   - title: Voice in, voice out
     body: Push-to-talk in the sim or the web portal. Speech is transcribed, answered and spoken back over COM1, all on the local GPU.
-  - title: Five specialist controllers
-    body: Clearance, Ground, Tower, Approach and Center agents, routed by frequency, request and flight phase.
-  - title: Grounded in real data
-    body: Retrieval over the simulator's navigation data, including SIDs, STARs and approaches, so instructions reference real procedures.
-  - title: Safety and readback checks
-    body: Replies are verified before they are spoken, pilot readbacks are checked against the clearance, and runway use is managed.
+  - title: Every controller on its own frequency
+    body: Clearance, Ground, Tower and Approach each answer on their published frequency; call the wrong one and you are told whom to call.
+  - title: Built from real data
+    body: Taxi routes, departure procedures, approaches and frequencies come from the simulator's navigation data, never from the model.
+  - title: Checked before it is spoken
+    body: Everything named must exist at the airport, the message must be well formed, and it must still be right when spoken. Readbacks are checked item by item, and a supervisor watches separation and runway use.
   - title: Live map and weather
     body: A web map with airport overlays and METAR colour coding, plus SimBrief import for flight plans.
   - title: Runtime model switching
-    body: Swap between local models at runtime to trade latency against phraseology quality.
+    body: Swap the local model at runtime to trade speed against understanding.
 stack:
   - Python
   - FastAPI
-  - Lua
   - C++ (X-Plane SDK)
   - Ollama
   - Qwen 3.5
@@ -56,7 +55,7 @@ outcomes:
   - title: "Real radio practice"
     body: "Speak, listen and read back like a real pilot, with a controller that understands natural speech."
   - title: "Every phase covered"
-    body: "Clearance, ground, tower, approach and center hand you over as you fly."
+    body: "Clearance, ground, tower and approach answer on their own frequencies and tell you whom to call next."
   - title: "No subscription"
     body: "Runs on your own PC, with no monthly or per-minute fee."
 audiences:
@@ -83,7 +82,7 @@ capabilities:
     items:
       - "A checklist of every flight phase"
       - "Hints for the next call"
-      - "Five controllers, chosen by flight phase"
+      - "Who to call next, and on which frequency"
       - "Demo mode for a complete flight"
   - group: "The world"
     items:
@@ -101,107 +100,14 @@ tailoring:
 note: "For simulation and practice only; not a certified air traffic control or training system."
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import RadioExchange from '../../../components/samples/RadioExchange.astro';
 
-## How it works
+## Engineering notes
 
 A radio reply has a two-to-four-second budget, so every stage is measured. Whisper tiny.en was chosen after
 benchmarking the same transmission across model sizes: all four produced the same intent accuracy, and tiny is 20×
 faster than medium.
 
-<Pipeline
-  title="Pilot transmission → controller reply"
-  caption="One round trip, entirely on the local machine."
-  stages={[
-    { label: 'Aircraft state', detail: 'The X-Plane plugin streams position, phase and radio state every second.', tag: 'C++ · Lua plugin' },
-    { label: 'Speech to text', detail: 'Push-to-talk audio is transcribed on the GPU.', tag: 'whisper tiny.en' },
-    {
-      label: 'Route to a controller',
-      detail: 'Frequency, keywords and flight phase pick the specialist agent.',
-      items: ['Clearance', 'Ground', 'Tower', 'Approach', 'Center'],
-    },
-    { label: 'Retrieve context', detail: 'Airport data, procedures and conversation history.', tag: 'qdrant + postgres' },
-    { label: 'Generate the reply', detail: 'ICAO-style phraseology from a local model.', tag: 'qwen 3.5' },
-    { label: 'Verify', detail: 'Safety rules, conflict detection and readback checks before anything is spoken.' },
-    { label: 'Speak', detail: 'Synthesised speech played back over the in-sim COM1 radio.', tag: 'kokoro' },
-  ]}
-/>
-
 ## Sample output
 
 <RadioExchange lang="en" />
-
-## Routing by flight phase
-
-When the frequency and keywords don't settle it, the router falls back to the flight phase, then to whether the
-aircraft is on the ground and how high it is.
-
-<Flow
-  title="Which controller answers"
-  caption="Each check is tried in turn; the first that decides wins."
-  nodes={[
-    {
-      "label": "A transmission arrives",
-      "detail": "Your words, turned into text, plus the live state of the aircraft."
-    },
-    {
-      "kind": "decision",
-      "label": "Is a controller already handling the aircraft?",
-      "branches": [
-        {
-          "when": "Yes",
-          "then": "That controller answers.",
-          "tone": "ok"
-        }
-      ],
-      "yes": "No"
-    },
-    {
-      "kind": "decision",
-      "label": "Does the tuned frequency decide?",
-      "branches": [
-        {
-          "when": "Yes",
-          "then": "The controller on that frequency answers.",
-          "tone": "ok"
-        }
-      ],
-      "yes": "No"
-    },
-    {
-      "kind": "decision",
-      "label": "Do the words name a controller?",
-      "branches": [
-        {
-          "when": "Yes",
-          "then": "For example “Tower” or “Ground”.",
-          "tone": "ok"
-        }
-      ],
-      "yes": "No, so the flight phase decides"
-    },
-    {
-      "kind": "decision",
-      "label": "Where is the aircraft?",
-      "branches": [
-        {
-          "when": "On the ground",
-          "then": "Clearance if the flight phase calls for it, otherwise Ground.",
-          "tone": "ok"
-        },
-        {
-          "when": "Below 18,000 ft",
-          "then": "Approach if the flight phase calls for it, otherwise Tower.",
-          "tone": "ok"
-        },
-        {
-          "when": "Above 18,000 ft",
-          "then": "Center.",
-          "tone": "ok"
-        }
-      ]
-    }
-  ]}
-/>

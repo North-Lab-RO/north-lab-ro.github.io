@@ -4,8 +4,9 @@ category: Finanțe personale · privat
 tagline: "BANKY citește extrasele de cont și bonurile direct pe calculatorul tău, încadrează fiecare plată și îți arată bugete, obiective și rapoarte lunare. Tu confirmi fiecare rând."
 summary: >-
   BANKY este o aplicație de finanțe personale pentru cei care nu vor să-și trimită extrasele de cont unui serviciu
-  din cloud. Importă extrase PDF, Excel și CSV, pagini scanate și fotografii de bonuri, apoi extrage și încadrează
-  fiecare tranzacție cu ajutorul unui model de limbaj care rulează local. Soldurile, bugetele, împărțirea 50/30/20,
+  din cloud. Importă extrase PDF, Excel și CSV, pagini scanate și fotografii de bonuri. Extrasele cu text sunt citite
+  cu reguli scrise pentru fiecare bancă; paginile scanate și bonurile sunt citite de un OCR local și aranjate în rânduri
+  de un model de limbaj care rulează local, care propune și categoriile. Soldurile, bugetele, împărțirea 50/30/20,
   obiectivele, investițiile și rapoartele tipăribile se calculează dintr-un registru pe care îl confirmi rând cu rând.
   Modelul doar propune: orice cifră scrisă de el trebuie să existe în documentul original, iar toate calculele cu bani
   le face codul, nu modelul.
@@ -103,29 +104,15 @@ tailoring:
   - "Interfață în limba română"
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import ImportReview from '../../../components/samples/ImportReview.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
-## Cum funcționează
+## Note tehnice
 
-Modelul de limbaj face singurul lucru pe care codul nu-l poate face: transformă o pagină dezordonată în rânduri
-structurate. Tot ce e înainte și după el e determinist. Modelul rulează într-o rețea izolată, fără acces la
-internet.
-
-<Pipeline
-  title="Extras → registru verificat"
-  caption="Modelul propune, codul verifică, tu confirmi."
-  stages={[
-    { label: 'Încărcare', detail: 'Extrase PDF, XLSX sau CSV, pagini scanate și poze cu bonuri.' },
-    { label: 'Citire', detail: 'Cititoare dedicate pentru formatele cunoscute ale băncilor și pentru numerele scrise în format românesc; recunoaștere de text locală pentru scanări și bonuri.', tag: 'PaddleOCR' },
-    { label: 'Structurare', detail: 'Modelul de limbaj transformă textul în rânduri cu dată, descriere și sumă.', tag: 'qwen3.6 27B' },
-    { label: 'Verificarea cifrelor', detail: 'Fiecare număr din rezultat trebuie să apară întocmai în document. Orice altceva e eliminat.' },
-    { label: 'Revizuire', detail: 'Rândurile te așteaptă alături de documentul original, cu dublurile marcate.' },
-    { label: 'Registru', detail: 'Rândurile confirmate devin tranzacții păstrate ca NUMERIC(18,2), cu istoricul modificărilor.' },
-  ]}
-/>
+Extrasele care conțin text și foile de calcul sunt citite cu reguli scrise pentru fiecare bancă, fără AI. Modelul
+de limbaj face singurul lucru pe care regulile nu îl pot face: transformă textul citit de pe o pagină scanată sau de
+pe fotografia unui bon în rânduri structurate, iar fiecare număr pe care îl întoarce trebuie să existe pe pagină.
+Modelul și OCR-ul rulează într-o rețea izolată, fără acces la internet.
 
 Observațiile scrise de aplicație trec prin cinci etape (ciornă, verificare, critică, revizuire, verificare), iar
 ultimul cuvânt îl are o verificare fixă, bazată pe reguli. Pe o placă de 24 GB, mai multe treceri cu un model care
@@ -144,47 +131,3 @@ ultimul cuvânt îl are o verificare fixă, bazată pe reguli. Pe o placă de 24
 ## Exemplu de rezultat
 
 <ImportReview lang="ro" />
-
-## Verificarea, pas cu pas
-
-<Flow
-  title="Fiecare număr e verificat pe pagină"
-  caption="O valoare contează doar dacă se potrivește cu un număr întreg tipărit pe extras."
-  nodes={[
-    {
-      "label": "Modelul citește un rând",
-      "detail": "Data, descrierea și suma, de pe extras sau de pe bon."
-    },
-    {
-      "label": "Fiecare număr citit e comparat cu pagina",
-      "detail": "Doar numere întregi: o bucată dintr-un număr mai lung nu contează."
-    },
-    {
-      "kind": "decision",
-      "label": "Se potrivesc toate numerele?",
-      "branches": [
-        {
-          "when": "Nu",
-          "then": "Valoarea e eliminată, iar rândul așteaptă să o completezi tu. De exemplu, 84.32 citit din 184,32.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Da"
-    },
-    {
-      "label": "Rândul îți e arătat pentru verificare",
-      "detail": "Cu categoria sugerată și cât de sigur e modelul."
-    },
-    {
-      "kind": "decision",
-      "label": "Confirmi",
-      "branches": [
-        {
-          "when": "Confirmat",
-          "then": "Rândul intră în registru.",
-          "tone": "ok"
-        }
-      ]
-    }
-  ]}
-/>

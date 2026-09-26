@@ -1,21 +1,13 @@
 ---
 /**
- * A workflow diagram: steps down a spine, decisions with side-exits.
+ * A single workflow diagram: steps down a spine, decisions with side-exits.
  * A decision's `branches` leave the flow (tinted by tone); `yes` labels the path that carries on down the spine.
- * A last decision with branches and no `yes` is a set of outcomes.
+ * A last decision with branches and no `yes` is a set of outcomes. Rendering is shared with Workflows via FlowSteps.
  */
-export interface Branch {
-  when: string;
-  then: string;
-  tone?: 'ok' | 'bad' | 'warn' | 'neutral';
-}
-export interface FlowNode {
-  kind?: 'step' | 'decision';
-  label: string;
-  detail?: string;
-  yes?: string;
-  branches?: Branch[];
-}
+import FlowSteps from './FlowSteps.astro';
+import type { WStep } from './workflows/types';
+
+export type FlowNode = WStep;
 interface Props {
   title: string;
   caption?: string;
@@ -29,48 +21,11 @@ const { title, caption, nodes } = Astro.props;
     <span class="label">{title}</span>
     {caption && <span class="muted cap">{caption}</span>}
   </figcaption>
-  <ol class="spine">
-    {
-      nodes.map((n, i) => {
-        const decision = n.kind === 'decision';
-        const last = i === nodes.length - 1;
-        return (
-          <li class:list={['fnode', decision && 'decision', n.branches?.length && 'has-exits']} style={`--i:${i}`}>
-            <span class="mark" aria-hidden="true">{decision ? '?' : ''}</span>
-            <div class="body">
-              <div class="box">
-                <h3 class="name">{n.label}</h3>
-                {n.detail && <p class="muted detail">{n.detail}</p>}
-              </div>
-              {n.branches && n.branches.length > 0 && (
-                <ul class:list={['exits', last && !n.yes && 'outcomes']}>
-                  {n.branches.map((b) => (
-                    <li class:list={['exit', b.tone ?? 'neutral']}>
-                      <span class="when">{b.when}</span>
-                      <span class="then">{b.then}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {n.yes && !last && (
-                <p class="yes">
-                  <span aria-hidden="true">↓</span> {n.yes}
-                </p>
-              )}
-            </div>
-          </li>
-        );
-      })
-    }
-  </ol>
+  <FlowSteps steps={nodes} level="h3" />
 </figure>
 
 <style>
   .flow {
-    --ok: var(--color-aurora);
-    --bad: var(--color-ember);
-    --warn: #fbbf24;
-    --neutral: var(--color-mist);
     margin-block: 40px;
     padding: clamp(20px, 3vw, 36px);
     border: 1px solid var(--color-line);
@@ -88,151 +43,5 @@ const { title, caption, nodes } = Astro.props;
   }
   .cap {
     font-size: 0.9rem;
-  }
-  .spine {
-    position: relative;
-    display: grid;
-    gap: 14px;
-  }
-  .spine::before {
-    content: '';
-    position: absolute;
-    left: 10px;
-    top: 12px;
-    bottom: 12px;
-    width: 2px;
-    background: linear-gradient(180deg, var(--color-line), color-mix(in srgb, var(--accent) 55%, var(--color-line)), var(--color-line));
-  }
-  .fnode {
-    position: relative;
-    display: grid;
-    grid-template-columns: 22px minmax(0, 1fr);
-    gap: 16px;
-  }
-  .mark {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    margin-top: 14px;
-    border-radius: 50%;
-    border: 2px solid var(--accent);
-    background: var(--color-night);
-    box-shadow: 0 0 0 4px var(--color-deep);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--accent);
-  }
-  /* decisions are diamonds, the way flowcharts draw them; the "?" stays upright */
-  .decision .mark {
-    isolation: isolate;
-    border: 0;
-    background: none;
-    box-shadow: none;
-  }
-  .decision .mark::before {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    z-index: -1;
-    border: 2px solid var(--accent);
-    border-radius: 3px;
-    background: var(--color-night);
-    box-shadow: 0 0 0 4px var(--color-deep);
-    transform: rotate(45deg);
-  }
-  .body {
-    display: grid;
-    gap: 10px;
-    min-width: 0;
-  }
-  .box {
-    padding: 14px 18px;
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--color-panel) 60%, transparent);
-  }
-  .decision .box {
-    border-color: color-mix(in srgb, var(--accent) 40%, var(--color-line));
-  }
-  .name {
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.005em;
-  }
-  .detail {
-    margin-top: 4px;
-    font-size: 0.92rem;
-    line-height: 1.5;
-  }
-  .exits {
-    display: grid;
-    gap: 8px;
-  }
-  .exit {
-    --tone: var(--neutral);
-    display: grid;
-    gap: 2px;
-    padding: 10px 14px;
-    border: 1px solid color-mix(in srgb, var(--tone) 45%, var(--color-line));
-    border-left: 3px solid var(--tone);
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--tone) 8%, transparent);
-  }
-  .exit.ok {
-    --tone: var(--ok);
-  }
-  .exit.bad {
-    --tone: var(--bad);
-  }
-  .exit.warn {
-    --tone: var(--warn);
-  }
-  .when {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--tone);
-  }
-  .then {
-    font-size: 0.92rem;
-    line-height: 1.45;
-  }
-  .yes {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--accent);
-    padding-left: 4px;
-  }
-  @media (min-width: 900px) {
-    /* side-exits leave the flow to the right, joined to their decision by a short arm */
-    .has-exits .body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      column-gap: 36px;
-      align-items: start;
-    }
-    .has-exits .yes {
-      grid-column: 1;
-    }
-    .exits {
-      position: relative;
-    }
-    /* the arm leaves at the height of the decision's own box */
-    .exits::before {
-      content: '';
-      position: absolute;
-      left: -36px;
-      top: 26px;
-      width: 36px;
-      height: 2px;
-      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, var(--color-line)), var(--color-line));
-    }
-    .outcomes {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 </style>

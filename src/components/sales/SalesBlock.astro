@@ -4,6 +4,7 @@ import Gallery from '../project/Gallery.astro';
 import ReportSlot from '../project/ReportSlot.astro';
 import TourFrame from '../tours/TourFrame.astro';
 import { getTour } from '../tours';
+import { getWorkflows } from '../diagrams/workflows';
 import type { Project } from '../../lib';
 import { t, type Lang } from '../../i18n/ui';
 
@@ -40,6 +41,7 @@ const tour = d.tour !== 'none' ? getTour(d.tour, lang) : null;
 const tourNote = tour && tour.uiLang !== lang ? s.realNoteLang : undefined;
 // Only reports with a real sample PDF are shown to clients; placeholders stay in the content until a file exists.
 const reports = d.reports.filter((r) => r.file);
+const hasWorkflows = getWorkflows(entry.slug, lang) !== null;
 const checkIcon = 'M5 12l4 4L19 6';
 ---
 
@@ -81,6 +83,13 @@ const checkIcon = 'M5 12l4 4L19 6';
     <section class="wrap block" id="tour">
       <h2 class="h-section sm" data-reveal>{s.tour}</h2>
       <TourFrame lang={lang} label={tour.label} steps={tour.steps} url={tour.url} note={tourNote} />
+      {hasWorkflows && (
+        <p class="depth">
+          <a href="#how">
+            {t(lang).workflows.seeDepth} <span aria-hidden="true">↓</span>
+          </a>
+        </p>
+      )}
     </section>
   )
 }
@@ -218,6 +227,17 @@ const checkIcon = 'M5 12l4 4L19 6';
   }
   .audc p {
     margin-top: 8px;
+  }
+  .depth {
+    margin-top: 18px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+  .depth a {
+    color: var(--accent);
+  }
+  .depth a:hover {
+    text-decoration: underline;
   }
   .roadnote {
     margin-top: 12px;

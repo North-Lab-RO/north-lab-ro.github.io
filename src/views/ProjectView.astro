@@ -5,6 +5,8 @@ import Scene from '../components/3d/Scene.astro';
 import Gallery from '../components/project/Gallery.astro';
 import ProjectVisual from '../components/project/ProjectVisual.astro';
 import SalesBlock from '../components/sales/SalesBlock.astro';
+import Workflows from '../components/diagrams/Workflows.astro';
+import { getWorkflows } from '../components/diagrams/workflows';
 import DemoButton from '../components/sales/DemoButton.astro';
 import CtaBand from '../components/sales/CtaBand.astro';
 import { accentVar, type Project } from '../lib';
@@ -18,6 +20,7 @@ interface Props {
 const { lang, entry, next } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
+const wf = getWorkflows(entry.slug, lang);
 const tp = t(lang).project;
 const ts = t(lang).sales;
 const forLabel = t(lang).projects.forLabel;
@@ -110,6 +113,15 @@ const sceneLabels = {
         )
       }
     </section>
+
+    {
+      wf && (
+        <section id="how" class="wrap block how" aria-labelledby="how-title">
+          <h2 id="how-title" class="h-section sm" data-reveal>{t(lang).workflows.heading}</h2>
+          <Workflows lang={lang} set={wf} uid={entry.slug} />
+        </section>
+      )
+    }
 
 
     <section class="wrap block prose">

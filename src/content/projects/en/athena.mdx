@@ -58,7 +58,7 @@ outcomes:
   - title: "Every finding reviewed"
     body: "An analyst confirms or rejects each finding, with a confidence score. Rejected findings never reach the report."
   - title: "Private and accountable"
-    body: "The AI runs on your server, collection can go through a VPN, and every action is recorded in the audit log."
+    body: "The AI runs on your server, collection can go through a VPN, and key actions are recorded in the audit log."
 audiences:
   - title: "Due diligence & compliance"
     body: "Background checks on companies, partners and domains, with a report that shows where every fact came from."
@@ -74,7 +74,7 @@ capabilities:
     items:
       - "Cases with members and roles"
       - "Task checklists from templates"
-      - "A timeline and audit trail of every action"
+      - "A case timeline and an audit log of key actions"
       - "In-app notifications"
   - group: "Subjects"
     items:
@@ -116,34 +116,15 @@ tailoring:
   - "Searches in leak databases"
   - "An automatic structured report with the standard intelligence sections"
   - "The network graph included in the PDF report"
-note: "For lawful investigations carried out by authorised teams. Every action is recorded in the audit log."
+note: "For lawful investigations carried out by authorised teams. Key actions, such as case creation, evidence decisions and exports, are recorded in the audit log."
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
-## How it works
+## Engineering notes
 
 A case moves from leads to evidence to a report. Collection is automated; judgement stays with the analyst; the AI
 helps but never decides what is true.
-
-<Pipeline
-  title="Lead → evidence → report"
-  caption="Everything runs on your own server; collection can be routed through a VPN."
-  stages={[
-    { label: 'Case & subjects', detail: 'A case holds the people, organisations, domains and devices under investigation, with their identifiers.' },
-    {
-      label: 'Collectors',
-      detail: 'Run one collector or all of them against the identifiers.',
-      items: ['web search', 'DNS & WHOIS', 'breach check', 'profile discovery', 'deep social', 'post analysis', 'reverse image'],
-    },
-    { label: 'Review', detail: 'Each finding is confirmed or rejected by an analyst, with a confidence score.' },
-    { label: 'Knowledge', detail: 'Findings and past conversations are embedded for semantic search.', tag: 'nomic-embed-text → qdrant' },
-    { label: 'AI assistant', detail: 'Answers questions about the case from the evidence, weighing sources by their track record.', tag: 'qwen3 4B' },
-    { label: 'Report', detail: 'A report assembled from the case and exported as PDF.', tag: 'WeasyPrint' },
-  ]}
-/>
 
 <InfoGrid
   columns={2}
@@ -152,105 +133,5 @@ helps but never decides what is true.
     { tag: 'frontend', title: 'A workspace for analysts', body: 'React and TypeScript, with a Cytoscape network graph, charts and an eleven-tab case workspace.' },
     { tag: 'ai', title: 'Local models only', body: 'Ollama runs the chat model and the embedding model on the same server; the model can be switched in the settings.' },
     { tag: 'collection', title: 'Private by default', body: 'Web search through a self-hosted SearXNG, a headless browser for pages that need one, and optional VPN routing for outbound requests.' },
-  ]}
-/>
-
-## Sources earn their weight
-
-The assistant sees how reliable each source has been in this case: the share of its findings that analysts
-confirmed. A source that keeps being rejected carries less weight in the answer.
-
-<Flow
-  title="How a source earns trust"
-  caption="Analysts decide what is true; the assistant learns which sources to rely on."
-  nodes={[
-    {
-      "label": "A collector reports a finding",
-      "detail": "From web search, DNS and WHOIS, social profiles, images and the other collectors."
-    },
-    {
-      "kind": "decision",
-      "label": "An analyst reviews it",
-      "branches": [
-        {
-          "when": "Pending",
-          "then": "Not counted yet.",
-          "tone": "neutral"
-        },
-        {
-          "when": "Rejected",
-          "then": "Counts against the source, and never reaches the report.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Confirmed"
-    },
-    {
-      "label": "Each source gets a track record",
-      "detail": "Confirmed findings out of all reviewed findings, per source, for this case."
-    },
-    {
-      "kind": "decision",
-      "label": "When the assistant answers",
-      "branches": [
-        {
-          "when": "Reliable source",
-          "then": "Given more weight.",
-          "tone": "ok"
-        },
-        {
-          "when": "Often rejected",
-          "then": "Given less weight.",
-          "tone": "warn"
-        }
-      ]
-    }
-  ]}
-/>
-
-## Reports that fit the subject
-
-The structured report adapts to what the case is about: a report on a person drops the infrastructure section, and
-any section without data is left out rather than filled with padding.
-
-<Flow
-  title="How a report is assembled"
-  caption="Built from the case data; nothing is padded."
-  nodes={[
-    {
-      "label": "The case evidence is gathered",
-      "detail": "Everything except rejected findings, newest first."
-    },
-    {
-      "kind": "decision",
-      "label": "Who is the subject?",
-      "branches": [
-        {
-          "when": "A person",
-          "then": "The infrastructure section is left out.",
-          "tone": "neutral"
-        }
-      ],
-      "yes": "An organisation keeps every section"
-    },
-    {
-      "label": "Sections are built",
-      "detail": "Subject identification, infrastructure, digital footprint, relationships and timeline."
-    },
-    {
-      "kind": "decision",
-      "label": "Does each section have data?",
-      "branches": [
-        {
-          "when": "Empty",
-          "then": "Left out, never filled with padding.",
-          "tone": "neutral"
-        }
-      ],
-      "yes": "Kept, in the standard order"
-    },
-    {
-      "label": "The report is exported as PDF"
-    }
   ]}
 />

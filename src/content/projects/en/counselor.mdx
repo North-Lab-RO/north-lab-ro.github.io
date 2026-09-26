@@ -143,14 +143,12 @@ roadmap:
     body: "Sections, the story list and the story side by side, with endless scrolling, a layout made for phones and keyboard navigation."
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import StoryAnalysis from '../../../components/samples/StoryAnalysis.astro';
 import CounselorStory from '../../../components/project/CounselorStory.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 import ScoreBars from '../../../components/project/ScoreBars.astro';
 
-## How it works
+## From headlines to stories
 
 Four stages turn a stream of headlines into a handful of stories worth reading. Scroll through them below.
 
@@ -159,21 +157,6 @@ Four stages turn a stream of headlines into a handful of stories worth reading. 
 Under the hood, the work runs as queued jobs on four separate queues, so bulk article processing never blocks the
 high-value story analysis. Two models split the load: a small one handles every article, and a larger one runs only
 where many sources meet.
-
-<Pipeline
-  title="Article → story → briefing"
-  caption="Every stage runs on one Linux host with a single GPU."
-  stages={[
-    { label: 'Fetch', detail: '41 RSS feeds polled every five minutes.', tag: 'feedparser' },
-    { label: 'Extract & clean', detail: 'Full-text extraction, language detection and de-duplication.', tag: 'trafilatura' },
-    { label: 'Lead image', detail: 'Taken from RSS media tags or page metadata, fetched with a size cap, a type allow-list and an SSRF guard, then cached.', tag: 'image proxy' },
-    { label: 'Embed', detail: 'Multilingual embeddings for every article, stored for similarity search.', tag: 'bge-m3 → qdrant' },
-    { label: 'Cluster into stories', detail: 'Cosine similarity ≥ 0.78 within a ±72-hour window; a story stops accepting articles after 48 hours.' },
-    { label: 'Per-article analysis', detail: 'Summary, bias estimate and headline translation for each article.', tag: 'qwen3 4B' },
-    { label: 'Per-story analysis', detail: 'Consensus, divergence, known vs. unknown, fact vs. opinion.', tag: 'qwen3 14B' },
-    { label: 'Score & deliver', detail: 'Importance scoring, push alerts, scheduled briefings and PDF reports.', items: ['alerts', 'briefings', 'PDF reports', 'search'] },
-  ]}
-/>
 
 ## What you see
 
@@ -280,75 +263,3 @@ Designed and approved; implementation is under way.
 ## Sample output
 
 <StoryAnalysis lang="en" />
-
-## Verdicts are computed, not generated
-
-A model that is free to answer "confirmed" can do so while citing nothing. COUNSELOR retrieves quotes from *other*
-outlets and asks the model only to classify each one. The verdict then follows from the tallies.
-
-<Flow
-  title="From a claim to a verdict"
-  caption="The model classifies quotes; it never writes the verdict."
-  nodes={[
-    {
-      "label": "A claim is picked out",
-      "detail": "A statement from an article that can be checked against other reporting."
-    },
-    {
-      "label": "Quotes are found in other outlets",
-      "detail": "The most similar passages from other articles, found by meaning, not just keywords."
-    },
-    {
-      "kind": "decision",
-      "label": "Can this quote count as evidence?",
-      "branches": [
-        {
-          "when": "Same article",
-          "then": "Dropped: a claim cannot confirm itself.",
-          "tone": "bad"
-        },
-        {
-          "when": "Same outlet",
-          "then": "Dropped: an outlet cannot corroborate its own story.",
-          "tone": "bad"
-        },
-        {
-          "when": "Unknown outlet",
-          "then": "Dropped rather than cited under a guessed name.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Independent outlet, known by name"
-    },
-    {
-      "label": "The model classifies each quote",
-      "detail": "Supports the claim, contradicts it, or is unrelated. That is the only question it answers."
-    },
-    {
-      "kind": "decision",
-      "label": "Verdict, from the tally",
-      "branches": [
-        {
-          "when": "Any contradiction",
-          "then": "Disputed, naming who contradicts it.",
-          "tone": "warn"
-        },
-        {
-          "when": "Two or more support it",
-          "then": "Confirmed by several outlets.",
-          "tone": "ok"
-        },
-        {
-          "when": "One supports it",
-          "then": "Single source.",
-          "tone": "neutral"
-        },
-        {
-          "when": "None",
-          "then": "Unverifiable for now.",
-          "tone": "neutral"
-        }
-      ]
-    }
-  ]}
-/>

@@ -151,98 +151,16 @@ tailoring:
   - "Editing generated cases before publishing"
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import CaseFile from '../../../components/samples/CaseFile.astro';
 
-## How it works
+## Engineering notes
 
 The LLM and the image model can't fit on a 24 GB card at the same time, so a GPU lease runs them in turn. Everything
 is generated up front, which means playing a case needs no GPU at all.
 
-<Pipeline
-  title="Premise → proven case → rendered case"
-  caption="Generation runs as background jobs; failures are repaired at the stage that caused them."
-  stages={[
-    {
-      label: 'Staged generation',
-      detail: 'Ten schema-constrained stages, each derived from the hidden truth.',
-      tag: 'mistral-small 24B',
-      items: ['premise', 'hidden truth', 'cast', 'locations', 'evidence', 'lab results', 'interviews', 'documents', 'opening state', 'image list'],
-      numberedItems: true,
-    },
-    {
-      label: 'Validators',
-      detail: 'References, timeline, era accuracy, fairness and solvability.',
-      items: ['structural', 'timeline', 'era', 'fairness', 'solvability'],
-      loop: 'up to 3 targeted repairs',
-    },
-    { label: 'Render', detail: 'Portraits, crime scenes, evidence and locations with consistent character looks.', tag: 'SDXL · ComfyUI' },
-    { label: 'Admin review', detail: 'An editor reviews the case, including the hidden solution, and publishes it.' },
-    { label: 'Play', detail: 'Investigate, interview, run lab tests, file the report, face the trial. No GPU needed.' },
-  ]}
-/>
-
 ## Sample output
 
 <CaseFile lang="en" />
-
-## Solvability is a proof, not a hope
-
-Every action a team can take (a search, an interview, a lab test, a records request) has prerequisites, reveals and
-a clock cost. The validator computes everything reachable from the opening knowledge, then checks the cheapest path
-to the proving evidence fits the time budget.
-
-<Flow
-  title="How a case is proven solvable"
-  caption="Checked before a case is ever played."
-  nodes={[
-    {
-      "label": "A draft case is written",
-      "detail": "The truth, the people, the places and the evidence."
-    },
-    {
-      "label": "Every action is listed",
-      "detail": "Each search, interview, lab test or records request: what it needs, what it reveals and how long it takes."
-    },
-    {
-      "label": "Everything reachable is unlocked",
-      "detail": "Starting from what a team knows on day one, actions are applied again and again until nothing new appears."
-    },
-    {
-      "kind": "decision",
-      "label": "Is every piece of proving evidence reachable?",
-      "branches": [
-        {
-          "when": "No",
-          "then": "Sent back to the stage that can produce the missing evidence.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Yes"
-    },
-    {
-      "label": "The quickest route to the proof is found",
-      "detail": "The cheapest path through the actions, in game time."
-    },
-    {
-      "kind": "decision",
-      "label": "Does it fit the time budget?",
-      "branches": [
-        {
-          "when": "No",
-          "then": "Flagged as too slow and reworked.",
-          "tone": "warn"
-        },
-        {
-          "when": "Yes",
-          "then": "The case is accepted.",
-          "tone": "ok"
-        }
-      ]
-    }
-  ]}
-/>
 
 ## Generated imagery
 

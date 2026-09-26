@@ -128,14 +128,12 @@ roadmap:
     body: "Secțiunile, lista de povești și povestea, una lângă alta, cu derulare continuă, o variantă gândită pentru telefon și navigare din tastatură."
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import StoryAnalysis from '../../../components/samples/StoryAnalysis.astro';
 import CounselorStory from '../../../components/project/CounselorStory.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 import ScoreBars from '../../../components/project/ScoreBars.astro';
 
-## Cum funcționează
+## De la titluri la povești
 
 Patru etape transformă un șuvoi de titluri în câteva povești care merită citite. Derulează în jos ca să le vezi pe
 rând.
@@ -145,21 +143,6 @@ rând.
 În spate, munca e împărțită în patru cozi separate, așa că procesarea articolelor nu blochează niciodată analiza
 poveștilor importante. Două modele își împart efortul: unul mic se ocupă de fiecare articol, iar unul mai mare
 intervine doar acolo unde se întâlnesc mai multe surse.
-
-<Pipeline
-  title="Articol → poveste → sinteză"
-  caption="Toate etapele rulează pe un singur server Linux, cu o singură placă video."
-  stages={[
-    { label: 'Preluare', detail: '41 de fluxuri RSS, verificate la fiecare cinci minute.', tag: 'feedparser' },
-    { label: 'Extragere și curățare', detail: 'Textul complet al articolului, limba în care e scris și eliminarea dublurilor.', tag: 'trafilatura' },
-    { label: 'Imaginea principală', detail: 'Preluată din fluxul RSS sau din metadatele paginii, cu limită de mărime, doar tipuri permise și protecție SSRF, apoi păstrată local.', tag: 'proxy de imagini' },
-    { label: 'Vectorizare', detail: 'Fiecare articol primește o reprezentare semantică multilingvă, folosită pentru căutarea după sens.', tag: 'bge-m3 → qdrant' },
-    { label: 'Gruparea în povești', detail: 'Similaritate cosinus de cel puțin 0,78, într-o fereastră de ±72 de ore; după 48 de ore, povestea nu mai primește articole.' },
-    { label: 'Analiza fiecărui articol', detail: 'Rezumat, estimarea orientării și traducerea titlului.', tag: 'qwen3 4B' },
-    { label: 'Analiza poveștii', detail: 'Unde sunt de acord sursele și unde nu, ce se știe și ce nu, fapt sau opinie.', tag: 'qwen3 14B' },
-    { label: 'Scor și livrare', detail: 'Scor de importanță, alerte, sinteze programate și rapoarte PDF.', items: ['alerte', 'sinteze', 'rapoarte PDF', 'căutare'] },
-  ]}
-/>
 
 ## Ce vezi
 
@@ -267,75 +250,3 @@ Proiectate și aprobate; implementarea e în curs.
 ## Exemplu de rezultat
 
 <StoryAnalysis lang="ro" />
-
-## Verdictele se calculează, nu se generează
-
-Un model lăsat liber să spună „confirmat” poate face asta fără să citeze nimic. COUNSELOR caută citate din *alte*
-publicații și îi cere modelului doar să le clasifice. Verdictul rezultă apoi din numărătoare.
-
-<Flow
-  title="De la afirmație la verdict"
-  caption="Modelul clasifică citate; nu scrie niciodată verdictul."
-  nodes={[
-    {
-      "label": "Se alege o afirmație",
-      "detail": "O frază dintr-un articol care poate fi verificată în alte relatări."
-    },
-    {
-      "label": "Se caută citate în alte publicații",
-      "detail": "Cele mai apropiate pasaje din alte articole, găsite după sens, nu doar după cuvinte."
-    },
-    {
-      "kind": "decision",
-      "label": "Poate conta citatul ca dovadă?",
-      "branches": [
-        {
-          "when": "Același articol",
-          "then": "Eliminat: o afirmație nu se poate confirma singură.",
-          "tone": "bad"
-        },
-        {
-          "when": "Aceeași publicație",
-          "then": "Eliminat: o publicație nu își poate confirma propria știre.",
-          "tone": "bad"
-        },
-        {
-          "when": "Publicație necunoscută",
-          "then": "Eliminat, în loc să fie citat sub un nume ghicit.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Publicație independentă, cu nume cunoscut"
-    },
-    {
-      "label": "Modelul clasifică fiecare citat",
-      "detail": "Susține afirmația, o contrazice sau nu are legătură. Doar la asta răspunde."
-    },
-    {
-      "kind": "decision",
-      "label": "Verdictul, din numărătoare",
-      "branches": [
-        {
-          "when": "Există o contrazicere",
-          "then": "Contestat, cu sursele care o contrazic.",
-          "tone": "warn"
-        },
-        {
-          "when": "Două sau mai multe o susțin",
-          "then": "Confirmat de mai multe publicații.",
-          "tone": "ok"
-        },
-        {
-          "when": "O singură sursă o susține",
-          "then": "O singură sursă.",
-          "tone": "neutral"
-        },
-        {
-          "when": "Niciuna",
-          "then": "Deocamdată neverificabil.",
-          "tone": "neutral"
-        }
-      ]
-    }
-  ]}
-/>

@@ -1,0 +1,296 @@
+---
+/**
+ * The spine of a workflow: steps joined by a line, decisions as diamonds with side-exits,
+ * loops and schedules with their own marks, and an optional actor chip on each step.
+ * Shared by Flow (a single diagram) and Workflows (a tabbed set).
+ */
+import type { WStep, Actor } from './workflows/types';
+
+interface Props {
+  steps: WStep[];
+  /** Actor names in the page language; without it no actor chips are shown. */
+  actors?: Record<Actor, string>;
+  /** Names of the other workflows, for "continues in" links. */
+  titles?: Record<string, string>;
+  continuesIn?: string;
+  plannedLabel?: string;
+  /** Heading level of each step's name, to keep the page outline in order. */
+  level?: 'h3' | 'h4';
+}
+const { steps, actors, titles = {}, continuesIn = '→', plannedLabel = 'planned', level = 'h4' } = Astro.props;
+const Name = level;
+const marks: Record<string, string> = { decision: '?', loop: '↻', schedule: '◷' };
+---
+
+<ol class="spine">
+  {
+    steps.map((n, i) => {
+      const kind = n.kind ?? 'step';
+      const last = i === steps.length - 1;
+      return (
+        <li class:list={['fnode', kind, n.branches?.length && 'has-exits', n.planned && 'planned']}>
+          <span class="mark" aria-hidden="true">
+            {marks[kind] ?? ''}
+          </span>
+          <div class="body">
+            <div class="box">
+              {(actors && n.actor) || n.planned ? (
+                <p class="meta">
+                  {actors && n.actor && <span class:list={['actor', `a-${n.actor}`]}>{actors[n.actor]}</span>}
+                  {n.planned && <span class="plan">{plannedLabel}</span>}
+                </p>
+              ) : null}
+              <Name class="name">{n.label}</Name>
+              {n.detail && <p class="muted detail">{n.detail}</p>}
+              {n.goto && titles[n.goto] && (
+                <button type="button" class="goto" data-wf-open={n.goto}>
+                  {continuesIn} {titles[n.goto]}
+                </button>
+              )}
+            </div>
+            {n.branches && n.branches.length > 0 && (
+              <ul class:list={['exits', last && !n.yes && 'outcomes']}>
+                {n.branches.map((b) => (
+                  <li class:list={['exit', b.tone ?? 'neutral']}>
+                    <span class="when">{b.when}</span>
+                    <span class="then">{b.then}</span>
+                    {b.goto && titles[b.goto] && (
+                      <button type="button" class="goto" data-wf-open={b.goto}>
+                        {continuesIn} {titles[b.goto]}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {n.yes && !last && (
+              <p class="yes">
+                <span aria-hidden="true">↓</span> {n.yes}
+              </p>
+            )}
+          </div>
+        </li>
+      );
+    })
+  }
+</ol>
+
+<style>
+  .spine {
+    --ok: var(--color-aurora);
+    --bad: var(--color-ember);
+    --warn: #fbbf24;
+    --neutral: var(--color-mist);
+    position: relative;
+    display: grid;
+    gap: 14px;
+  }
+  .spine::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--color-line), color-mix(in srgb, var(--accent) 55%, var(--color-line)), var(--color-line));
+  }
+  .fnode {
+    position: relative;
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .mark {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-top: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--color-night);
+    box-shadow: 0 0 0 4px var(--color-deep);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--accent);
+  }
+  /* decisions are diamonds, the way flowcharts draw them; the "?" stays upright */
+  .decision .mark {
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .decision .mark::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    border: 2px solid var(--accent);
+    border-radius: 3px;
+    background: var(--color-night);
+    box-shadow: 0 0 0 4px var(--color-deep);
+    transform: rotate(45deg);
+  }
+  .loop .mark,
+  .schedule .mark {
+    font-size: 0.85rem;
+    border-style: dashed;
+  }
+  .body {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+  }
+  .box {
+    padding: 14px 18px;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-panel) 60%, transparent);
+  }
+  .decision .box {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--color-line));
+  }
+  .loop .box,
+  .schedule .box {
+    border-style: dashed;
+  }
+  .planned .box {
+    border-style: dashed;
+    opacity: 0.85;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .actor,
+  .plan {
+    --c: var(--color-mist);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2em 0.6em;
+    border-radius: 999px;
+    color: var(--c);
+    border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+    background: color-mix(in srgb, var(--c) 10%, transparent);
+  }
+  .a-you {
+    --c: #8be9ff;
+  }
+  .a-app {
+    --c: #a5b4fc;
+  }
+  .a-ai {
+    --c: #d8b4fe;
+  }
+  .a-store {
+    --c: #fcd34d;
+  }
+  .a-ext {
+    --c: #fdba74;
+  }
+  .a-sim {
+    --c: #6ee7b7;
+  }
+  .plan {
+    --c: #fbbf24;
+  }
+  .name {
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.005em;
+  }
+  .detail {
+    margin-top: 4px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .goto {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+  .goto:hover {
+    text-decoration: underline;
+  }
+  .exits {
+    display: grid;
+    gap: 8px;
+  }
+  .exit {
+    --tone: var(--neutral);
+    display: grid;
+    gap: 2px;
+    padding: 10px 14px;
+    border: 1px solid color-mix(in srgb, var(--tone) 45%, var(--color-line));
+    border-left: 3px solid var(--tone);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--tone) 8%, transparent);
+  }
+  .exit.ok {
+    --tone: var(--ok);
+  }
+  .exit.bad {
+    --tone: var(--bad);
+  }
+  .exit.warn {
+    --tone: var(--warn);
+  }
+  .when {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tone);
+  }
+  .then {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .yes {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    padding-left: 4px;
+  }
+  @media (min-width: 900px) {
+    /* side-exits leave the flow to the right, joined to their decision by a short arm */
+    .has-exits .body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 36px;
+      align-items: start;
+    }
+    .has-exits .yes {
+      grid-column: 1;
+    }
+    .exits {
+      position: relative;
+    }
+    .exits::before {
+      content: '';
+      position: absolute;
+      left: -36px;
+      top: 26px;
+      width: 36px;
+      height: 2px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, var(--color-line)), var(--color-line));
+    }
+    .outcomes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

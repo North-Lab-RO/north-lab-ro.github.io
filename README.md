@@ -78,7 +78,7 @@ src/
 │  ├─ tours/                 TourFrame.astro + one data file per product
 │  ├─ project/               Gallery, ReportSlot, InfoGrid, ScoreBars, CounselorStory, ProjectVisual
 │  ├─ samples/               illustrative sample outputs (story analysis, case file, radio, import review)
-│  ├─ diagrams/              Pipeline (linear stages) and Flow (workflows with decisions)
+│  ├─ diagrams/              Workflows (overview + tabs), FlowSteps, Flow, Pipeline; workflows/<slug>.ts = EN/RO data
 │  └─ 3d/                    engine.ts + scenes
 └─ assets/projects/<slug>/   images, logos, screens/
 public/reports/              sample PDFs and their first-page previews
@@ -136,7 +136,9 @@ Everything a client reads comes first; the MDX body (architecture, pipeline, wor
 
 ### Diagrams, not code
 
-The site shows no source code. The logic behind each product is drawn with `Flow` (`components/diagrams/Flow.astro`): steps down a spine, decisions as diamonds whose side-exits are tinted by outcome (green accepted, red dropped, amber flagged) and always labelled in words. On desktop the exits sit beside their decision; on phones, below it. `Pipeline` draws the linear "How it works" stages.
+The site shows no source code. Each product page has **How it works, in depth** (`components/diagrams/Workflows.astro`): an overview of every workflow the product runs (what starts it, what it hands over to), then one tab per workflow with its full flow. Every step carries an actor chip (You, App, Local AI, Storage, Outside service, Simulator); decisions are diamonds whose side-exits are tinted by outcome (green accepted, red dropped, amber flagged) and always labelled in words; loops and schedules have their own marks; "continues in" links jump between workflows; features that are designed but not built carry a *planned* tag. Tabs are keyboard accessible and, without JavaScript, every workflow is shown stacked.
+
+The data lives in `components/diagrams/workflows/<slug>.ts` (EN and RO), one file per product, loaded by slug like the tours. Every step was traced from the product's own source code, with thresholds taken from the code's defaults. `FlowSteps.astro` renders the spine for both `Workflows` and the single-diagram `Flow`.
 
 ## Product tours and real screenshots
 
@@ -185,46 +187,51 @@ npm run preview   # serve the build
 
 ```mermaid
 flowchart LR
-    A[41 RSS feeds<br/>every 5 min] --> B[Extract & clean<br/>trafilatura]
-    B --> C[Embed<br/>BGE-M3]
-    C --> Q[(Qdrant)]
-    C --> D[Cluster into stories<br/>cosine ≥ 0.78 · ±72 h]
-    D --> E[Per-article analysis<br/>Qwen3 4B]
-    E --> F[Per-story analysis<br/>Qwen3 14B]
-    F --> S[Importance score 0–100]
-    S --> H[Push alerts]
-    S --> I[Briefings 07:00 + every 4 h]
-    S --> J[PDF reports]
+    A[RSS feeds or page scraping<br/>checked every 5 min] --> B[Extract & clean<br/>trafilatura · language · lead image]
+    B --> C[Embed<br/>BGE-M3] --> Q[(Qdrant)]
+    C --> D{Cluster into stories<br/>cosine ≥ 0.78 · ±72 h}
+    D --> F[Story analysis<br/>one source: Qwen3 4B · several: Qwen3 14B]
+    B --> E[Per-article analysis · Qwen3 4B<br/>summary · framing · claims]
+    E --> CL[(Claims index)]
+    F --> S[Importance 0–100<br/>arithmetic]
+    S -- "≥ threshold" --> H[Push alert + why it matters]
+    F --> I[Briefings 07:00 + every 4 h]
+    CL --> V{Fact-check verdict<br/>computed from evidence}
+    V --> I
+    I --> J[PDF on download]
 ```
 
 ### ATHENA
 
 ```mermaid
 flowchart LR
-    CASE[Case · subjects<br/>identifiers] --> COLL{Collectors}
-    COLL --> W[Web search<br/>SearXNG]
+    CASE[Case · subjects<br/>identifiers] --> COLL{7 collectors<br/>queued jobs}
+    COLL --> W[Web search<br/>self-hosted SearXNG]
     COLL --> D[DNS & WHOIS]
-    COLL --> SO[Social discovery<br/>52 platforms]
+    COLL --> SO[Profiles · deep social<br/>52 platforms]
+    COLL --> PA[Post analysis<br/>behavioural profile]
     COLL --> IMG[Reverse image]
-    W & D & SO & IMG --> EV[Findings]
+    W & D & SO & PA & IMG --> EV[Findings<br/>with confidence]
+    EV --> KB[(Qdrant<br/>nomic-embed-text)]
     EV --> REV{Analyst review<br/>confirm / reject}
-    REV --> KB[(Qdrant<br/>nomic-embed-text)]
-    KB --> AI[AI assistant<br/>Qwen3 4B · sources weighted by accuracy]
-    REV --> REP[Report · PDF]
+    KB --> AI[AI assistant · Qwen3 4B<br/>top findings · source track record]
+    REV -- not rejected --> REP[Structured report<br/>WeasyPrint PDF]
 ```
 
 ### BANKY
 
 ```mermaid
 flowchart LR
-    UP[Upload<br/>PDF · XLSX · CSV · scans] --> P{Known bank layout?}
-    P -- yes --> BP[Bank parser]
-    P -- no --> OCR[Local OCR<br/>PaddleOCR]
-    BP --> LLM[Structure rows<br/>Qwen 3.6 27B]
-    OCR --> LLM
+    UP[Upload] --> T{What kind of file?}
+    T -- PDF with text --> BP[Bank layout parser<br/>ING · generic · no AI]
+    T -- XLSX · CSV · HTML --> TP[Table parser<br/>no AI]
+    T -- scan or image --> OCR[Local OCR<br/>PaddleOCR]
+    OCR --> LLM[Local LLM<br/>arranges OCR text into rows]
     LLM --> G{Digit guard<br/>every number on the page?}
-    G -- no --> DROP[Value dropped<br/>left for the user]
-    G -- yes --> REV[Review screen]
+    G -- no --> DROP[Value blanked<br/>with a warning]
+    BP --> REV[Review screen<br/>duplicates flagged]
+    TP --> REV
+    G -- yes --> REV
     DROP --> REV
     REV -- confirmed --> LED[(Ledger<br/>NUMERIC 18,2)]
 ```
@@ -234,18 +241,14 @@ flowchart LR
 ```mermaid
 flowchart LR
     XP[X-Plane 12 plugin<br/>state every 1 s] --> API[FastAPI server]
-    MIC[Push-to-talk] --> STT[Whisper tiny.en]
-    STT --> API
-    API --> RT{Router}
-    RT --> C1[Clearance]
-    RT --> C2[Ground]
-    RT --> C3[Tower]
-    RT --> C4[Approach]
-    RT --> C5[Center]
-    C1 & C2 & C3 & C4 & C5 --> RAG[(Nav data · Qdrant · PostgreSQL)]
-    RAG --> LLM[Local LLM · Qwen 3.5]
-    LLM --> VER[Safety & readback checks]
-    VER --> TTS[Kokoro TTS] --> COM[COM1 radio in sim]
+    MIC[Push-to-talk] --> STT[Whisper tiny.en] --> API
+    API --> INT[Local LLM<br/>classifies the request · 14 intents]
+    INT --> WR[Word rules<br/>override the model]
+    WR --> ENG[Rules engine<br/>runway · frequency · taxi route · SID · approach · wake gaps]
+    NAV[(Navigation data<br/>PostgreSQL)] --> ENG
+    ENG --> G{3 gates<br/>names exist · well formed · still right when spoken}
+    G -- fail --> SB[Standby + reason]
+    G -- pass --> TTS[Kokoro TTS · radio effects] --> COM[COM1 radio in sim]
 ```
 
 ### CASES

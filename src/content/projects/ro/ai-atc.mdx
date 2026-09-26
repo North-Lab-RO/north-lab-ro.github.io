@@ -4,17 +4,17 @@ category: AI vocal · aviație
 tagline: "AI_ATC aduce în X-Plane 12 un controlor de trafic aerian cu care vorbești pe bune: îi spui ce vrei în stație, iar el îți răspunde în frazeologia ICAO, de la autorizare până la aterizare."
 summary: >-
   AI_ATC înlocuiește controlul de trafic prestabilit din simulator cu un controlor care chiar ascultă. Un plugin
-  trimite în timp real starea aeronavei către un server local. Pilotul vorbește, iar recunoașterea vocală, un agent
-  specializat pe faza de zbor și sinteza vocală produc un răspuns radio realist. Fiecare instrucțiune e verificată
-  față de datele reale de navigație și față de reguli de siguranță înainte să fie rostită. Fără cloud, fără
-  abonament, fără cost pe minut.
+  trimite în timp real starea aeronavei către un server local. Pilotul vorbește; recunoașterea vocală transformă
+  vorbirea în text, un model local înțelege ce s-a cerut, iar un motor de reguli construiește răspunsul controlorului
+  din datele reale de navigație. Fiecare transmisie e verificată înainte să fie rostită cu vocea unui controlor. Fără
+  cloud, fără abonament, fără cost pe minut.
 order: 4
 accent: aurora
 scene: radar
 logo: ../../../assets/projects/ai-atc/logo.jpg
 metrics:
-  - value: '5'
-    label: controlori specializați, aleși după faza de zbor
+  - value: '14'
+    label: tipuri de cereri ale pilotului înțelese
   - value: 2–4 s
     label: ținta pentru un răspuns radio complet
   - value: 0,61 s
@@ -25,7 +25,6 @@ features: []
 stack:
   - Python
   - FastAPI
-  - Lua
   - C++ (X-Plane SDK)
   - Ollama
   - Qwen 3.5
@@ -46,7 +45,7 @@ outcomes:
   - title: "Exersezi radioul ca în realitate"
     body: "Vorbești, asculți și repeți instrucțiunile ca un pilot adevărat, cu un controlor care înțelege vorbirea naturală."
   - title: "Toate fazele zborului"
-    body: "Autorizarea, solul, turnul, apropierea și controlul regional te preiau pe rând, pe măsură ce zbori."
+    body: "Clearance, Ground, Tower și Approach răspund fiecare pe frecvența lor și îți spun pe cine să apelezi mai departe."
   - title: "Fără abonament"
     body: "Rulează pe calculatorul tău, fără taxă lunară sau pe minut."
 audiences:
@@ -73,7 +72,7 @@ capabilities:
     items:
       - "Listă de verificare pentru fiecare fază a zborului"
       - "Indicii pentru următorul apel"
-      - "Cinci controlori, aleși după faza de zbor"
+      - "Pe cine apelezi mai departe și pe ce frecvență"
       - "Mod demonstrativ pentru un zbor complet"
   - group: "Lumea din jur"
     items:
@@ -91,107 +90,14 @@ tailoring:
 note: "Doar pentru simulare și exercițiu; nu este un sistem certificat de control al traficului aerian sau de instruire."
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import RadioExchange from '../../../components/samples/RadioExchange.astro';
 
-## Cum funcționează
+## Note tehnice
 
 Un răspuns radio are la dispoziție două până la patru secunde, așa că fiecare etapă e măsurată. Whisper tiny.en a
 fost ales după ce aceeași transmisie a fost testată cu mai multe dimensiuni de model: toate au înțeles la fel de bine
 intenția pilotului, iar tiny e de 20 de ori mai rapid decât medium.
 
-<Pipeline
-  title="Transmisia pilotului → răspunsul controlorului"
-  caption="Un schimb complet de replici, în întregime pe calculatorul tău."
-  stages={[
-    { label: 'Starea avionului', detail: 'Pluginul X-Plane trimite în fiecare secundă poziția, faza de zbor și starea stațiilor radio.', tag: 'plugin C++ · Lua' },
-    { label: 'Din voce în text', detail: 'Transmisia vocală e transcrisă pe placa video.', tag: 'whisper tiny.en' },
-    {
-      label: 'Alegerea controlorului',
-      detail: 'Frecvența, cuvintele-cheie și faza de zbor decid ce controlor răspunde.',
-      items: ['Autorizare', 'Sol', 'Turn', 'Apropiere', 'Control regional'],
-    },
-    { label: 'Context', detail: 'Datele aeroportului, procedurile și istoricul conversației.', tag: 'qdrant + postgres' },
-    { label: 'Răspunsul', detail: 'Frazeologie în stil ICAO, generată de un model local.', tag: 'qwen 3.5' },
-    { label: 'Verificare', detail: 'Reguli de siguranță, detectarea conflictelor și verificarea colaționării, înainte ca ceva să fie rostit.' },
-    { label: 'Rostire', detail: 'Vocea sintetizată se aude pe stația COM1 din simulator.', tag: 'kokoro' },
-  ]}
-/>
-
 ## Exemplu de rezultat
 
 <RadioExchange lang="ro" />
-
-## Alegerea controlorului după faza de zbor
-
-Când frecvența și cuvintele-cheie nu sunt de ajuns, sistemul se uită la faza de zbor, apoi la faptul că avionul e la
-sol sau în aer și la altitudine.
-
-<Flow
-  title="Care controlor răspunde"
-  caption="Verificările se fac pe rând; prima care decide are ultimul cuvânt."
-  nodes={[
-    {
-      "label": "Sosește o transmisie",
-      "detail": "Cuvintele tale, transformate în text, plus starea avionului în timp real."
-    },
-    {
-      "kind": "decision",
-      "label": "Se ocupă deja un controlor de avion?",
-      "branches": [
-        {
-          "when": "Da",
-          "then": "Răspunde acel controlor.",
-          "tone": "ok"
-        }
-      ],
-      "yes": "Nu"
-    },
-    {
-      "kind": "decision",
-      "label": "Decide frecvența selectată?",
-      "branches": [
-        {
-          "when": "Da",
-          "then": "Răspunde controlorul de pe acea frecvență.",
-          "tone": "ok"
-        }
-      ],
-      "yes": "Nu"
-    },
-    {
-      "kind": "decision",
-      "label": "Numesc cuvintele un controlor?",
-      "branches": [
-        {
-          "when": "Da",
-          "then": "De exemplu „Tower” sau „Ground”.",
-          "tone": "ok"
-        }
-      ],
-      "yes": "Nu, așa că decide faza de zbor"
-    },
-    {
-      "kind": "decision",
-      "label": "Unde e avionul?",
-      "branches": [
-        {
-          "when": "La sol",
-          "then": "Clearance, dacă faza de zbor o cere, altfel Ground.",
-          "tone": "ok"
-        },
-        {
-          "when": "Sub 18.000 ft",
-          "then": "Approach, dacă faza de zbor o cere, altfel Tower.",
-          "tone": "ok"
-        },
-        {
-          "when": "Peste 18.000 ft",
-          "then": "Center.",
-          "tone": "ok"
-        }
-      ]
-    }
-  ]}
-/>

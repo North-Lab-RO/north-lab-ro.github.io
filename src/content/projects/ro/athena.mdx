@@ -58,7 +58,7 @@ outcomes:
   - title: "Fiecare constatare, verificată"
     body: "Un analist confirmă sau respinge fiecare rezultat și îi dă un grad de încredere. Ce e respins nu ajunge niciodată în raport."
   - title: "Privat și trasabil"
-    body: "Inteligența artificială rulează pe serverul tău, colectarea poate trece printr-un VPN, iar fiecare acțiune rămâne în jurnalul de audit."
+    body: "Inteligența artificială rulează pe serverul tău, colectarea poate trece printr-un VPN, iar acțiunile importante rămân în jurnalul de audit."
 audiences:
   - title: "Due diligence și conformitate"
     body: "Verificări despre firme, parteneri și domenii, cu un raport care arată de unde vine fiecare informație."
@@ -74,7 +74,7 @@ capabilities:
     items:
       - "Cazuri cu membri și roluri"
       - "Liste de sarcini pornite din șabloane"
-      - "Cronologie și jurnal de audit pentru fiecare acțiune"
+      - "Cronologia cazului și jurnal de audit pentru acțiunile importante"
       - "Notificări în aplicație"
   - group: "Subiecți"
     items:
@@ -116,34 +116,15 @@ tailoring:
   - "Căutare în baze de date cu scurgeri de informații"
   - "Raport structurat automat, cu secțiunile standard ale unei investigații"
   - "Graficul rețelei inclus în raportul PDF"
-note: "Pentru investigații legale, făcute de echipe autorizate. Fiecare acțiune rămâne în jurnalul de audit."
+note: "Pentru investigații legale, făcute de echipe autorizate. Acțiunile importante, precum crearea cazului, deciziile asupra dovezilor și exporturile, rămân în jurnalul de audit."
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
-## Cum funcționează
+## Note tehnice
 
 Un caz trece de la piste la dovezi și apoi la raport. Colectarea e automată, decizia rămâne la analist, iar
 inteligența artificială ajută, dar nu hotărăște ce e adevărat.
-
-<Pipeline
-  title="Pistă → dovadă → raport"
-  caption="Totul rulează pe serverul tău; colectarea poate trece printr-un VPN."
-  stages={[
-    { label: 'Caz și subiecți', detail: 'Un caz cuprinde persoanele, organizațiile, domeniile și dispozitivele investigate, cu datele lor de identificare.' },
-    {
-      label: 'Colectoare',
-      detail: 'Pornești un colector sau pe toate, pe datele de identificare.',
-      items: ['căutare web', 'DNS și WHOIS', 'scurgeri de date', 'căutare de profiluri', 'analiză socială', 'analiza postărilor', 'căutare după imagine'],
-    },
-    { label: 'Verificare', detail: 'Un analist confirmă sau respinge fiecare constatare și îi dă un grad de încredere.' },
-    { label: 'Cunoaștere', detail: 'Constatările și conversațiile anterioare sunt vectorizate pentru căutarea după sens.', tag: 'nomic-embed-text → qdrant' },
-    { label: 'Asistent AI', detail: 'Răspunde la întrebări despre caz pe baza dovezilor, cântărind sursele după cât de sigure s-au dovedit.', tag: 'qwen3 4B' },
-    { label: 'Raport', detail: 'Un raport construit din caz și exportat în PDF.', tag: 'WeasyPrint' },
-  ]}
-/>
 
 <InfoGrid
   columns={2}
@@ -152,105 +133,5 @@ inteligența artificială ajută, dar nu hotărăște ce e adevărat.
     { tag: 'interfață', title: 'Un spațiu de lucru pentru analiști', body: 'React și TypeScript, cu graficul rețelei în Cytoscape, grafice și un spațiu de lucru cu unsprezece secțiuni pentru fiecare caz.' },
     { tag: 'ai', title: 'Doar modele locale', body: 'Ollama rulează modelul de conversație și modelul de vectorizare pe același server; modelul se poate schimba din setări.' },
     { tag: 'colectare', title: 'Privat din start', body: 'Căutarea pe web trece printr-un SearXNG găzduit la tine, un browser automat deschide paginile care au nevoie de el, iar cererile spre exterior pot trece printr-un VPN.' },
-  ]}
-/>
-
-## Sursele își câștigă încrederea
-
-Asistentul vede cât de sigură s-a dovedit fiecare sursă în cazul respectiv: ce parte din constatările ei au fost
-confirmate de analiști. O sursă respinsă des contează mai puțin în răspuns.
-
-<Flow
-  title="Cum își câștigă o sursă încrederea"
-  caption="Analiștii decid ce e adevărat; asistentul învață pe ce surse să se bazeze."
-  nodes={[
-    {
-      "label": "Un colector aduce o constatare",
-      "detail": "Din căutări web, DNS și WHOIS, profiluri sociale, imagini și celelalte colectoare."
-    },
-    {
-      "kind": "decision",
-      "label": "Un analist o verifică",
-      "branches": [
-        {
-          "when": "În așteptare",
-          "then": "Nu se numără încă.",
-          "tone": "neutral"
-        },
-        {
-          "when": "Respinsă",
-          "then": "Contează împotriva sursei și nu ajunge în raport.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Confirmată"
-    },
-    {
-      "label": "Fiecare sursă capătă un istoric",
-      "detail": "Constatările confirmate din totalul celor verificate, pe fiecare sursă, în cazul respectiv."
-    },
-    {
-      "kind": "decision",
-      "label": "Când răspunde asistentul",
-      "branches": [
-        {
-          "when": "Sursă de încredere",
-          "then": "Primește mai multă greutate.",
-          "tone": "ok"
-        },
-        {
-          "when": "Respinsă des",
-          "then": "Primește mai puțină greutate.",
-          "tone": "warn"
-        }
-      ]
-    }
-  ]}
-/>
-
-## Rapoarte potrivite subiectului
-
-Raportul structurat se adaptează la tipul cazului: pentru o persoană dispare secțiunea de infrastructură, iar
-secțiunile fără date sunt lăsate deoparte, nu umplute cu text de umplutură.
-
-<Flow
-  title="Cum se construiește un raport"
-  caption="Pornește din datele cazului; nimic nu e umplutură."
-  nodes={[
-    {
-      "label": "Se adună dovezile cazului",
-      "detail": "Tot, în afară de constatările respinse, cele mai noi primele."
-    },
-    {
-      "kind": "decision",
-      "label": "Cine este subiectul?",
-      "branches": [
-        {
-          "when": "O persoană",
-          "then": "Secțiunea de infrastructură lipsește.",
-          "tone": "neutral"
-        }
-      ],
-      "yes": "O organizație păstrează toate secțiunile"
-    },
-    {
-      "label": "Se construiesc secțiunile",
-      "detail": "Identificarea subiectului, infrastructura, amprenta digitală, relațiile și cronologia."
-    },
-    {
-      "kind": "decision",
-      "label": "Are fiecare secțiune date?",
-      "branches": [
-        {
-          "when": "Goală",
-          "then": "Lăsată deoparte, niciodată umplută artificial.",
-          "tone": "neutral"
-        }
-      ],
-      "yes": "Păstrată, în ordinea standard"
-    },
-    {
-      "label": "Raportul se exportă ca PDF"
-    }
   ]}
 />

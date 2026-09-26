@@ -4,8 +4,9 @@ category: Personal finance · private
 tagline: "BANKY reads your bank statements and receipts on your own computer, categorises every payment and gives you budgets, goals and monthly reports, with you confirming every line."
 summary: >-
   BANKY is a personal finance app for people who won't hand their bank statements to a cloud service. It imports PDF,
-  Excel and CSV statements, scanned pages and receipt photos, then extracts and categorises each transaction with a
-  language model running on local hardware. Balances, budgets, 50/30/20 analysis, goals, investments and printable
+  Excel and CSV statements, scanned pages and receipt photos. Statements with text are read by rules written for each
+  bank; scans and receipts are read by local OCR and arranged into rows by a language model running on local hardware,
+  which also suggests categories. Balances, budgets, 50/30/20 analysis, goals, investments and printable
   reports are all computed from a ledger you confirm row by row. The model only suggests: every number it writes must
   exist on the source page, and all the money maths is plain code.
 order: 3
@@ -113,28 +114,15 @@ tailoring:
   - "A Romanian-language interface"
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import ImportReview from '../../../components/samples/ImportReview.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
-## How it works
+## Engineering notes
 
-The language model does the one thing code can't: turning a messy page into structured rows. Everything before and
-after it is deterministic. The model runs on an isolated network with no internet access.
-
-<Pipeline
-  title="Statement → reviewed ledger"
-  caption="The model suggests; code checks; you confirm."
-  stages={[
-    { label: 'Upload', detail: 'PDF, XLSX or CSV statements, scanned pages and receipt photos.' },
-    { label: 'Parse or read', detail: 'Bank-specific parsers for known layouts and Romanian number formats; local OCR for scans and receipts.', tag: 'PaddleOCR' },
-    { label: 'Structure', detail: 'The language model turns text into dated, described, signed rows.', tag: 'qwen3.6 27B' },
-    { label: 'Digit guard', detail: 'Every number in the output must equal a whole number on the page. Anything else is dropped.' },
-    { label: 'Review', detail: 'Rows wait for you in a side-by-side review screen, with duplicates flagged.' },
-    { label: 'Ledger', detail: 'Confirmed rows become transactions stored as NUMERIC(18,2), with an audit trail.' },
-  ]}
-/>
+Statements that contain text, and spreadsheets, are read by layout rules written for each bank, with no AI. The
+language model does the one thing rules can't: turning the text read from a scanned page or a receipt photo into
+structured rows, and every number it returns must match the page. The model and the OCR run on an isolated network
+with no internet access.
 
 Written insights take five passes (draft, verify, critique, revise, verify), and a fixed rule-based guard has the final
 say. On a 24 GB card, several passes of a model that fits in memory beat a single pass of a larger one.
@@ -152,47 +140,3 @@ say. On a 24 GB card, several passes of a model that fits in memory beat a singl
 ## Sample output
 
 <ImportReview lang="en" />
-
-## The guard, step by step
-
-<Flow
-  title="Every number is checked against the page"
-  caption="A value only counts if it matches a whole number printed on the statement."
-  nodes={[
-    {
-      "label": "The model reads a line",
-      "detail": "Date, description and amount, from the statement or the receipt."
-    },
-    {
-      "label": "Every number it read is compared with the page",
-      "detail": "Whole numbers only: a fragment of a longer number does not count."
-    },
-    {
-      "kind": "decision",
-      "label": "Do all the numbers match?",
-      "branches": [
-        {
-          "when": "No",
-          "then": "The value is dropped and the line waits for you to type it. For example, 84.32 read from 184,32.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Yes"
-    },
-    {
-      "label": "The line is shown for review",
-      "detail": "With its suggested category and how sure the model is."
-    },
-    {
-      "kind": "decision",
-      "label": "You confirm",
-      "branches": [
-        {
-          "when": "Confirmed",
-          "then": "The line enters the ledger.",
-          "tone": "ok"
-        }
-      ]
-    }
-  ]}
-/>

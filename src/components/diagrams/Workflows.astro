@@ -1,0 +1,359 @@
+---
+/**
+ * Every workflow a product runs: an overview of how they hand over to each other,
+ * then one tab per workflow with its full flow. Without JS all panels are shown, stacked.
+ */
+import FlowSteps from './FlowSteps.astro';
+import type { WorkflowSet, Actor } from './workflows/types';
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  set: WorkflowSet;
+  /** Unique prefix for ids on the page. */
+  uid: string;
+}
+const { lang, set, uid } = Astro.props;
+const w = t(lang).workflows;
+const actors = w.actors as Record<Actor, string>;
+const titles = Object.fromEntries(set.workflows.map((x) => [x.id, x.title]));
+const used = [...new Set(set.workflows.flatMap((x) => x.steps.map((s) => s.actor).filter(Boolean)))] as Actor[];
+const order: Actor[] = ['you', 'sim', 'app', 'ai', 'store', 'ext'];
+const legend = order.filter((a) => used.includes(a));
+---
+
+<div class="wf" data-wf>
+  <p class="lede intro">{set.intro}</p>
+
+  <div class="legend" aria-label={w.legend}>
+    <span class="label">{w.legend}</span>
+    {legend.map((a) => <span class:list={['actor', `a-${a}`]}>{actors[a]}</span>)}
+  </div>
+
+  <ol class="overview" aria-label={w.overview}>
+    {
+      set.workflows.map((x, i) => (
+        <li class="card">
+          <button type="button" class="open" data-wf-open={x.id}>
+            <span class="num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="ctitle">{x.title}</span>
+            <span class="trig">{x.trigger}</span>
+          </button>
+          {x.feeds && x.feeds.length > 0 && (
+            <p class="feeds">
+              <span class="muted">{w.feeds}</span>
+              {x.feeds.map((f) => (
+                <button type="button" class="chip feed" data-wf-open={f}>
+                  {titles[f]}
+                </button>
+              ))}
+            </p>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="tabs" role="tablist" aria-label={w.tabs}>
+    {
+      set.workflows.map((x, i) => (
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          id={`${uid}-tab-${x.id}`}
+          aria-controls={`${uid}-panel-${x.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-wf-tab={x.id}
+        >
+          <span class="n">{i + 1}</span> {x.title}
+        </button>
+      ))
+    }
+  </div>
+
+  {
+    set.workflows.map((x, i) => (
+      <section
+        class:list={['panel', i === 0 && 'on']}
+        role="tabpanel"
+        id={`${uid}-panel-${x.id}`}
+        aria-labelledby={`${uid}-tab-${x.id}`}
+        data-wf-panel={x.id}
+      >
+        <header class="phead">
+          <p class="label">
+            {w.workflow} {i + 1} / {set.workflows.length}
+          </p>
+          <h3 class="ptitle">{x.title}</h3>
+          <p class="trigger">
+            <span class="tlabel">{w.trigger}</span> {x.trigger}
+          </p>
+          <p class="muted summary">{x.summary}</p>
+        </header>
+        <FlowSteps steps={x.steps} actors={actors} titles={titles} continuesIn={w.continues} plannedLabel={w.planned} />
+        {x.outputs && x.outputs.length > 0 && (
+          <div class="outputs">
+            <span class="label">{w.outputs}</span>
+            <ul>
+              {x.outputs.map((o) => (
+                <li class="chip">{o}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    ))
+  }
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-wf]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-wf-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-wf-panel]')];
+    const strip = root.querySelector<HTMLElement>('.tabs')!;
+
+    const show = (id: string, focus = false, scroll = false) => {
+      tabs.forEach((t) => {
+        const on = t.dataset.wfTab === id;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        if (on) {
+          // keep the active tab visible in the strip without moving the page
+          strip.scrollTo({ left: t.offsetLeft - strip.clientWidth / 2 + t.offsetWidth / 2, behavior: 'smooth' });
+          if (focus) t.focus({ preventScroll: true });
+        }
+      });
+      panels.forEach((p) => p.classList.toggle('on', p.dataset.wfPanel === id));
+      if (scroll) strip.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => show(t.dataset.wfTab!));
+      t.addEventListener('keydown', (e) => {
+        const k = e.key;
+        let j = -1;
+        if (k === 'ArrowRight') j = (i + 1) % tabs.length;
+        else if (k === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+        else if (k === 'Home') j = 0;
+        else if (k === 'End') j = tabs.length - 1;
+        if (j < 0) return;
+        e.preventDefault();
+        show(tabs[j].dataset.wfTab!, true);
+      });
+    });
+    // overview cards, "feeds" chips and "continues in" links open a workflow's tab
+    root.querySelectorAll<HTMLButtonElement>('[data-wf-open]').forEach((b) =>
+      b.addEventListener('click', () => show(b.dataset.wfOpen!, false, true)),
+    );
+  });
+</script>
+
+<style>
+  .wf {
+    display: grid;
+    gap: 28px;
+  }
+  .intro {
+    max-width: 70ch;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend .label {
+    margin-right: 6px;
+  }
+  .actor {
+    --c: var(--color-mist);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25em 0.7em;
+    border-radius: 999px;
+    color: var(--c);
+    border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+    background: color-mix(in srgb, var(--c) 10%, transparent);
+  }
+  .a-you {
+    --c: #8be9ff;
+  }
+  .a-app {
+    --c: #a5b4fc;
+  }
+  .a-ai {
+    --c: #d8b4fe;
+  }
+  .a-store {
+    --c: #fcd34d;
+  }
+  .a-ext {
+    --c: #fdba74;
+  }
+  .a-sim {
+    --c: #6ee7b7;
+  }
+
+  /* overview: every workflow at a glance, with what it hands over to */
+  .overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .card {
+    display: grid;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-panel) 55%, transparent);
+  }
+  .open {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 2px 12px;
+    text-align: left;
+    background: none;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+  }
+  .open:hover .ctitle {
+    color: var(--accent);
+  }
+  .num {
+    grid-row: span 2;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    padding-top: 2px;
+  }
+  .ctitle {
+    font-weight: 600;
+  }
+  .trig {
+    font-size: 0.85rem;
+    color: var(--color-mist);
+  }
+  .feeds {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+  .feed {
+    cursor: pointer;
+    font-size: 0.7rem;
+    white-space: normal;
+  }
+  .feed::before {
+    content: '→';
+    color: var(--accent);
+  }
+  .feed:hover {
+    border-color: var(--accent);
+  }
+
+  /* tabs: a strip that scrolls sideways on phones */
+  .tabs {
+    display: none;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-margin-top: 96px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
+  :global(.js) .tabs {
+    display: flex;
+  }
+  .tab {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.55em 1em;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-deep);
+    color: var(--color-mist);
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+  .tab .n {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+  .tab[aria-selected='true'] {
+    background: var(--color-frost);
+    border-color: var(--color-frost);
+    color: var(--color-night);
+  }
+  .panel {
+    padding: clamp(20px, 3vw, 36px);
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background:
+      radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%),
+      var(--color-deep);
+  }
+  :global(.js) .panel:not(.on) {
+    display: none;
+  }
+  .phead {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .ptitle {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    letter-spacing: -0.02em;
+  }
+  .trigger {
+    font-size: 0.92rem;
+  }
+  .tlabel {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-right: 6px;
+  }
+  .summary {
+    max-width: 70ch;
+  }
+  .outputs {
+    display: grid;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-line);
+  }
+  .outputs ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .outputs .chip {
+    white-space: normal;
+  }
+  @media (min-width: 720px) {
+    .overview {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1100px) {
+    .overview {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

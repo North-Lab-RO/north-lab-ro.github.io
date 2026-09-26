@@ -141,100 +141,17 @@ tailoring:
   - "Editarea cazurilor generate înainte de publicare"
 ---
 
-import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import Flow from '../../../components/diagrams/Flow.astro';
 import CaseFile from '../../../components/samples/CaseFile.astro';
 
-## Cum funcționează
+## Note tehnice
 
 Modelul de limbaj și cel de imagine nu încap în același timp pe o placă de 24 GB, așa că un mecanism de rezervare a
 plăcii video le pornește pe rând. Totul se generează dinainte, deci jocul propriu-zis nu are nevoie deloc de placa
 video.
 
-<Pipeline
-  title="Premisă → caz verificat → caz ilustrat"
-  caption="Generarea rulează în fundal; o eroare e reparată în etapa care a produs-o."
-  stages={[
-    {
-      label: 'Generare în etape',
-      detail: 'Zece etape cu structură fixă, fiecare construită pornind de la adevărul ascuns.',
-      tag: 'mistral-small 24B',
-      items: ['premisa', 'adevărul ascuns', 'personajele', 'locurile', 'probele', 'laboratorul', 'interogatoriile', 'documentele', 'situația de start', 'imaginile'],
-      numberedItems: true,
-    },
-    {
-      label: 'Verificări',
-      detail: 'Trimiteri corecte, cronologie, fidelitate față de epocă, corectitudine și faptul că poate fi rezolvat.',
-      items: ['structură', 'cronologie', 'epocă', 'corectitudine', 'rezolvabilitate'],
-      loop: 'până la 3 reparații țintite',
-    },
-    { label: 'Ilustrare', detail: 'Portrete, scene, probe și locuri, cu personaje care își păstrează înfățișarea.', tag: 'SDXL · ComfyUI' },
-    { label: 'Revizuire', detail: 'Un editor verifică întregul caz, inclusiv soluția, și îl publică.' },
-    { label: 'Joc', detail: 'Ancheta, interogatoriile, analizele, raportul și procesul. Fără placă video.' },
-  ]}
-/>
-
 ## Exemplu de rezultat
 
 <CaseFile lang="ro" />
-
-## Un caz rezolvabil se demonstrează, nu se speră
-
-Fiecare acțiune pe care o poate face echipa (o percheziție, un interogatoriu, o analiză de laborator, o cerere de
-documente) are condiții, dezvăluiri și un cost în timp. Verificarea calculează tot ce se poate afla pornind de la
-informațiile de început și apoi se asigură că drumul cel mai scurt până la probele decisive încape în timpul
-disponibil.
-
-<Flow
-  title="Cum se dovedește că un caz poate fi rezolvat"
-  caption="Verificat înainte ca un caz să fie jucat vreodată."
-  nodes={[
-    {
-      "label": "Se scrie o variantă a cazului",
-      "detail": "Adevărul, persoanele, locurile și probele."
-    },
-    {
-      "label": "Se listează fiecare acțiune",
-      "detail": "Fiecare percheziție, interogatoriu, analiză sau cerere de documente: de ce are nevoie, ce dezvăluie și cât durează."
-    },
-    {
-      "label": "Se deblochează tot ce se poate afla",
-      "detail": "Pornind de la ce știe echipa în prima zi, acțiunile se aplică iar și iar până nu mai apare nimic nou."
-    },
-    {
-      "kind": "decision",
-      "label": "Se poate ajunge la fiecare probă decisivă?",
-      "branches": [
-        {
-          "when": "Nu",
-          "then": "Trimis înapoi la etapa care poate produce proba lipsă.",
-          "tone": "bad"
-        }
-      ],
-      "yes": "Da"
-    },
-    {
-      "label": "Se găsește drumul cel mai scurt spre dovadă",
-      "detail": "Cel mai ieftin drum prin acțiuni, în timp de joc."
-    },
-    {
-      "kind": "decision",
-      "label": "Încape în timpul disponibil?",
-      "branches": [
-        {
-          "when": "Nu",
-          "then": "Marcat ca prea lent și refăcut.",
-          "tone": "warn"
-        },
-        {
-          "when": "Da",
-          "then": "Cazul este acceptat.",
-          "tone": "ok"
-        }
-      ]
-    }
-  ]}
-/>
 
 ## Imagini generate
 
