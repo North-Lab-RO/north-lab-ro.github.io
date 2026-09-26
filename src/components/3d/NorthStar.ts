@@ -24,7 +24,7 @@ import { noise } from './glsl';
 /** Six-pointed crystal with a long north–south axis: the "north star". */
 function starGeometry(): BufferGeometry {
   const parts = [
-    new OctahedronGeometry(1, 0).scale(0.62, 2.15, 0.62),
+    new OctahedronGeometry(1, 0).scale(0.62, 1.9, 0.62),
     new OctahedronGeometry(1, 0).scale(1.35, 0.42, 0.42),
     new OctahedronGeometry(1, 0).scale(0.42, 0.42, 1.35),
   ];
@@ -178,8 +178,10 @@ const create: SceneFactory = (ctx) => {
   rig.add(star);
 
   const ring = bezel(3.2);
+  // Tilted only enough to read as 3D: seen from the front, the bezel's inner ring (2.58) still frames
+  // the star's tips (1.9), so the star never pokes out of its compass while it turns and bobs.
   const ringTilt = new Group();
-  ringTilt.rotation.x = -1.2;
+  ringTilt.rotation.x = -0.42;
   ringTilt.add(ring);
   rig.add(ringTilt);
 
@@ -202,10 +204,11 @@ const create: SceneFactory = (ctx) => {
       const halfW = halfH * aspect;
       // Desktop: star owns the right half. Phone: star floats above the headline.
       baseX = wide ? halfW * 0.5 : 0;
-      baseY = wide ? 0 : halfH * 0.46;
+      baseY = wide ? 0 : halfH * 0.4;
       // camera looks at the rig, so shift the view window instead of the rig
       camera.setViewOffset(w, h, wide ? -w * 0.3 : 0, wide ? 0 : h * 0.23, w, h);
-      rig.scale.setScalar(wide ? Math.min(0.85, halfW / 7) : 0.62);
+      // on phones the whole compass (bezel + north marker) must fit the width, and the space above the headline
+      rig.scale.setScalar(wide ? Math.min(0.85, halfW / 7) : Math.min(0.62, (halfW * 0.92) / 3.6, (halfH * 0.37) / 3.3));
       rig.position.x = baseX;
     },
     update(t) {
