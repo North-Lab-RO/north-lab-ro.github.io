@@ -102,7 +102,7 @@ note: "For simulation and practice only; not a certified air traffic control or 
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import RadioExchange from '../../../components/samples/RadioExchange.astro';
 
 ## How it works
@@ -138,30 +138,70 @@ faster than medium.
 When the frequency and keywords don't settle it, the router falls back to the flight phase, then to whether the
 aircraft is on the ground and how high it is.
 
-<CodeSnippet
-  file="fastapi/agents/router.py"
-  lang="python"
-  caption="The last fallback in the routing chain. Earlier checks use the controller that owns the aircraft, the tuned frequency and explicit keywords."
-  code={`
-phase = aircraft_state.get("phase", "cruise").lower()
-possible_agents = self.phase_agent_map.get(phase, ["center"])
-
-if len(possible_agents) > 1:
-    altitude = aircraft_state.get("altitude_msl", 0)
-    on_ground = aircraft_state.get("on_ground", False)
-
-    if on_ground:
-        if "clearance" in possible_agents:
-            return "clearance"
-        return "ground"
-    elif altitude < 18000:
-        if "approach" in possible_agents:
-            return "approach"
-        return "tower"
-    else:
-        if "center" in possible_agents:
-            return "center"
-
-return possible_agents[0]
-`}
+<Flow
+  title="Which controller answers"
+  caption="Each check is tried in turn; the first that decides wins."
+  nodes={[
+    {
+      "label": "A transmission arrives",
+      "detail": "Your words, turned into text, plus the live state of the aircraft."
+    },
+    {
+      "kind": "decision",
+      "label": "Is a controller already handling the aircraft?",
+      "branches": [
+        {
+          "when": "Yes",
+          "then": "That controller answers.",
+          "tone": "ok"
+        }
+      ],
+      "yes": "No"
+    },
+    {
+      "kind": "decision",
+      "label": "Does the tuned frequency decide?",
+      "branches": [
+        {
+          "when": "Yes",
+          "then": "The controller on that frequency answers.",
+          "tone": "ok"
+        }
+      ],
+      "yes": "No"
+    },
+    {
+      "kind": "decision",
+      "label": "Do the words name a controller?",
+      "branches": [
+        {
+          "when": "Yes",
+          "then": "For example “Tower” or “Ground”.",
+          "tone": "ok"
+        }
+      ],
+      "yes": "No, so the flight phase decides"
+    },
+    {
+      "kind": "decision",
+      "label": "Where is the aircraft?",
+      "branches": [
+        {
+          "when": "On the ground",
+          "then": "Clearance if the flight phase calls for it, otherwise Ground.",
+          "tone": "ok"
+        },
+        {
+          "when": "Below 18,000 ft",
+          "then": "Approach if the flight phase calls for it, otherwise Tower.",
+          "tone": "ok"
+        },
+        {
+          "when": "Above 18,000 ft",
+          "then": "Center.",
+          "tone": "ok"
+        }
+      ]
+    }
+  ]}
 />

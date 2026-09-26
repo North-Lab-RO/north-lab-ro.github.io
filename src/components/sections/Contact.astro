@@ -1,0 +1,97 @@
+---
+import DemoButton from '../sales/DemoButton.astro';
+import { site } from '../../config';
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c = t(lang).contact;
+// Each way of reaching us appears only when it is set in src/config.ts; with neither set, the section is not rendered.
+const mail = site.email ? `mailto:${site.email}?subject=${encodeURIComponent(c.subject)}` : '';
+---
+
+{
+  (site.email || site.linkedin) && (
+    <section id="contact" class="section contact" aria-labelledby="contact-title">
+      <div class="wrap grid">
+        <header class="head">
+          <p class="label" data-reveal>{c.label}</p>
+          <h2 id="contact-title" class="h-section" data-reveal style="--delay:.06s">{c.title}</h2>
+          <p class="lede" data-reveal style="--delay:.12s">{c.body}</p>
+        </header>
+        <ul class="ways">
+          {site.email && (
+            <li class="panel way" data-reveal>
+              <p class="label">{c.email}</p>
+              <a href={mail} class="value">{site.email}</a>
+              <a href={mail} class="btn btn-primary">
+                {c.write} <span aria-hidden="true">→</span>
+              </a>
+            </li>
+          )}
+          {site.linkedin && (
+            <li class="panel way" data-reveal style="--delay:.06s">
+              <p class="label">{c.linkedin}</p>
+              <p class="muted small">{c.linkedinBody}</p>
+              <a href={site.linkedin} class="btn btn-ghost" rel="noopener">
+                {c.linkedinCta} <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+          )}
+          <li class="panel way" data-reveal style="--delay:.12s">
+            <p class="label">{c.demo}</p>
+            <p class="muted small">{t(lang).sales.ctaBody}</p>
+            <DemoButton lang={lang} variant="ghost" />
+          </li>
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .grid {
+    display: grid;
+    gap: 40px;
+  }
+  .head .label {
+    margin-bottom: 20px;
+  }
+  .head .lede {
+    margin-top: 20px;
+  }
+  .ways {
+    display: grid;
+    gap: 16px;
+  }
+  .way {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    justify-items: start;
+    padding: clamp(20px, 3vw, 28px);
+    border-radius: 18px;
+  }
+  .value {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+    color: var(--color-frost);
+  }
+  .value:hover {
+    color: var(--color-ice);
+  }
+  .small {
+    font-size: 0.95rem;
+  }
+  @media (min-width: 960px) {
+    .grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: 64px;
+      align-items: start;
+    }
+  }
+</style>

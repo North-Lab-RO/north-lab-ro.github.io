@@ -92,7 +92,7 @@ note: "Doar pentru simulare și exercițiu; nu este un sistem certificat de cont
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import RadioExchange from '../../../components/samples/RadioExchange.astro';
 
 ## Cum funcționează
@@ -128,30 +128,70 @@ intenția pilotului, iar tiny e de 20 de ori mai rapid decât medium.
 Când frecvența și cuvintele-cheie nu sunt de ajuns, sistemul se uită la faza de zbor, apoi la faptul că avionul e la
 sol sau în aer și la altitudine.
 
-<CodeSnippet
-  file="fastapi/agents/router.py"
-  lang="python"
-  caption="Ultima variantă din lanțul de decizie. Înainte de ea contează controlorul care are avionul în grijă, frecvența pe care e acordată stația și cuvintele-cheie explicite."
-  code={`
-phase = aircraft_state.get("phase", "cruise").lower()
-possible_agents = self.phase_agent_map.get(phase, ["center"])
-
-if len(possible_agents) > 1:
-    altitude = aircraft_state.get("altitude_msl", 0)
-    on_ground = aircraft_state.get("on_ground", False)
-
-    if on_ground:
-        if "clearance" in possible_agents:
-            return "clearance"
-        return "ground"
-    elif altitude < 18000:
-        if "approach" in possible_agents:
-            return "approach"
-        return "tower"
-    else:
-        if "center" in possible_agents:
-            return "center"
-
-return possible_agents[0]
-`}
+<Flow
+  title="Care controlor răspunde"
+  caption="Verificările se fac pe rând; prima care decide are ultimul cuvânt."
+  nodes={[
+    {
+      "label": "Sosește o transmisie",
+      "detail": "Cuvintele tale, transformate în text, plus starea avionului în timp real."
+    },
+    {
+      "kind": "decision",
+      "label": "Se ocupă deja un controlor de avion?",
+      "branches": [
+        {
+          "when": "Da",
+          "then": "Răspunde acel controlor.",
+          "tone": "ok"
+        }
+      ],
+      "yes": "Nu"
+    },
+    {
+      "kind": "decision",
+      "label": "Decide frecvența selectată?",
+      "branches": [
+        {
+          "when": "Da",
+          "then": "Răspunde controlorul de pe acea frecvență.",
+          "tone": "ok"
+        }
+      ],
+      "yes": "Nu"
+    },
+    {
+      "kind": "decision",
+      "label": "Numesc cuvintele un controlor?",
+      "branches": [
+        {
+          "when": "Da",
+          "then": "De exemplu „Tower” sau „Ground”.",
+          "tone": "ok"
+        }
+      ],
+      "yes": "Nu, așa că decide faza de zbor"
+    },
+    {
+      "kind": "decision",
+      "label": "Unde e avionul?",
+      "branches": [
+        {
+          "when": "La sol",
+          "then": "Clearance, dacă faza de zbor o cere, altfel Ground.",
+          "tone": "ok"
+        },
+        {
+          "when": "Sub 18.000 ft",
+          "then": "Approach, dacă faza de zbor o cere, altfel Tower.",
+          "tone": "ok"
+        },
+        {
+          "when": "Peste 18.000 ft",
+          "then": "Center.",
+          "tone": "ok"
+        }
+      ]
+    }
+  ]}
 />

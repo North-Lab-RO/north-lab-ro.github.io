@@ -20,7 +20,14 @@ const hasContact = Boolean(site.email || site.linkedin);
           <h2 id="cta-title" class="h-section sm">{s.ctaTitle}</h2>
           <p class="lede">{s.ctaBody}</p>
         </div>
-        <DemoButton lang={lang} product={product} />
+        <div class="actions">
+          <DemoButton lang={lang} product={product} />
+          {site.email && site.linkedin && (
+            <a href={site.linkedin} class="btn btn-ghost" rel="noopener">
+              {t(lang).contact.linkedin} <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </div>
       </div>
     </section>
   )
@@ -44,6 +51,11 @@ const hasContact = Boolean(site.email || site.linkedin);
   }
   .lede {
     margin-top: 14px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
   }
   @media (min-width: 900px) {
     .inner {

@@ -120,7 +120,7 @@ note: "Pentru investigații legale, făcute de echipe autorizate. Fiecare acțiu
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
 ## Cum funcționează
@@ -160,37 +160,52 @@ inteligența artificială ajută, dar nu hotărăște ce e adevărat.
 Asistentul vede cât de sigură s-a dovedit fiecare sursă în cazul respectiv: ce parte din constatările ei au fost
 confirmate de analiști. O sursă respinsă des contează mai puțin în răspuns.
 
-<CodeSnippet
-  file="backend/apps/ai/services.py"
-  lang="python"
-  caption="Deciziile de confirmare și respingere devin, pentru fiecare sursă, un indice de acuratețe de care AI-ul ține cont."
-  code={`
-def _compute_source_accuracy(case) -> dict[str, dict]:
-    rows = (
-        Evidence.objects
-        .filter(case=case)
-        .exclude(status="pending")
-        .values("source_name", "source_type")
-        .annotate(
-            total=Count("id"),
-            confirmed=Count("id", filter=Q(status="confirmed")),
-            rejected=Count("id", filter=Q(status="rejected")),
-        )
-    )
-    out: dict[str, dict] = {}
-    for r in rows:
-        key = (r["source_name"] or r["source_type"]).strip()
-        if not key or r["total"] == 0:
-            continue
-        ratio = r["confirmed"] / r["total"] if r["total"] else 0.0
-        out[key] = {
-            "confirmed": r["confirmed"],
-            "rejected": r["rejected"],
-            "total": r["total"],
-            "ratio": round(ratio, 2),
+<Flow
+  title="Cum își câștigă o sursă încrederea"
+  caption="Analiștii decid ce e adevărat; asistentul învață pe ce surse să se bazeze."
+  nodes={[
+    {
+      "label": "Un colector aduce o constatare",
+      "detail": "Din căutări web, DNS și WHOIS, profiluri sociale, imagini și celelalte colectoare."
+    },
+    {
+      "kind": "decision",
+      "label": "Un analist o verifică",
+      "branches": [
+        {
+          "when": "În așteptare",
+          "then": "Nu se numără încă.",
+          "tone": "neutral"
+        },
+        {
+          "when": "Respinsă",
+          "then": "Contează împotriva sursei și nu ajunge în raport.",
+          "tone": "bad"
         }
-    return out
-`}
+      ],
+      "yes": "Confirmată"
+    },
+    {
+      "label": "Fiecare sursă capătă un istoric",
+      "detail": "Constatările confirmate din totalul celor verificate, pe fiecare sursă, în cazul respectiv."
+    },
+    {
+      "kind": "decision",
+      "label": "Când răspunde asistentul",
+      "branches": [
+        {
+          "when": "Sursă de încredere",
+          "then": "Primește mai multă greutate.",
+          "tone": "ok"
+        },
+        {
+          "when": "Respinsă des",
+          "then": "Primește mai puțină greutate.",
+          "tone": "warn"
+        }
+      ]
+    }
+  ]}
 />
 
 ## Rapoarte potrivite subiectului
@@ -198,29 +213,44 @@ def _compute_source_accuracy(case) -> dict[str, dict]:
 Raportul structurat se adaptează la tipul cazului: pentru o persoană dispare secțiunea de infrastructură, iar
 secțiunile fără date sunt lăsate deoparte, nu umplute cu text de umplutură.
 
-<CodeSnippet
-  file="backend/apps/reports/structured.py"
-  lang="python"
-  caption="Secțiunile sunt construite din datele cazului, iar în ordinea standard rămân doar cele care au conținut."
-  code={`
-evidence = list(
-    Evidence.objects.filter(case=case).exclude(status="rejected").order_by("-created_at")
-)
-profile = detect_profile(entities, selectors)
-
-subject = _build_subject_identification(entities)
-infrastructure = _build_infrastructure(selectors, evidence)
-digital = _build_digital_footprint(selectors, evidence)
-network = _build_relationships(relationships)
-timeline = _build_timeline(case, evidence)
-
-if profile == "person":
-    infrastructure = ""
-
-sections = [
-    {"title": title, "markdown": md}
-    for title, md in candidates
-    if md and md.strip()
-]
-`}
+<Flow
+  title="Cum se construiește un raport"
+  caption="Pornește din datele cazului; nimic nu e umplutură."
+  nodes={[
+    {
+      "label": "Se adună dovezile cazului",
+      "detail": "Tot, în afară de constatările respinse, cele mai noi primele."
+    },
+    {
+      "kind": "decision",
+      "label": "Cine este subiectul?",
+      "branches": [
+        {
+          "when": "O persoană",
+          "then": "Secțiunea de infrastructură lipsește.",
+          "tone": "neutral"
+        }
+      ],
+      "yes": "O organizație păstrează toate secțiunile"
+    },
+    {
+      "label": "Se construiesc secțiunile",
+      "detail": "Identificarea subiectului, infrastructura, amprenta digitală, relațiile și cronologia."
+    },
+    {
+      "kind": "decision",
+      "label": "Are fiecare secțiune date?",
+      "branches": [
+        {
+          "when": "Goală",
+          "then": "Lăsată deoparte, niciodată umplută artificial.",
+          "tone": "neutral"
+        }
+      ],
+      "yes": "Păstrată, în ordinea standard"
+    },
+    {
+      "label": "Raportul se exportă ca PDF"
+    }
+  ]}
 />

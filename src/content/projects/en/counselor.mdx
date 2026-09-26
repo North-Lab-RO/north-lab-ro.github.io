@@ -132,10 +132,19 @@ tailoring:
   - "Briefings focused on your sector, clients or competitors"
   - "Alert thresholds you set yourself, and email delivery"
   - "Your branding and company sign-in"
+roadmap:
+  - title: "What people say on Reddit"
+    body: "For every story, the Reddit discussions about the same subject are found and summarised: the main opinions and how people are reacting, next to what the press reports."
+  - title: "Collection through your own VPN"
+    body: "Public sources are fetched through a WireGuard VPN, such as ProtonVPN, while internal traffic stays direct. If the tunnel is down, fetching waits instead of exposing your address, and the status is visible in the app."
+  - title: "A settings page for integrations"
+    body: "Credentials are stored encrypted and never shown again once saved. Each integration shows whether it is working, failing or not set up, with a test you can run at any time."
+  - title: "A reading view"
+    body: "Sections, the story list and the story side by side, with endless scrolling, a layout made for phones and keyboard navigation."
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import StoryAnalysis from '../../../components/samples/StoryAnalysis.astro';
 import CounselorStory from '../../../components/project/CounselorStory.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
@@ -262,6 +271,7 @@ Designed and approved; implementation is under way.
 <InfoGrid
   columns={2}
   items={[
+    { tag: 'in development', title: 'Public reaction from Reddit', body: 'Already built but switched off until credentials are entered: hot posts are matched to existing stories by URL and by meaning, unmatched posts are dropped, and the matching discussion is summarised into the main opinions. The settings work below makes it possible to connect Reddit from the app.' },
     { tag: 'in development', title: 'Settings, and a VPN you can see', body: 'A settings page for integration credentials, encrypted at rest and write-only once saved. Public fetches go through a ProtonVPN WireGuard tunnel as a proxy, while internal traffic stays direct. If the tunnel is down, fetches wait instead of exposing the real address. Each integration reports working, failing or not configured, with an on-demand test.' },
     { tag: 'in development', title: 'A reader alongside the control room', body: 'A three-pane reading view (sections, story list, story) next to the existing dashboard, with endless scrolling through stories, a layout built for phones and keyboard navigation.' },
   ]}
@@ -276,44 +286,69 @@ Designed and approved; implementation is under way.
 A model that is free to answer "confirmed" can do so while citing nothing. COUNSELOR retrieves quotes from *other*
 outlets and asks the model only to classify each one. The verdict then follows from the tallies.
 
-<CodeSnippet
-  file="backend/app/services/fact_check.py"
-  lang="python"
-  caption="A claim's own article and its own outlet can never corroborate it, and a quote from an unknown source is dropped rather than cited under a guessed name."
-  code={`
-def gather_evidence(
-    hits: list[SearchHit],
-    *,
-    claim_article_id: int | None,
-    claim_source_id: int | None,
-    source_names: dict[int, str],
-) -> list[Evidence]:
-    best: dict[int, Evidence] = {}
-    for h in hits:
-        payload = h.payload or {}
-        source_id = payload.get("source_id")
-        article_id = payload.get("article_id")
-        text = (payload.get("text") or "").strip()
-        if not text or source_id is None:
-            continue
-        if article_id is not None and article_id == claim_article_id:
-            continue
-        if source_id == claim_source_id:
-            continue
-        name = source_names.get(source_id)
-        if not name:
-            continue
-        ...
-    return sorted(best.values(), key=lambda e: e.score, reverse=True)
-
-
-def decide_verdict(*, supporting: int, contradicting: int) -> str:
-    if contradicting > 0:
-        return CONTESTED
-    if supporting >= 2:
-        return CONFIRMED
-    if supporting == 1:
-        return SINGLE_SOURCE
-    return UNVERIFIABLE
-`}
+<Flow
+  title="From a claim to a verdict"
+  caption="The model classifies quotes; it never writes the verdict."
+  nodes={[
+    {
+      "label": "A claim is picked out",
+      "detail": "A statement from an article that can be checked against other reporting."
+    },
+    {
+      "label": "Quotes are found in other outlets",
+      "detail": "The most similar passages from other articles, found by meaning, not just keywords."
+    },
+    {
+      "kind": "decision",
+      "label": "Can this quote count as evidence?",
+      "branches": [
+        {
+          "when": "Same article",
+          "then": "Dropped: a claim cannot confirm itself.",
+          "tone": "bad"
+        },
+        {
+          "when": "Same outlet",
+          "then": "Dropped: an outlet cannot corroborate its own story.",
+          "tone": "bad"
+        },
+        {
+          "when": "Unknown outlet",
+          "then": "Dropped rather than cited under a guessed name.",
+          "tone": "bad"
+        }
+      ],
+      "yes": "Independent outlet, known by name"
+    },
+    {
+      "label": "The model classifies each quote",
+      "detail": "Supports the claim, contradicts it, or is unrelated. That is the only question it answers."
+    },
+    {
+      "kind": "decision",
+      "label": "Verdict, from the tally",
+      "branches": [
+        {
+          "when": "Any contradiction",
+          "then": "Disputed, naming who contradicts it.",
+          "tone": "warn"
+        },
+        {
+          "when": "Two or more support it",
+          "then": "Confirmed by several outlets.",
+          "tone": "ok"
+        },
+        {
+          "when": "One supports it",
+          "then": "Single source.",
+          "tone": "neutral"
+        },
+        {
+          "when": "None",
+          "then": "Unverifiable for now.",
+          "tone": "neutral"
+        }
+      ]
+    }
+  ]}
 />

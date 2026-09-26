@@ -67,10 +67,10 @@ gallery:
     alt: O potecă prin pădure, cu o masă de picnic din lemn
     caption: Loc · potecă
 reports:
-  - title: Fișe de probe tipăribile (PDF)
-    description: Setul de exponate pe care jucătorii îl tipăresc pentru panoul real.
-  - title: Dosarul cazului (PDF)
-    description: Informarea, persoanele de interes și registrul probelor pentru un caz.
+  - title: Kitul de printat al cazului (PDF)
+    description: "Kitul de print al jocului, pentru un caz inventat: copertă, briefing, harta zonei, locații, probe cu lanțul de custodie și rapoarte de laborator. Zece pagini A4 pentru masă. Kitul este în limba engleză, ca jocul."
+    file: cases-kit-exemplu.pdf
+    preview: cases-kit-exemplu.webp
 
 # ── Sales block ──
 promise: "Un mister polițist nou de fiecare dată când vin invitații."
@@ -142,7 +142,7 @@ tailoring:
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import CaseFile from '../../../components/samples/CaseFile.astro';
 
 ## Cum funcționează
@@ -185,46 +185,55 @@ documente) are condiții, dezvăluiri și un cost în timp. Verificarea calculea
 informațiile de început și apoi se asigură că drumul cel mai scurt până la probele decisive încape în timpul
 disponibil.
 
-<CodeSnippet
-  file="packages/shared/src/knowledge.ts"
-  lang="ts"
-  caption="O închidere de tip punct fix peste acțiunile cazului. Orice probă decisivă rămasă în afara ei trimite cazul înapoi la etapa care o poate produce."
-  code={`
-export function computeClosure(
-  initial: readonly KnowledgeKey[],
-  actions: readonly DiscoveryAction[],
-): Set<KnowledgeKey> {
-  const held = new Set<KnowledgeKey>(initial);
-  let grew = true;
-  while (grew) {
-    grew = false;
-    for (const act of actions) {
-      if (!isSatisfied(held, act.requires)) continue;
-      for (const key of act.reveals) {
-        if (!held.has(key)) {
-          held.add(key);
-          grew = true;
+<Flow
+  title="Cum se dovedește că un caz poate fi rezolvat"
+  caption="Verificat înainte ca un caz să fie jucat vreodată."
+  nodes={[
+    {
+      "label": "Se scrie o variantă a cazului",
+      "detail": "Adevărul, persoanele, locurile și probele."
+    },
+    {
+      "label": "Se listează fiecare acțiune",
+      "detail": "Fiecare percheziție, interogatoriu, analiză sau cerere de documente: de ce are nevoie, ce dezvăluie și cât durează."
+    },
+    {
+      "label": "Se deblochează tot ce se poate afla",
+      "detail": "Pornind de la ce știe echipa în prima zi, acțiunile se aplică iar și iar până nu mai apare nimic nou."
+    },
+    {
+      "kind": "decision",
+      "label": "Se poate ajunge la fiecare probă decisivă?",
+      "branches": [
+        {
+          "when": "Nu",
+          "then": "Trimis înapoi la etapa care poate produce proba lipsă.",
+          "tone": "bad"
         }
-      }
+      ],
+      "yes": "Da"
+    },
+    {
+      "label": "Se găsește drumul cel mai scurt spre dovadă",
+      "detail": "Cel mai ieftin drum prin acțiuni, în timp de joc."
+    },
+    {
+      "kind": "decision",
+      "label": "Încape în timpul disponibil?",
+      "branches": [
+        {
+          "when": "Nu",
+          "then": "Marcat ca prea lent și refăcut.",
+          "tone": "warn"
+        },
+        {
+          "when": "Da",
+          "then": "Cazul este acceptat.",
+          "tone": "ok"
+        }
+      ]
     }
-  }
-  return held;
-}
-
-// validation/solvability.ts
-const closure = computeClosure(initial, actions);
-const unreachable = draft.truth.provingEvidence.filter((key) => !closure.has(key));
-
-const path = computeCriticalPath(initial, actions, draft.truth.provingEvidence);
-const budgetSeconds = draft.profile.timeBudgetMinutes * 60;
-const fraction = path.costSeconds / budgetSeconds;
-if (fraction > draft.profile.maxCriticalPathFraction) {
-  const used = Math.round(fraction * 100);
-  const allowed = Math.round(draft.profile.maxCriticalPathFraction * 100);
-  issues.push(issue(7,
-    \`Critical path costs \${used}% of the time budget, above the \${allowed}% ceiling.\`));
-}
-`}
+  ]}
 />
 
 ## Imagini generate

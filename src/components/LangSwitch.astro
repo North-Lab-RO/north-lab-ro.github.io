@@ -30,11 +30,6 @@ const options: Lang[] = ['en', 'ro'];
 <script>
   document.querySelectorAll<HTMLAnchorElement>('[data-set-lang]').forEach((a) =>
     a.addEventListener('click', () => {
-      try {
-        localStorage.setItem('nl-lang', a.dataset.setLang!);
-      } catch {
-        /* storage blocked: the switch still navigates */
-      }
       if (location.hash) a.href = a.href.split('#')[0] + location.hash;
     }),
   );

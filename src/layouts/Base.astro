@@ -13,9 +13,8 @@ interface Props {
   description?: string;
   image?: string;
   /** Redirect Romanian-language browsers to /ro/ on first visit. Off for the shared 404 page. */
-  autodetect?: boolean;
 }
-const { lang, title, description = t(lang).meta.description, image = '/og-image.png', autodetect = true } = Astro.props;
+const { lang, title, description = t(lang).meta.description, image = '/og-image.png' } = Astro.props;
 const pageTitle = title ? `${title} — ${site.name}` : t(lang).meta.title;
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site);
@@ -53,26 +52,6 @@ const ogImage = new URL(image, Astro.site);
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
-    {
-      autodetect && lang === 'en' && (
-        <script is:inline>
-          (function () {
-            var saved = null;
-            try {
-              saved = localStorage.getItem('nl-lang');
-            } catch (e) {}
-            if (saved) return;
-            var langs = navigator.languages || [navigator.language || ''];
-            for (var i = 0; i < langs.length; i++) {
-              if (/^ro(-|$)/i.test(langs[i])) {
-                location.replace('/ro' + location.pathname + location.search + location.hash);
-                return;
-              }
-            }
-          })();
-        </script>
-      )
-    }
   </head>
   <body>
     <a href="#main" class="skip">{t(lang).nav.skip}</a>

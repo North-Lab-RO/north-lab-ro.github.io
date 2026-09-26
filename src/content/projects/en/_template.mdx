@@ -41,7 +41,7 @@ reports: []
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 
 ## How it works
 
@@ -55,12 +55,12 @@ A paragraph about the architecture.
   ]}
 />
 
-<CodeSnippet
-  file="path/in/repo.py"
-  lang="python"
-  caption="Why this excerpt matters."
-  code={`
-def example():
-    return 42
-`}
+<Flow
+  title="How a decision is made"
+  caption="One sentence on why this logic matters."
+  nodes={[
+    { label: 'Something happens', detail: 'What starts the flow.' },
+    { kind: 'decision', label: 'A check?', branches: [{ when: 'No', then: 'What happens instead.', tone: 'bad' }], yes: 'Yes' },
+    { kind: 'decision', label: 'Outcome', branches: [{ when: 'Case A', then: 'Result A.', tone: 'ok' }, { when: 'Case B', then: 'Result B.', tone: 'warn' }] },
+  ]}
 />

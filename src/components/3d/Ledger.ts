@@ -81,6 +81,38 @@ function sheetTexture() {
   });
 }
 
+/** A glow that is even along the whole beam, with soft ends and a soft vertical falloff. */
+function lineGlowTexture() {
+  return canvasTexture(512, 64, (g) => {
+    const v = g.createLinearGradient(0, 0, 0, 64);
+    v.addColorStop(0, 'rgba(154,140,255,0)');
+    v.addColorStop(0.5, 'rgba(154,140,255,1)');
+    v.addColorStop(1, 'rgba(154,140,255,0)');
+    g.fillStyle = v;
+    g.fillRect(0, 0, 512, 64);
+    // soften the two ends so the glow stops where the sheet stops
+    g.globalCompositeOperation = 'destination-in';
+    const h = g.createLinearGradient(0, 0, 512, 0);
+    h.addColorStop(0, 'rgba(0,0,0,0)');
+    h.addColorStop(0.06, 'rgba(0,0,0,1)');
+    h.addColorStop(0.94, 'rgba(0,0,0,1)');
+    h.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = h;
+    g.fillRect(0, 0, 512, 64);
+  });
+}
+
+/** The part of the page the beam has already read: brightest at the line, fading upwards. */
+function washTexture() {
+  return canvasTexture(64, 256, (g) => {
+    const v = g.createLinearGradient(0, 0, 0, 256);
+    v.addColorStop(0, 'rgba(154,140,255,0)');
+    v.addColorStop(1, 'rgba(154,140,255,0.55)');
+    g.fillStyle = v;
+    g.fillRect(0, 0, 64, 256);
+  });
+}
+
 function tileTexture(text: string) {
   return canvasTexture(256, 72, (g) => {
     g.fillStyle = '#12213d';
@@ -102,19 +134,25 @@ const create: SceneFactory = (ctx) => {
   const root = new Group();
   scene.add(root);
 
-  const sheet = new Mesh(new PlaneGeometry(2.4, 3.28), new MeshBasicMaterial({ map: sheetTexture(), transparent: true }));
-  sheet.position.set(SHEET_X, 0, 0);
-  sheet.rotation.y = 0.18;
-  root.add(sheet);
+  // The sheet and everything that scans it share one frame, so the beam always lies exactly on the page.
+  const sheetGroup = new Group();
+  sheetGroup.position.set(SHEET_X, 0, 0);
+  sheetGroup.rotation.y = 0.18;
+  root.add(sheetGroup);
 
-  const beam = new Mesh(
-    new PlaneGeometry(2.6, 0.035),
-    new MeshBasicMaterial({ color: 0x9a8cff, transparent: true, blending: AdditiveBlending, depthWrite: false }),
-  );
-  beam.rotation.y = 0.18;
-  const beamGlow = glowSprite('#9a8cff', 1.4, 0.35);
-  beamGlow.scale.set(3, 0.5, 1);
-  root.add(beam, beamGlow);
+  const SHEET_W = 2.4;
+  const sheet = new Mesh(new PlaneGeometry(SHEET_W, 3.28), new MeshBasicMaterial({ map: sheetTexture(), transparent: true }));
+  sheetGroup.add(sheet);
+
+  const additive = { transparent: true, blending: AdditiveBlending, depthWrite: false } as const;
+  const beam = new Mesh(new PlaneGeometry(SHEET_W - 0.04, 0.03), new MeshBasicMaterial({ color: 0xe8e4ff, ...additive }));
+  const beamGlow = new Mesh(new PlaneGeometry(SHEET_W + 0.1, 0.34), new MeshBasicMaterial({ map: lineGlowTexture(), ...additive }));
+  const WASH_H = 0.9;
+  const wash = new Mesh(new PlaneGeometry(SHEET_W - 0.04, WASH_H), new MeshBasicMaterial({ map: washTexture(), ...additive }));
+  beam.position.z = 0.012;
+  beamGlow.position.z = 0.014;
+  wash.position.z = 0.008;
+  sheetGroup.add(wash, beamGlow, beam);
 
   // The guard: every number passes through here before it may touch the ledger.
   const gatePts = [
@@ -168,11 +206,17 @@ const create: SceneFactory = (ctx) => {
       // Beam sweeps the statement top to bottom, reaching each row as its tile lifts off.
       const bp = Math.min(1, Math.max(0, (tc - 0.6) / 6.2));
       const by = 1.4 - bp * 2.8;
-      beam.position.set(SHEET_X, by, 0.02);
-      beamGlow.position.set(SHEET_X, by, 0.05);
-      const beamOn = tc > 0.5 && tc < 7.0 ? 1 : 0;
-      (beam.material as MeshBasicMaterial).opacity = beamOn;
-      beamGlow.material.opacity = 0.35 * beamOn;
+      const on = tc < 0.5 ? 0 : tc < 0.8 ? (tc - 0.5) / 0.3 : tc < 6.8 ? 1 : tc < 7.2 ? (7.2 - tc) / 0.4 : 0;
+      const pulse = 0.85 + Math.sin(t * 9) * 0.15;
+      beam.position.y = by;
+      beamGlow.position.y = by;
+      // the wash trails above the line, clipped to the top edge of the sheet
+      const washH = Math.min(WASH_H, 1.62 - by);
+      wash.scale.y = Math.max(0.001, washH / WASH_H);
+      wash.position.y = by + washH / 2;
+      (beam.material as MeshBasicMaterial).opacity = on;
+      (beamGlow.material as MeshBasicMaterial).opacity = 0.75 * on * pulse;
+      (wash.material as MeshBasicMaterial).opacity = 0.35 * on;
 
       let flash: Color | null = null;
       ROWS.forEach((r, i) => {

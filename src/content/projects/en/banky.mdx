@@ -114,7 +114,7 @@ tailoring:
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import ImportReview from '../../../components/samples/ImportReview.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
@@ -153,32 +153,46 @@ say. On a 24 GB card, several passes of a model that fits in memory beat a singl
 
 <ImportReview lang="en" />
 
-## The guard, in code
+## The guard, step by step
 
-<CodeSnippet
-  file="backend/app/ai/extraction_guard.py"
-  lang="python"
-  caption="Each numeral in the model's output must equal a numeral that was read. Substring matches are not enough: that is exactly how a dropped leading digit would slip through."
-  code={`
-_DIGITS = re.compile(r"\\D")
-_DIGIT_RUN = re.compile(r"\\d[\\d.,]*\\d|\\d")
-
-
-def digits(text: str) -> str:
-    return _DIGITS.sub("", text or "")
-
-
-def is_grounded(value: str, sources: list[str]) -> bool:
-    if not value:
-        return True
-
-    source_runs = [digits(run) for block in sources for run in _DIGIT_RUN.findall(block)]
-    for run in _DIGIT_RUN.findall(value):
-        needle = digits(run)
-        if not needle:
-            continue
-        if needle not in source_runs:
-            return False
-    return True
-`}
+<Flow
+  title="Every number is checked against the page"
+  caption="A value only counts if it matches a whole number printed on the statement."
+  nodes={[
+    {
+      "label": "The model reads a line",
+      "detail": "Date, description and amount, from the statement or the receipt."
+    },
+    {
+      "label": "Every number it read is compared with the page",
+      "detail": "Whole numbers only: a fragment of a longer number does not count."
+    },
+    {
+      "kind": "decision",
+      "label": "Do all the numbers match?",
+      "branches": [
+        {
+          "when": "No",
+          "then": "The value is dropped and the line waits for you to type it. For example, 84.32 read from 184,32.",
+          "tone": "bad"
+        }
+      ],
+      "yes": "Yes"
+    },
+    {
+      "label": "The line is shown for review",
+      "detail": "With its suggested category and how sure the model is."
+    },
+    {
+      "kind": "decision",
+      "label": "You confirm",
+      "branches": [
+        {
+          "when": "Confirmed",
+          "then": "The line enters the ledger.",
+          "tone": "ok"
+        }
+      ]
+    }
+  ]}
 />

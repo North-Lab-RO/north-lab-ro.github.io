@@ -3,6 +3,8 @@ import {
   BufferGeometry,
   CatmullRomCurve3,
   CircleGeometry,
+  CylinderGeometry,
+  EdgesGeometry,
   Float32BufferAttribute,
   Group,
   Line,
@@ -13,11 +15,12 @@ import {
   MeshBasicMaterial,
   PlaneGeometry,
   Points,
+  PointsMaterial,
   ShaderMaterial,
   Vector3,
 } from 'three';
 import { fitDistance, type SceneFactory } from './engine';
-import { disposeTree, tick } from './common';
+import { disposeTree, glowSprite, tick } from './common';
 
 const RANGE = 4;
 const SWEEP_SPEED = 0.9; // rad/s
@@ -77,6 +80,80 @@ function sweep(): Mesh {
   return new Mesh(new CircleGeometry(RANGE, 128), mat);
 }
 
+/** Did the sweep pass angle `a` between the previous frame and this one? */
+function swept(a: number, prev: number, now: number) {
+  return prev <= now ? a > prev && a <= now : a > prev || a <= now;
+}
+
+/** Runway 08/26: dark surface, threshold bars, dashed centreline and edge lights. */
+function runwayGroup(): Group {
+  const g = new Group();
+  const L = 0.95;
+  const W = 0.09;
+  const surface = new Mesh(new PlaneGeometry(L, W), new MeshBasicMaterial({ color: 0x1b2b33 }));
+  g.add(surface);
+  const white = new MeshBasicMaterial({ color: 0xe8f3ff });
+  for (const end of [-1, 1]) {
+    for (let k = 0; k < 4; k++) {
+      const bar = new Mesh(new PlaneGeometry(0.04, 0.012), white);
+      bar.position.set(end * (L / 2 - 0.035), (k - 1.5) * 0.019, 0.001);
+      g.add(bar);
+    }
+  }
+  const centre = new Line(
+    new BufferGeometry().setFromPoints([new Vector3(-L / 2 + 0.08, 0, 0.001), new Vector3(L / 2 - 0.08, 0, 0.001)]),
+    new LineDashedMaterial({ color: 0xe8f3ff, dashSize: 0.035, gapSize: 0.03, transparent: true, opacity: 0.8 }),
+  );
+  centre.computeLineDistances();
+  g.add(centre);
+  const lights: number[] = [];
+  for (let i = 0; i <= 12; i++) {
+    const x = -L / 2 + (i / 12) * L;
+    lights.push(x, W / 2 + 0.008, 0.002, x, -W / 2 - 0.008, 0.002);
+  }
+  const lg = new BufferGeometry();
+  lg.setAttribute('position', new Float32BufferAttribute(lights, 3));
+  g.add(new Points(lg, new PointsMaterial({ color: 0xfff4d6, size: 0.022, transparent: true, opacity: 0.9, depthWrite: false })));
+  return g;
+}
+
+/** A control tower drawn like the scope: dark body, phosphor outlines, a glass cab and an obstruction beacon. */
+function towerGroup() {
+  const g = new Group();
+  // Cylinders stand on Y; the scope's "up" is +Z, so the tower is built on Y and turned onto Z.
+  const body = new Group();
+  body.rotation.x = Math.PI / 2;
+  g.add(body);
+  const fill = new MeshBasicMaterial({ color: 0x07131b });
+  const edge = new LineBasicMaterial({ color: PHOSPHOR, transparent: true, opacity: 0.85 });
+  const part = (geo: CylinderGeometry, y: number) => {
+    const m = new Mesh(geo, fill);
+    m.position.y = y;
+    const e = new LineSegments(new EdgesGeometry(geo, 20), edge);
+    e.position.y = y;
+    body.add(m, e);
+  };
+  part(new CylinderGeometry(0.05, 0.085, 0.07, 8), 0.035); // base
+  part(new CylinderGeometry(0.035, 0.05, 0.55, 8), 0.345); // shaft
+  part(new CylinderGeometry(0.085, 0.045, 0.05, 8), 0.645); // cab floor, flaring out
+  const glassMat = new MeshBasicMaterial({ color: PHOSPHOR, transparent: true, opacity: 0.35, blending: AdditiveBlending, depthWrite: false });
+  const glass = new Mesh(new CylinderGeometry(0.1, 0.088, 0.09, 8, 1, true), glassMat);
+  glass.position.y = 0.715;
+  body.add(glass, new LineSegments(new EdgesGeometry(glass.geometry, 20), edge).translateY(0.715));
+  part(new CylinderGeometry(0.06, 0.108, 0.035, 8), 0.778); // roof
+  const mast = new Line(
+    new BufferGeometry().setFromPoints([new Vector3(0, 0.795, 0), new Vector3(0, 0.93, 0)]),
+    new LineBasicMaterial({ color: PHOSPHOR, transparent: true, opacity: 0.9 }),
+  );
+  body.add(mast);
+  const beacon = glowSprite('#ff5a6a', 0.22, 1);
+  beacon.position.set(0, 0, 0.94);
+  const cabGlow = glowSprite('#4dffb8', 0.55, 0);
+  cabGlow.position.set(0, 0, 0.715);
+  g.add(beacon, cabGlow);
+  return { group: g, glassMat, beacon, cabGlow };
+}
+
 interface Blip {
   path: CatmullRomCurve3;
   s: number;
@@ -97,12 +174,23 @@ const create: SceneFactory = (ctx) => {
   sweepMesh.position.z = 0.001;
   tilt.add(sweepMesh);
 
-  // Runway at the centre of the scope, oriented 08/26.
-  const runway = new Mesh(new PlaneGeometry(0.9, 0.07), new MeshBasicMaterial({ color: 0xe8f3ff }));
+  // Runway at the centre of the scope, oriented 08/26, with the control tower beside it at midfield.
+  const runway = runwayGroup();
   runway.rotation.z = 0.14;
   runway.position.z = 0.002;
+  runway.scale.setScalar(1.5);
   tilt.add(runway);
-  const threshold = new Vector3(-0.45, -0.06, 0);
+  // Arrivals end at the 08 threshold, the runway's western end.
+  const threshold = new Vector3(-0.71, -0.1, 0);
+
+  const tower = towerGroup();
+  const TOWER_AT = new Vector3(0.22, 0.42, 0);
+  tower.group.position.copy(TOWER_AT);
+  tower.group.scale.setScalar(1.7);
+  tilt.add(tower.group);
+  let towerAngle = Math.atan2(TOWER_AT.y, TOWER_AT.x);
+  if (towerAngle < 0) towerAngle += Math.PI * 2;
+  let cabLit = 0;
 
   // Arrival streams converging on the runway.
   const routes = [
@@ -184,8 +272,7 @@ const create: SceneFactory = (ctx) => {
         let a = Math.atan2(p.y, p.x);
         if (a < 0) a += Math.PI * 2;
         // Painted only when the beam passes: the display lags the aircraft like a real scope.
-        const crossed = prevAngle <= angle ? a > prevAngle && a <= angle : a > prevAngle || a <= angle;
-        if (crossed) {
+        if (swept(a, prevAngle, angle)) {
           b.trail.unshift(b.painted.clone());
           if (b.trail.length > TRAIL) b.trail.pop();
           b.painted.copy(p);
@@ -200,6 +287,14 @@ const create: SceneFactory = (ctx) => {
           alpha[k++] = b.trail[i] ? 0.28 * (1 - i / TRAIL) * (0.4 + b.glow * 0.6) : 0;
         }
       }
+      // The cab lights up as the sweep passes over the tower; the beacon blinks on its own rhythm.
+      if (swept(towerAngle, prevAngle, angle)) cabLit = 1;
+      cabLit *= 0.975;
+      tower.glassMat.opacity = 0.3 + cabLit * 0.6;
+      tower.cabGlow.material.opacity = cabLit * 0.7;
+      const blink = Math.max(0, Math.sin(t * 2.6));
+      tower.beacon.material.opacity = 0.25 + Math.pow(blink, 6) * 0.75;
+
       blipGeo.attributes.position.needsUpdate = true;
       blipGeo.attributes.alpha.needsUpdate = true;
       prevAngle = angle;

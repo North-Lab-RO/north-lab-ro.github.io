@@ -68,17 +68,17 @@ src/
 ├─ content.config.ts         project schema (zod)
 ├─ lib.ts                    getProjects(lang), accent colours
 ├─ i18n/ui.ts                every interface string, EN + RO; altPath(), projectHref()
-├─ layouts/Base.astro        <head>, SEO, hreflang, language auto-detect, smooth scroll, reveals
+├─ layouts/Base.astro        <head>, SEO, hreflang, smooth scroll, reveals
 ├─ views/                    HomeView, ProjectView (shared by both languages)
 ├─ pages/                    index, projects/[slug], ro/index, ro/projects/[slug], 404
 ├─ content/projects/{en,ro}/ one MDX file per product and language, plus _template.mdx
 ├─ components/
-│  ├─ sections/              Hero, Services, ProjectsGrid, FeaturedProject, About, Process, TechWall
+│  ├─ sections/              Hero, Services, ProjectsGrid, FeaturedProject, About, Process, TechWall, Contact
 │  ├─ sales/                 SalesBlock, DemoButton, CtaBand
 │  ├─ tours/                 TourFrame.astro + one data file per product
-│  ├─ project/               Gallery, ReportSlot, InfoGrid, ScoreBars, CodeSnippet, CounselorStory, ProjectVisual
+│  ├─ project/               Gallery, ReportSlot, InfoGrid, ScoreBars, CounselorStory, ProjectVisual
 │  ├─ samples/               illustrative sample outputs (story analysis, case file, radio, import review)
-│  ├─ diagrams/Pipeline.astro
+│  ├─ diagrams/              Pipeline (linear stages) and Flow (workflows with decisions)
 │  └─ 3d/                    engine.ts + scenes
 └─ assets/projects/<slug>/   images, logos, screens/
 public/reports/              sample PDFs and their first-page previews
@@ -99,17 +99,18 @@ Each product is one MDX file per language with the same file name. The frontmatt
 | `tour` | Product tour to show (`counselor`, `athena`, `banky`, `atc`, `cases`) |
 | `capabilities` | Full feature checklist, grouped |
 | `requirements`, `tailoring`, `note` | What the client needs, what can be customised, small print |
+| `roadmap` | Planned features, shown as "Coming soon" with an "In development" tag; never presented as available |
 | `metrics`, `stack`, `credits` | Technical facts shown below the "For your technical team" divider |
 | `gallery`, `reports` | Extra images; report slots (`file` in `public/reports/`, or empty for a placeholder) |
 
-Everything a client reads comes first; the MDX body (architecture, pipeline, code, measurements) follows under **"For your technical team"**.
+Everything a client reads comes first; the MDX body (architecture, pipeline, workflow diagrams, measurements) follows under **"For your technical team"**.
 
 **Add a product:** copy `src/content/projects/en/_template.mdx` and `ro/_template.mdx` to `<slug>.mdx`, fill both, add images under `src/assets/projects/<slug>/`, set `draft: false`, push.
 
 ## Two languages
 
 - English lives at `/`, Romanian at `/ro/`. Pages are generated from the same views with a `lang` prop; interface text comes from `src/i18n/ui.ts`, product text from the language's MDX file.
-- **Auto-detect:** an inline script in `Base.astro` sends first-time visitors whose browser prefers Romanian to `/ro/`. The EN | RO switch stores the choice in `localStorage`, so it is never overridden. The shared `404.html` never redirects (GitHub Pages serves one 404 for every path, which would otherwise loop).
+- **English by default:** `/` is always English and nothing redirects by browser language; visitors switch with the EN | RO control in the header, which keeps the current section (`#hash`) when changing language.
 - `hreflang` alternates and `x-default` in every page head; the sitemap carries the same links.
 - **No mixed languages:** a build-time check extracts the visible text and ARIA labels of every page and flags the other language. Allowed exceptions are ICAO radio phraseology and real-product screenshots, which are captioned with the product's interface language.
 
@@ -133,6 +134,10 @@ Everything a client reads comes first; the MDX body (architecture, pipeline, cod
 | `Radar` | AI_ATC | Radar sweep with aircraft on approach paths |
 | `Board` | CASES | An evidence board with pinned photos and red string |
 
+### Diagrams, not code
+
+The site shows no source code. The logic behind each product is drawn with `Flow` (`components/diagrams/Flow.astro`): steps down a spine, decisions as diamonds whose side-exits are tinted by outcome (green accepted, red dropped, amber flagged) and always labelled in words. On desktop the exits sit beside their decision; on phones, below it. `Pipeline` draws the linear "How it works" stages.
+
 ## Product tours and real screenshots
 
 - `components/tours/TourFrame.astro` renders a tabbed tour: a real screenshot per step, numbered markers placed as percentages of the image, the explanation beside it, ‹ › arrows, keyboard navigation and auto-advance that pauses on hover or focus.
@@ -145,6 +150,8 @@ Everything a client reads comes first; the MDX body (architecture, pipeline, cod
 
 - **COUNSELOR morning briefing** — produced by the application's own PDF renderer (Jinja2 + WeasyPrint) from an invented briefing, run in a throwaway container with no database.
 - **BANKY monthly report** — the application's own Reports page with invented data, printed through the browser's print pipeline, exactly as the app's Print button does.
+- **ATHENA intelligence report** — the application's own structured-report renderer (WeasyPrint) on an invented due-diligence case.
+- **CASES printable kit** — the game's own "Print the kit" pages (cover, briefing, map, locations, exhibits, lab reports) for an invented case, printed through the browser's print pipeline and compressed for the web.
 - Report slots show a first-page preview and an "Open PDF" link; a slot without a file shows "Sample in preparation".
 
 ## Accessibility and performance

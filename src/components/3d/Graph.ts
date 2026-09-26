@@ -8,6 +8,7 @@ import {
   LineBasicMaterial,
   Mesh,
   MeshBasicMaterial,
+  PlaneGeometry,
   SphereGeometry,
   Sprite,
   SpriteMaterial,
@@ -16,6 +17,7 @@ import {
 } from 'three';
 import { fitDistance, type SceneFactory } from './engine';
 import { disposeTree, glowSprite } from './common';
+import { ATHENA_PROFILE, SHIELD_RINGS, meanderPath } from './athena-emblem';
 
 /** An investigation as a network: subject → identifiers → findings that analysts confirm or reject. */
 
@@ -54,11 +56,64 @@ function label(text: string): Sprite {
   return s;
 }
 
+/** Athena's shield drawn once to a canvas: either its rim (rings + Greek key) or the goddess emblem. */
+function shieldTexture(size: number, part: 'rim' | 'emblem'): CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const g = c.getContext('2d')!;
+  const k = size / 200;
+  g.scale(k, k);
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  g.shadowBlur = 10 * k;
+  if (part === 'rim') {
+    g.strokeStyle = '#818cf8';
+    g.shadowColor = '#818cf8';
+    for (const [r, w] of SHIELD_RINGS) {
+      g.lineWidth = 1.1 * w;
+      g.beginPath();
+      g.arc(100, 100, r, 0, Math.PI * 2);
+      g.stroke();
+    }
+    g.lineWidth = 0.9;
+    g.stroke(new Path2D(meanderPath(100, 100, 78, 92, 28)));
+  } else {
+    g.strokeStyle = '#c7d2fe';
+    g.shadowColor = '#818cf8';
+    g.lineWidth = 1.5;
+    g.translate(100, 100);
+    g.scale(0.66, 0.66);
+    g.translate(-97, -106);
+    for (const d of ATHENA_PROFILE) g.stroke(new Path2D(d));
+  }
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  return tex;
+}
+
 const create: SceneFactory = (ctx) => {
   const { scene, camera, lite } = ctx;
   const lang = document.documentElement.lang === 'ro' ? 'ro' : 'en';
   const net = new Group();
   scene.add(net);
+
+  // Athena's shield stands behind the investigation; it turns gently with the pointer, not with the network.
+  const SHIELD_D = 5.5;
+  const texSize = lite ? 512 : 1024;
+  const plane = new PlaneGeometry(SHIELD_D, SHIELD_D);
+  const layer = (part: 'rim' | 'emblem', opacity: number) =>
+    new Mesh(
+      plane,
+      new MeshBasicMaterial({ map: shieldTexture(texSize, part), transparent: true, opacity, blending: AdditiveBlending, depthWrite: false }),
+    );
+  const shield = new Group();
+  const rim = layer('rim', 0.35);
+  const emblem = layer('emblem', 0.5);
+  emblem.position.z = 0.01;
+  shield.add(rim, emblem);
+  shield.position.z = -1.4;
+  scene.add(shield);
+  let rimFlash = 0;
 
   // subject
   const subject = new Mesh(new SphereGeometry(0.26, 24, 16), new MeshBasicMaterial({ color: INDIGO }));
@@ -105,9 +160,9 @@ const create: SceneFactory = (ctx) => {
   let baseZ = 9;
   return {
     resize() {
-      baseZ = fitDistance(camera, 3.4, 2.6);
+      baseZ = fitDistance(camera, 3.4, 2.95);
     },
-    update(t) {
+    update(t, dt) {
       const { pointer } = ctx;
       net.rotation.y = t * 0.12 + pointer.x * 0.35;
       net.rotation.x = -pointer.y * 0.18 + Math.sin(t * 0.2) * 0.05;
@@ -115,6 +170,9 @@ const create: SceneFactory = (ctx) => {
 
       for (const f of findings) {
         const tc = (t + f.offset) % CYCLE;
+        // the moment an analyst confirms a finding, the shield's rim answers
+        const prev = (t - (dt || 0.016) + f.offset) % CYCLE;
+        if (f.confirmed && prev < 4 && tc >= 4) rimFlash = 1;
         // a finding arrives along its edge, waits for review, then is confirmed or rejected
         const travel = Math.min(1, tc / 1.6);
         f.pulse.position.lerpVectors(f.from, f.to, travel);
@@ -138,6 +196,11 @@ const create: SceneFactory = (ctx) => {
           f.mesh.scale.setScalar(1 - k * 0.4);
         }
       }
+
+      rimFlash *= 0.96;
+      (rim.material as MeshBasicMaterial).opacity = 0.32 + rimFlash * 0.45;
+      shield.rotation.y = pointer.x * 0.15 + Math.sin(t * 0.3) * 0.05;
+      shield.rotation.x = -pointer.y * 0.1;
 
       camera.position.set(0, 0.2, baseZ);
       camera.lookAt(0, 0, 0);

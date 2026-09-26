@@ -1,6 +1,7 @@
 ---
 import Wordmark from './Wordmark.astro';
 import LangSwitch from './LangSwitch.astro';
+import { site } from '../config';
 import { t, homeHref, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -13,6 +14,8 @@ const nav = [
   { href: homeHref(lang, '#projects'), label: n.projects },
   { href: homeHref(lang, '#about'), label: n.about },
   { href: homeHref(lang, '#process'), label: n.stack },
+  // Contact only links somewhere when an email or LinkedIn is set in src/config.ts.
+  ...(site.email || site.linkedin ? [{ href: homeHref(lang, '#contact'), label: n.contact }] : []),
 ];
 ---
 

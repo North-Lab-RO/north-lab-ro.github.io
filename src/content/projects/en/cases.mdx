@@ -78,10 +78,10 @@ gallery:
     alt: A forest trail with a wooden picnic table
     caption: Location · trail
 reports:
-  - title: Printable evidence sheets (PDF)
-    description: The exhibit pack players print for their physical detective board.
-  - title: Case file export (PDF)
-    description: Briefing, persons of interest and evidence log for one case.
+  - title: Printable case kit (PDF)
+    description: "The game's own print kit for an invented case: cover, briefing, area map, locations, exhibits with chain of custody, and lab reports. Ten A4 pages for the table."
+    file: cases-kit-exemplu.pdf
+    preview: cases-kit-exemplu.webp
 # ── Sales block ──
 promise: "A new detective mystery, every time your guests arrive."
 audienceShort:
@@ -152,7 +152,7 @@ tailoring:
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import CaseFile from '../../../components/samples/CaseFile.astro';
 
 ## How it works
@@ -193,46 +193,55 @@ Every action a team can take (a search, an interview, a lab test, a records requ
 a clock cost. The validator computes everything reachable from the opening knowledge, then checks the cheapest path
 to the proving evidence fits the time budget.
 
-<CodeSnippet
-  file="packages/shared/src/knowledge.ts"
-  lang="ts"
-  caption="A fixed-point closure over the case's actions. Any proving key outside it sends the case back to the stage that can actually produce it."
-  code={`
-export function computeClosure(
-  initial: readonly KnowledgeKey[],
-  actions: readonly DiscoveryAction[],
-): Set<KnowledgeKey> {
-  const held = new Set<KnowledgeKey>(initial);
-  let grew = true;
-  while (grew) {
-    grew = false;
-    for (const act of actions) {
-      if (!isSatisfied(held, act.requires)) continue;
-      for (const key of act.reveals) {
-        if (!held.has(key)) {
-          held.add(key);
-          grew = true;
+<Flow
+  title="How a case is proven solvable"
+  caption="Checked before a case is ever played."
+  nodes={[
+    {
+      "label": "A draft case is written",
+      "detail": "The truth, the people, the places and the evidence."
+    },
+    {
+      "label": "Every action is listed",
+      "detail": "Each search, interview, lab test or records request: what it needs, what it reveals and how long it takes."
+    },
+    {
+      "label": "Everything reachable is unlocked",
+      "detail": "Starting from what a team knows on day one, actions are applied again and again until nothing new appears."
+    },
+    {
+      "kind": "decision",
+      "label": "Is every piece of proving evidence reachable?",
+      "branches": [
+        {
+          "when": "No",
+          "then": "Sent back to the stage that can produce the missing evidence.",
+          "tone": "bad"
         }
-      }
+      ],
+      "yes": "Yes"
+    },
+    {
+      "label": "The quickest route to the proof is found",
+      "detail": "The cheapest path through the actions, in game time."
+    },
+    {
+      "kind": "decision",
+      "label": "Does it fit the time budget?",
+      "branches": [
+        {
+          "when": "No",
+          "then": "Flagged as too slow and reworked.",
+          "tone": "warn"
+        },
+        {
+          "when": "Yes",
+          "then": "The case is accepted.",
+          "tone": "ok"
+        }
+      ]
     }
-  }
-  return held;
-}
-
-// validation/solvability.ts
-const closure = computeClosure(initial, actions);
-const unreachable = draft.truth.provingEvidence.filter((key) => !closure.has(key));
-
-const path = computeCriticalPath(initial, actions, draft.truth.provingEvidence);
-const budgetSeconds = draft.profile.timeBudgetMinutes * 60;
-const fraction = path.costSeconds / budgetSeconds;
-if (fraction > draft.profile.maxCriticalPathFraction) {
-  const used = Math.round(fraction * 100);
-  const allowed = Math.round(draft.profile.maxCriticalPathFraction * 100);
-  issues.push(issue(7,
-    \`Critical path costs \${used}% of the time budget, above the \${allowed}% ceiling.\`));
-}
-`}
+  ]}
 />
 
 ## Generated imagery

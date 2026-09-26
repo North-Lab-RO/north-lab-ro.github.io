@@ -120,7 +120,7 @@ note: "For lawful investigations carried out by authorised teams. Every action i
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
 ## How it works
@@ -160,37 +160,52 @@ helps but never decides what is true.
 The assistant sees how reliable each source has been in this case: the share of its findings that analysts
 confirmed. A source that keeps being rejected carries less weight in the answer.
 
-<CodeSnippet
-  file="backend/apps/ai/services.py"
-  lang="python"
-  caption="Confirm and reject decisions become a per-source accuracy ratio that the AI takes into account."
-  code={`
-def _compute_source_accuracy(case) -> dict[str, dict]:
-    rows = (
-        Evidence.objects
-        .filter(case=case)
-        .exclude(status="pending")
-        .values("source_name", "source_type")
-        .annotate(
-            total=Count("id"),
-            confirmed=Count("id", filter=Q(status="confirmed")),
-            rejected=Count("id", filter=Q(status="rejected")),
-        )
-    )
-    out: dict[str, dict] = {}
-    for r in rows:
-        key = (r["source_name"] or r["source_type"]).strip()
-        if not key or r["total"] == 0:
-            continue
-        ratio = r["confirmed"] / r["total"] if r["total"] else 0.0
-        out[key] = {
-            "confirmed": r["confirmed"],
-            "rejected": r["rejected"],
-            "total": r["total"],
-            "ratio": round(ratio, 2),
+<Flow
+  title="How a source earns trust"
+  caption="Analysts decide what is true; the assistant learns which sources to rely on."
+  nodes={[
+    {
+      "label": "A collector reports a finding",
+      "detail": "From web search, DNS and WHOIS, social profiles, images and the other collectors."
+    },
+    {
+      "kind": "decision",
+      "label": "An analyst reviews it",
+      "branches": [
+        {
+          "when": "Pending",
+          "then": "Not counted yet.",
+          "tone": "neutral"
+        },
+        {
+          "when": "Rejected",
+          "then": "Counts against the source, and never reaches the report.",
+          "tone": "bad"
         }
-    return out
-`}
+      ],
+      "yes": "Confirmed"
+    },
+    {
+      "label": "Each source gets a track record",
+      "detail": "Confirmed findings out of all reviewed findings, per source, for this case."
+    },
+    {
+      "kind": "decision",
+      "label": "When the assistant answers",
+      "branches": [
+        {
+          "when": "Reliable source",
+          "then": "Given more weight.",
+          "tone": "ok"
+        },
+        {
+          "when": "Often rejected",
+          "then": "Given less weight.",
+          "tone": "warn"
+        }
+      ]
+    }
+  ]}
 />
 
 ## Reports that fit the subject
@@ -198,29 +213,44 @@ def _compute_source_accuracy(case) -> dict[str, dict]:
 The structured report adapts to what the case is about: a report on a person drops the infrastructure section, and
 any section without data is left out rather than filled with padding.
 
-<CodeSnippet
-  file="backend/apps/reports/structured.py"
-  lang="python"
-  caption="Sections are built from the case data, then only the non-empty ones are kept, in the standard order."
-  code={`
-evidence = list(
-    Evidence.objects.filter(case=case).exclude(status="rejected").order_by("-created_at")
-)
-profile = detect_profile(entities, selectors)
-
-subject = _build_subject_identification(entities)
-infrastructure = _build_infrastructure(selectors, evidence)
-digital = _build_digital_footprint(selectors, evidence)
-network = _build_relationships(relationships)
-timeline = _build_timeline(case, evidence)
-
-if profile == "person":
-    infrastructure = ""
-
-sections = [
-    {"title": title, "markdown": md}
-    for title, md in candidates
-    if md and md.strip()
-]
-`}
+<Flow
+  title="How a report is assembled"
+  caption="Built from the case data; nothing is padded."
+  nodes={[
+    {
+      "label": "The case evidence is gathered",
+      "detail": "Everything except rejected findings, newest first."
+    },
+    {
+      "kind": "decision",
+      "label": "Who is the subject?",
+      "branches": [
+        {
+          "when": "A person",
+          "then": "The infrastructure section is left out.",
+          "tone": "neutral"
+        }
+      ],
+      "yes": "An organisation keeps every section"
+    },
+    {
+      "label": "Sections are built",
+      "detail": "Subject identification, infrastructure, digital footprint, relationships and timeline."
+    },
+    {
+      "kind": "decision",
+      "label": "Does each section have data?",
+      "branches": [
+        {
+          "when": "Empty",
+          "then": "Left out, never filled with padding.",
+          "tone": "neutral"
+        }
+      ],
+      "yes": "Kept, in the standard order"
+    },
+    {
+      "label": "The report is exported as PDF"
+    }
+  ]}
 />

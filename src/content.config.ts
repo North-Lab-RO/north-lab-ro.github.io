@@ -62,6 +62,8 @@ const projects = defineCollection({
       capabilities: z.array(z.object({ group: z.string(), items: z.array(z.string()) })).default([]),
       requirements: z.array(z.string()).default([]),
       tailoring: z.array(z.string()).default([]),
+      /** Planned features, shown as "Coming soon"; never describe them as available. */
+      roadmap: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
       note: z.string().optional(),
     }),
 });

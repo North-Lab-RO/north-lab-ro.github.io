@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { ATHENA_PROFILE, SHIELD_RINGS, meanderPath } from '../3d/athena-emblem';
 
 interface Props {
   scene: 'none' | 'globe' | 'board' | 'radar' | 'ledger' | 'graph';
@@ -102,6 +103,15 @@ const ledgerRows = [
   {
     scene === 'graph' && (
       <svg viewBox="0 0 400 300" class="art graph" aria-hidden="true">
+        <g class="shield" transform="translate(200 150) scale(1.45) translate(-100 -100)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          {SHIELD_RINGS.map(([r, w]) => (
+            <circle cx="100" cy="100" r={r} stroke="#818cf8" stroke-width={w * 0.9} stroke-opacity=".45" />
+          ))}
+          <path d={meanderPath(100, 100, 78, 92, 24)} stroke="#818cf8" stroke-width=".7" stroke-opacity=".4" />
+          <g transform="translate(100 100) scale(0.66) translate(-97 -106)" stroke="#c7d2fe" stroke-width="1.5" stroke-opacity=".38">
+            {ATHENA_PROFILE.map((d) => <path d={d} />)}
+          </g>
+        </g>
         {netNodes.map((n) => (
           <line x1="200" y1="150" x2={n.x.toFixed(1)} y2={n.y.toFixed(1)} stroke="#818cf8" stroke-opacity=".5" />
         ))}

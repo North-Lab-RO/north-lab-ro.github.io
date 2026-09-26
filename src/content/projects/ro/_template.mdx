@@ -41,7 +41,7 @@ reports: []
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 
 ## Cum funcționează
 
@@ -55,12 +55,12 @@ Un paragraf despre arhitectură.
   ]}
 />
 
-<CodeSnippet
-  file="path/in/repo.py"
-  lang="python"
-  caption="De ce contează acest fragment."
-  code={`
-def example():
-    return 42
-`}
+<Flow
+  title="Cum se ia o decizie"
+  caption="O frază despre de ce contează această logică."
+  nodes={[
+    { label: 'Se întâmplă ceva', detail: 'Ce pornește fluxul.' },
+    { kind: 'decision', label: 'O verificare?', branches: [{ when: 'Nu', then: 'Ce se întâmplă în schimb.', tone: 'bad' }], yes: 'Da' },
+    { kind: 'decision', label: 'Rezultat', branches: [{ when: 'Cazul A', then: 'Rezultatul A.', tone: 'ok' }, { when: 'Cazul B', then: 'Rezultatul B.', tone: 'warn' }] },
+  ]}
 />

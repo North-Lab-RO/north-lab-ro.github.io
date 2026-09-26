@@ -117,10 +117,19 @@ tailoring:
   - "Sinteze axate pe domeniul, clienții sau concurenții tăi"
   - "Praguri de alertă stabilite de tine și trimitere pe email"
   - "Identitatea vizuală și autentificarea companiei tale"
+roadmap:
+  - title: "Ce spun oamenii pe Reddit"
+    body: "Pentru fiecare poveste sunt găsite și rezumate discuțiile de pe Reddit despre același subiect: opiniile principale și cum reacționează oamenii, alături de ce scrie presa."
+  - title: "Colectare prin propriul VPN"
+    body: "Sursele publice sunt descărcate printr-un VPN WireGuard, de exemplu ProtonVPN, iar traficul intern rămâne direct. Dacă tunelul cade, descărcarea așteaptă, în loc să îți expună adresa, iar starea se vede în aplicație."
+  - title: "O pagină de setări pentru integrări"
+    body: "Datele de acces sunt stocate criptat și nu mai sunt afișate după salvare. Fiecare integrare arată dacă merge, dacă are erori sau dacă nu e configurată, cu un test pe care îl pornești oricând."
+  - title: "Un ecran de citit"
+    body: "Secțiunile, lista de povești și povestea, una lângă alta, cu derulare continuă, o variantă gândită pentru telefon și navigare din tastatură."
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import StoryAnalysis from '../../../components/samples/StoryAnalysis.astro';
 import CounselorStory from '../../../components/project/CounselorStory.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
@@ -249,6 +258,7 @@ Proiectate și aprobate; implementarea e în curs.
 <InfoGrid
   columns={2}
   items={[
+    { tag: 'în dezvoltare', title: 'Reacția publicului de pe Reddit', body: 'Construită deja, dar oprită până sunt introduse datele de acces: postările populare sunt potrivite cu poveștile existente după adresă și după sens, cele fără legătură sunt ignorate, iar discuția potrivită e rezumată în opiniile principale. Setările de mai jos permit conectarea la Reddit din aplicație.' },
     { tag: 'în dezvoltare', title: 'Setări și un VPN pe care îl vezi', body: 'O pagină de setări pentru datele de acces ale integrărilor, criptate și imposibil de citit după salvare. Descărcările publice trec printr-un tunel ProtonVPN WireGuard, iar traficul intern rămâne direct. Dacă tunelul cade, descărcările așteaptă, în loc să expună adresa reală. Fiecare integrare arată dacă merge, dacă are erori sau dacă nu e configurată, cu un test la cerere.' },
     { tag: 'în dezvoltare', title: 'Un ecran de citit, lângă panoul de control', body: 'Un mod de citire pe trei coloane (secțiuni, lista de povești, povestea), alături de panoul existent, cu derulare continuă, o variantă gândită pentru telefon și navigare din tastatură.' },
   ]}
@@ -263,44 +273,69 @@ Proiectate și aprobate; implementarea e în curs.
 Un model lăsat liber să spună „confirmat” poate face asta fără să citeze nimic. COUNSELOR caută citate din *alte*
 publicații și îi cere modelului doar să le clasifice. Verdictul rezultă apoi din numărătoare.
 
-<CodeSnippet
-  file="backend/app/services/fact_check.py"
-  lang="python"
-  caption="Articolul care face afirmația și publicația lui nu o pot confirma niciodată, iar un citat dintr-o sursă necunoscută e eliminat, nu atribuit unui nume ghicit."
-  code={`
-def gather_evidence(
-    hits: list[SearchHit],
-    *,
-    claim_article_id: int | None,
-    claim_source_id: int | None,
-    source_names: dict[int, str],
-) -> list[Evidence]:
-    best: dict[int, Evidence] = {}
-    for h in hits:
-        payload = h.payload or {}
-        source_id = payload.get("source_id")
-        article_id = payload.get("article_id")
-        text = (payload.get("text") or "").strip()
-        if not text or source_id is None:
-            continue
-        if article_id is not None and article_id == claim_article_id:
-            continue
-        if source_id == claim_source_id:
-            continue
-        name = source_names.get(source_id)
-        if not name:
-            continue
-        ...
-    return sorted(best.values(), key=lambda e: e.score, reverse=True)
-
-
-def decide_verdict(*, supporting: int, contradicting: int) -> str:
-    if contradicting > 0:
-        return CONTESTED
-    if supporting >= 2:
-        return CONFIRMED
-    if supporting == 1:
-        return SINGLE_SOURCE
-    return UNVERIFIABLE
-`}
+<Flow
+  title="De la afirmație la verdict"
+  caption="Modelul clasifică citate; nu scrie niciodată verdictul."
+  nodes={[
+    {
+      "label": "Se alege o afirmație",
+      "detail": "O frază dintr-un articol care poate fi verificată în alte relatări."
+    },
+    {
+      "label": "Se caută citate în alte publicații",
+      "detail": "Cele mai apropiate pasaje din alte articole, găsite după sens, nu doar după cuvinte."
+    },
+    {
+      "kind": "decision",
+      "label": "Poate conta citatul ca dovadă?",
+      "branches": [
+        {
+          "when": "Același articol",
+          "then": "Eliminat: o afirmație nu se poate confirma singură.",
+          "tone": "bad"
+        },
+        {
+          "when": "Aceeași publicație",
+          "then": "Eliminat: o publicație nu își poate confirma propria știre.",
+          "tone": "bad"
+        },
+        {
+          "when": "Publicație necunoscută",
+          "then": "Eliminat, în loc să fie citat sub un nume ghicit.",
+          "tone": "bad"
+        }
+      ],
+      "yes": "Publicație independentă, cu nume cunoscut"
+    },
+    {
+      "label": "Modelul clasifică fiecare citat",
+      "detail": "Susține afirmația, o contrazice sau nu are legătură. Doar la asta răspunde."
+    },
+    {
+      "kind": "decision",
+      "label": "Verdictul, din numărătoare",
+      "branches": [
+        {
+          "when": "Există o contrazicere",
+          "then": "Contestat, cu sursele care o contrazic.",
+          "tone": "warn"
+        },
+        {
+          "when": "Două sau mai multe o susțin",
+          "then": "Confirmat de mai multe publicații.",
+          "tone": "ok"
+        },
+        {
+          "when": "O singură sursă o susține",
+          "then": "O singură sursă.",
+          "tone": "neutral"
+        },
+        {
+          "when": "Niciuna",
+          "then": "Deocamdată neverificabil.",
+          "tone": "neutral"
+        }
+      ]
+    }
+  ]}
 />

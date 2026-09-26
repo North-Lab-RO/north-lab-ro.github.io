@@ -104,7 +104,7 @@ tailoring:
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
 import ImportReview from '../../../components/samples/ImportReview.astro';
 import InfoGrid from '../../../components/project/InfoGrid.astro';
 
@@ -145,32 +145,46 @@ ultimul cuvânt îl are o verificare fixă, bazată pe reguli. Pe o placă de 24
 
 <ImportReview lang="ro" />
 
-## Verificarea, în cod
+## Verificarea, pas cu pas
 
-<CodeSnippet
-  file="backend/app/ai/extraction_guard.py"
-  lang="python"
-  caption="Fiecare număr scris de model trebuie să fie identic cu un număr citit din document. O potrivire parțială nu ajunge: exact așa ar trece neobservată o primă cifră pierdută."
-  code={`
-_DIGITS = re.compile(r"\\D")
-_DIGIT_RUN = re.compile(r"\\d[\\d.,]*\\d|\\d")
-
-
-def digits(text: str) -> str:
-    return _DIGITS.sub("", text or "")
-
-
-def is_grounded(value: str, sources: list[str]) -> bool:
-    if not value:
-        return True
-
-    source_runs = [digits(run) for block in sources for run in _DIGIT_RUN.findall(block)]
-    for run in _DIGIT_RUN.findall(value):
-        needle = digits(run)
-        if not needle:
-            continue
-        if needle not in source_runs:
-            return False
-    return True
-`}
+<Flow
+  title="Fiecare număr e verificat pe pagină"
+  caption="O valoare contează doar dacă se potrivește cu un număr întreg tipărit pe extras."
+  nodes={[
+    {
+      "label": "Modelul citește un rând",
+      "detail": "Data, descrierea și suma, de pe extras sau de pe bon."
+    },
+    {
+      "label": "Fiecare număr citit e comparat cu pagina",
+      "detail": "Doar numere întregi: o bucată dintr-un număr mai lung nu contează."
+    },
+    {
+      "kind": "decision",
+      "label": "Se potrivesc toate numerele?",
+      "branches": [
+        {
+          "when": "Nu",
+          "then": "Valoarea e eliminată, iar rândul așteaptă să o completezi tu. De exemplu, 84.32 citit din 184,32.",
+          "tone": "bad"
+        }
+      ],
+      "yes": "Da"
+    },
+    {
+      "label": "Rândul îți e arătat pentru verificare",
+      "detail": "Cu categoria sugerată și cât de sigur e modelul."
+    },
+    {
+      "kind": "decision",
+      "label": "Confirmi",
+      "branches": [
+        {
+          "when": "Confirmat",
+          "then": "Rândul intră în registru.",
+          "tone": "ok"
+        }
+      ]
+    }
+  ]}
 />
