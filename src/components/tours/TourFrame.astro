@@ -1,0 +1,365 @@
+---
+import type { Lang } from '../../i18n/ui';
+
+export interface TourStep {
+  tab: string;
+  title: string;
+  /** One line per numbered callout on the screen, in the same order. */
+  points: string[];
+}
+interface Props {
+  lang: Lang;
+  label: string;
+  steps: TourStep[];
+  /** 'desktop' draws a browser window, 'app' a plain app window. */
+  chrome?: 'desktop' | 'app';
+  url?: string;
+}
+const { lang, label, steps, chrome = 'desktop', url = '' } = Astro.props;
+const uid = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const copy = {
+  en: { caption: 'Illustrative screens with invented data. The real interface is shown further down.', step: 'Screen' },
+  ro: { caption: 'Ecrane ilustrative, cu date inventate. Interfața reală este prezentată mai jos.', step: 'Ecranul' },
+}[lang];
+---
+
+<section class="tour" data-tour aria-label={label}>
+  <div class="tabs" role="tablist" aria-label={label}>
+    {
+      steps.map((s, i) => (
+        <button
+          role="tab"
+          id={`${uid}-tab-${i}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`${uid}-panel`}
+          tabindex={i === 0 ? 0 : -1}
+          data-tab={i}
+        >
+          <span class="n">{i + 1}</span>
+          {s.tab}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="body" id={`${uid}-panel`} role="tabpanel">
+    <div class:list={['window', chrome]}>
+      <div class="bar" aria-hidden="true">
+        <span class="dots"><i></i><i></i><i></i></span>
+        {chrome === 'desktop' && <span class="url">{url}</span>}
+      </div>
+      <div class="stage" data-stage>
+        <div class="canvas" data-canvas>
+          <slot />
+        </div>
+      </div>
+      <div class="progress" aria-hidden="true"><span data-progress></span></div>
+    </div>
+
+    <div class="explain">
+      {
+        steps.map((s, i) => (
+          <div class:list={['step', i === 0 && 'on']} data-step-text={i}>
+            <p class="label">
+              {copy.step} {i + 1} / {steps.length}
+            </p>
+            <h3 class="h-sub">{s.title}</h3>
+            <ol class="points">
+              {s.points.map((p, k) => (
+                <li>
+                  <span class="badge">{k + 1}</span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <p class="caption muted">{copy.caption}</p>
+</section>
+
+<script>
+  const AUTO_MS = 8000;
+  document.querySelectorAll<HTMLElement>('[data-tour]').forEach((tour) => {
+    const tabs = [...tour.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const screens = [...tour.querySelectorAll<HTMLElement>('[data-screen]')];
+    const texts = [...tour.querySelectorAll<HTMLElement>('[data-step-text]')];
+    const stage = tour.querySelector<HTMLElement>('[data-stage]')!;
+    const canvas = tour.querySelector<HTMLElement>('[data-canvas]')!;
+    const bar = tour.querySelector<HTMLElement>('[data-progress]')!;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = 0;
+    let timer = 0;
+    let paused = false;
+    let userTook = false;
+    let inView = false;
+
+    // Screens are designed at 1000×625 and scaled to the frame, so they look identical at every width.
+    const fit = () => canvas.style.setProperty('--s', String(stage.clientWidth / 1000));
+    new ResizeObserver(fit).observe(stage);
+    fit();
+
+    const show = (i: number, focus = false) => {
+      current = (i + tabs.length) % tabs.length;
+      tabs.forEach((t, k) => {
+        const on = k === current;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      screens.forEach((s, k) => s.classList.toggle('on', k === current));
+      texts.forEach((s, k) => s.classList.toggle('on', k === current));
+      if (focus) tabs[current].focus();
+      // Keep the active tab visible in the (horizontally scrolling) strip without moving the page.
+      const strip = tabs[current].parentElement!;
+      const t = tabs[current];
+      if (t.offsetLeft < strip.scrollLeft || t.offsetLeft + t.offsetWidth > strip.scrollLeft + strip.clientWidth) {
+        strip.scrollTo({ left: t.offsetLeft - 16, behavior: reduce ? 'auto' : 'smooth' });
+      }
+      restart();
+    };
+
+    const restart = () => {
+      clearTimeout(timer);
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      if (userTook || paused || !inView) return;
+      const ms = reduce ? AUTO_MS * 1.5 : AUTO_MS;
+      requestAnimationFrame(() => {
+        bar.style.transition = `width ${ms}ms linear`;
+        bar.style.width = '100%';
+      });
+      timer = window.setTimeout(() => show(current + 1), ms);
+    };
+
+    tabs.forEach((t, k) =>
+      t.addEventListener('click', () => {
+        userTook = true;
+        show(k);
+      }),
+    );
+    tour.querySelector('[role="tablist"]')!.addEventListener('keydown', (e) => {
+      const key = (e as KeyboardEvent).key;
+      if (key !== 'ArrowRight' && key !== 'ArrowLeft') return;
+      e.preventDefault();
+      userTook = true;
+      show(current + (key === 'ArrowRight' ? 1 : -1), true);
+    });
+    const hold = (v: boolean) => () => {
+      paused = v;
+      restart();
+    };
+    tour.addEventListener('pointerenter', hold(true));
+    tour.addEventListener('pointerleave', hold(false));
+    tour.addEventListener('focusin', hold(true));
+    tour.addEventListener('focusout', hold(false));
+    new IntersectionObserver(([e]) => {
+      inView = e.isIntersecting;
+      restart();
+    }, { threshold: 0.35 }).observe(tour);
+
+    show(0);
+  });
+</script>
+
+<style>
+  .tour {
+    margin-block: 32px;
+  }
+  .tabs {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 14px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  [role='tab'] {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--color-mist);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s,
+      background-color 0.2s;
+  }
+  [role='tab']:hover {
+    color: var(--color-frost);
+  }
+  [role='tab'][aria-selected='true'] {
+    color: var(--color-night);
+    background: var(--color-frost);
+    border-color: var(--color-frost);
+  }
+  .n {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .window {
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #05070c;
+    box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.7);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 34px;
+    padding-inline: 14px;
+    background: #10141d;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .dots {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #2a3346;
+  }
+  .url {
+    flex: 1;
+    max-width: 380px;
+    padding: 3px 12px;
+    border-radius: 6px;
+    background: #070a10;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-mist);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+  .canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1000px;
+    height: 625px;
+    transform: scale(var(--s, 1));
+    transform-origin: 0 0;
+  }
+  .canvas :global([data-screen]) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.5s var(--ease-out),
+      visibility 0s 0.5s;
+  }
+  .canvas :global([data-screen].on) {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s var(--ease-out);
+  }
+  /* numbered callout markers placed on the screens */
+  .canvas :global(.co) {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border-radius: 50%;
+    background: var(--color-ice);
+    color: #05070c;
+    font: 700 15px/1 var(--font-sans);
+    box-shadow:
+      0 0 0 4px rgb(139 233 255 / 0.25),
+      0 6px 16px rgb(0 0 0 / 0.5);
+    animation: co-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes co-pulse {
+    50% {
+      box-shadow:
+        0 0 0 10px rgb(139 233 255 / 0.08),
+        0 6px 16px rgb(0 0 0 / 0.5);
+    }
+  }
+  .progress {
+    height: 3px;
+    background: #10141d;
+  }
+  .progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--color-ice);
+  }
+  .step {
+    display: none;
+  }
+  .step.on {
+    display: block;
+  }
+  .step .h-sub {
+    margin-top: 8px;
+  }
+  .points {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .points li {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    font-size: 0.95rem;
+    color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));
+  }
+  .badge {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-ice);
+    color: var(--color-night);
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .caption {
+    margin-top: 16px;
+    font-size: 0.82rem;
+  }
+  @media (min-width: 1100px) {
+    .body {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+      align-items: start;
+    }
+  }
+</style>

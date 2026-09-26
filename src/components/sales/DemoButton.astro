@@ -1,0 +1,26 @@
+---
+import { site } from '../../config';
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Product the request is about; goes into the email subject. */
+  product?: string;
+  variant?: 'primary' | 'ghost';
+}
+const { lang, product, variant = 'primary' } = Astro.props;
+const s = t(lang).sales;
+const subject = product ? `${s.demoSubject}: ${product}` : s.demoSubject;
+// Email first; LinkedIn if there is no address; nothing at all if neither is configured in src/config.ts.
+const href = site.email
+  ? `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(s.demoBody)}`
+  : site.linkedin || '';
+---
+
+{
+  href && (
+    <a href={href} class:list={['btn', variant === 'primary' ? 'btn-primary' : 'btn-ghost']} rel={site.email ? undefined : 'noopener'}>
+      {s.demo} <span aria-hidden="true">→</span>
+    </a>
+  )
+}

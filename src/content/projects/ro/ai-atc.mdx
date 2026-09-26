@@ -1,7 +1,7 @@
 ---
 title: AI_ATC
 category: AI vocal · aviație
-tagline: Un controlor de trafic aerian găzduit local pentru X-Plane 12. Vorbești în stație, iar un model local răspunde în frazeologie ICAO.
+tagline: "AI_ATC aduce în X-Plane 12 un control de trafic aerian vorbit și realist: vorbești în stație, iar un controlor răspunde în frazeologie ICAO corectă, de la autorizare la aterizare."
 summary: >-
   AI_ATC înlocuiește controlul de trafic prestabilit al simulatorului cu un controlor care chiar ascultă. Un plugin
   trimite starea aeronavei în timp real către un server local. Pilotul vorbește, iar recunoașterea vocală, un agent
@@ -47,6 +47,59 @@ stack:
   - PostgreSQL
   - Qdrant
   - Docker
+# ── Sales block ──
+promise: "Un controlor de trafic aerian care ascultă și răspunde în câteva secunde."
+audienceShort:
+  - "Piloți de simulator"
+  - "Companii aeriene virtuale"
+  - "Centre de simulare și cabine acasă"
+outcomes:
+  - title: "Exercițiu radio real"
+    body: "Vorbești, asculți și colaționezi ca un pilot adevărat, cu un controlor care înțelege vorbirea naturală."
+  - title: "Toate fazele zborului"
+    body: "Autorizarea, solul, turnul, apropierea și controlul regional te preiau pe rând în timp ce zbori."
+  - title: "Fără abonament"
+    body: "Rulează pe propriul PC, fără taxă lunară sau pe minut."
+audiences:
+  - title: "Pasionați de simulare"
+    body: "Simulatorul prinde viață cu un controlor care chiar ascultă."
+  - title: "Companii aeriene virtuale"
+    body: "Control de trafic consecvent și realist pentru zboruri de grup și seri de antrenament."
+  - title: "Centre de simulare și cabine acasă"
+    body: "Imersiune radio pentru vizitatori și un loc unde exersezi frazeologia."
+tour: atc
+capabilities:
+  - group: "Radio"
+    items:
+      - "Transmisie de pe manșă sau din portalul web"
+      - "Vocea controlorului prin stația COM1 a aeronavei"
+      - "Două stații cu frecvențe active și de rezervă"
+      - "Un jurnal scris al fiecărui schimb de replici"
+  - group: "Planul de zbor"
+    items:
+      - "Încarci planul din SimBrief sau dintr-un fișier"
+      - "Alegi pista, plecarea, sosirea și apropierea"
+      - "Depui planul și vezi ruta pe hartă"
+  - group: "Ghidare"
+    items:
+      - "O listă cu fiecare fază a zborului"
+      - "Indicii pentru următorul apel"
+      - "Cinci controlori, aleși după faza de zbor"
+      - "Mod demo pentru un zbor complet"
+  - group: "Lumea din jur"
+    items:
+      - "Hartă live cu aeroporturi, piste și trafic"
+      - "Vremea și METAR pentru zona ta"
+      - "Niveluri de trafic, de la singur la aglomerat"
+requirements:
+  - "X-Plane 12"
+  - "Un PC cu placă grafică NVIDIA pentru serviciile AI (poate fi un al doilea PC din aceeași rețea)"
+  - "Un microfon și căști"
+tailoring:
+  - "Instalare și configurare făcute de noi"
+  - "Scenarii pentru seri de antrenament sau evenimente"
+  - "Mai multe aeroporturi, voci și limbi"
+note: "Doar pentru simulare și exercițiu; nu este un sistem certificat de control al traficului aerian sau de instruire."
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';

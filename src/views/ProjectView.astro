@@ -5,6 +5,9 @@ import Scene from '../components/3d/Scene.astro';
 import Gallery from '../components/project/Gallery.astro';
 import ReportSlot from '../components/project/ReportSlot.astro';
 import ProjectVisual from '../components/project/ProjectVisual.astro';
+import SalesBlock from '../components/sales/SalesBlock.astro';
+import DemoButton from '../components/sales/DemoButton.astro';
+import CtaBand from '../components/sales/CtaBand.astro';
 import { accentVar, type Project } from '../lib';
 import { t, projectHref, homeHref, type Lang } from '../i18n/ui';
 
@@ -17,6 +20,8 @@ const { lang, entry, next } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
 const tp = t(lang).project;
+const ts = t(lang).sales;
+const forLabel = t(lang).projects.forLabel;
 const sceneLabels = {
   en: {
     globe: 'A rotating globe of points, with arcs travelling from many news sources into one story',
@@ -39,9 +44,24 @@ const sceneLabels = {
       <div class="intro">
         <a href={homeHref(lang, '#projects')} class="back label">{tp.back}</a>
         <p class="label cat" data-rise><span class="swatch" aria-hidden="true"></span>{d.category}</p>
-        <h1 class="display title" data-rise style="--delay:.06s">{d.title}</h1>
-        <p class="tagline" data-rise style="--delay:.12s">{d.tagline}</p>
-        <p class="badge" data-rise style="--delay:.18s">
+        <h1 class="name" data-rise style="--delay:.04s">{d.title}</h1>
+        <p class="display promise" data-rise style="--delay:.08s">{d.promise ?? d.tagline}</p>
+        {d.promise && <p class="tagline" data-rise style="--delay:.12s">{d.tagline}</p>}
+        {
+          d.audienceShort.length > 0 && (
+            <p class="for" data-rise style="--delay:.16s">
+              <span class="label">{forLabel}</span>
+              {d.audienceShort.map((a) => (
+                <span class="chip">{a}</span>
+              ))}
+            </p>
+          )
+        }
+        <div class="cta" data-rise style="--delay:.2s">
+          <DemoButton lang={lang} product={d.title} />
+          <a href="#tour" class="btn btn-ghost">{ts.tour} <span aria-hidden="true">↓</span></a>
+        </div>
+        <p class="badge" data-rise style="--delay:.24s">
           {
             d.repo.visibility === 'public' && d.repo.url ? (
               <a href={d.repo.url} class="chip" rel="noopener">{tp.source}</a>
@@ -65,6 +85,15 @@ const sceneLabels = {
       </div>
     </header>
 
+    <SalesBlock lang={lang} entry={entry} />
+
+    <CtaBand lang={lang} product={d.title} />
+
+    <section class="wrap techdiv" aria-labelledby="tech-title">
+      <p class="label">{ts.tech}</p>
+      <h2 id="tech-title" class="h-section sm">{ts.techLede}</h2>
+    </section>
+
     <section class="wrap overview">
       <p class="lede" data-reveal>{d.summary}</p>
       {
@@ -81,21 +110,6 @@ const sceneLabels = {
       }
     </section>
 
-    {
-      d.features.length > 0 && (
-        <section class="wrap block">
-          <h2 class="h-section sm" data-reveal>{tp.whatItDoes}</h2>
-          <ul class="features">
-            {d.features.map((f, i) => (
-              <li class="feature" data-reveal style={`--delay:${(i % 3) * 0.06}s`}>
-                <h3 class="h-sub">{f.title}</h3>
-                <p class="muted">{f.body}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
 
     <section class="wrap block prose">
       <Content />
@@ -166,9 +180,54 @@ const sceneLabels = {
     height: 2px;
     background: var(--accent);
   }
-  .title {
+  .name {
     margin-top: 14px;
-    font-size: clamp(2.2rem, 10.5vw, 6.4rem);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .promise {
+    margin-top: 10px;
+    font-size: clamp(2rem, 5.4vw, 4.2rem);
+    line-height: 1.04;
+    max-width: 16ch;
+  }
+  .for {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .for .label {
+    margin-right: 4px;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 26px;
+  }
+  .techdiv {
+    padding-top: clamp(40px, 6vw, 72px);
+  }
+  .techdiv .label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .techdiv .label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-line);
+  }
+  .techdiv h2 {
+    margin-top: 18px;
+    max-width: 28ch;
+    color: color-mix(in srgb, var(--color-frost) 80%, var(--color-mist));
   }
   .tagline {
     margin-top: 22px;
@@ -277,12 +336,14 @@ const sceneLabels = {
   }
   .next a {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
     padding-top: 36px;
     border-top: 1px solid var(--color-line);
   }
   .next .name {
-    font-size: clamp(2.4rem, 7vw, 5rem);
+    font-size: clamp(1.9rem, 7vw, 5rem);
+    overflow-wrap: anywhere;
     transition: color 0.4s var(--ease-out);
   }
   .next a:hover .name {

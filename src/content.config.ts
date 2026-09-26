@@ -51,6 +51,16 @@ const projects = defineCollection({
         })
         .default({ visibility: 'private' }),
       credits: z.string().optional(),
+      // ── Sales block (shown first on the project page) ──
+      promise: z.string().optional(),
+      audienceShort: z.array(z.string()).default([]),
+      outcomes: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
+      audiences: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
+      tour: z.enum(['none', 'counselor', 'cases', 'atc', 'banky']).default('none'),
+      capabilities: z.array(z.object({ group: z.string(), items: z.array(z.string()) })).default([]),
+      requirements: z.array(z.string()).default([]),
+      tailoring: z.array(z.string()).default([]),
+      note: z.string().optional(),
     }),
 });
 

@@ -1,7 +1,7 @@
 ---
 title: BANKY
 category: Finanțe personale · privat
-tagline: Extrasele tale de cont, citite de un model pe propriul GPU. Fiecare cifră este verificată față de pagină înainte să ajungă în registru.
+tagline: "BANKY citește extrasele de cont și bonurile pe propriul calculator, clasifică fiecare plată și îți oferă bugete, obiective și rapoarte lunare, iar tu confirmi fiecare rând."
 summary: >-
   BANKY este o aplicație de finanțe personale pentru cei care nu vor să-și dea extrasele de cont unui serviciu din
   cloud. Importă extrase PDF, Excel și CSV, pagini scanate și fotografii de bonuri, apoi extrage și clasifică fiecare
@@ -51,6 +51,65 @@ stack:
 reports:
   - title: Raport lunar (PDF)
     description: Cheltuieli pe categorii, bugete și împărțirea 50/30/20 pentru o lună.
+# ── Sales block ──
+promise: "Finanțele tale, organizate de AI, fără să trimiți nimănui vreun extras."
+audienceShort:
+  - "Persoane și familii"
+  - "Liber-profesioniști"
+  - "Gospodării atente la confidențialitate"
+outcomes:
+  - title: "Toate conturile într-un loc"
+    body: "Bancă, economii, numerar, carduri și investiții împreună, în fiecare monedă pe care o folosești."
+  - title: "Clasificat pentru tine, verificat de tine"
+    body: "Imporți un extras și rândurile vin clasificate. Nimic nu ajunge în registru până nu confirmi."
+  - title: "Nimic nu iese din calculator"
+    body: "Extrasele, bonurile și cheltuielile rămân pe mașina ta. Fără date de logare la bancă, fără urcare în cloud."
+audiences:
+  - title: "Persoane și familii"
+    body: "Vezi unde se duc banii, îți setezi bugete și economisești pentru obiective, fără o aplicație care profită de datele tale."
+  - title: "Liber-profesioniști"
+    body: "Îți ții finanțele personale clare, chiar și cu venituri neregulate, cu rapoarte lunare tipăribile."
+  - title: "Gospodării atente la confidențialitate"
+    body: "Clasificare automată, fără să urci vreun extras nicăieri."
+tour: banky
+capabilities:
+  - group: "Import"
+    items:
+      - "Extrase PDF, Excel și CSV"
+      - "Pagini scanate și fotografii de bonuri, citite pe calculatorul tău"
+      - "Duplicate detectate la import"
+      - "Revizuire alături de sursă, înainte să se salveze ceva"
+  - group: "Zi de zi"
+    items:
+      - "Panou cu sold, venituri, cheltuieli și economii"
+      - "Căutare de tipul „Lidl >100”, cu filtre"
+      - "Categorii care îți învață magazinele"
+      - "Clasifici multe tranzacții deodată"
+  - group: "Planificare"
+    items:
+      - "Bugete lunare pe categorii"
+      - "50/30/20: nevoi, dorințe și economii"
+      - "Obiective cu progres"
+      - "Investiții: valoare, investit, câștig"
+  - group: "Rapoarte"
+    items:
+      - "Analize: avere netă, tendințe, comercianți principali"
+      - "Raport lunar tipăribil"
+      - "Copie de siguranță într-un singur fișier și export CSV"
+  - group: "Încredere"
+    items:
+      - "Fiecare cifră verificată față de extrasul original"
+      - "Banii nu sunt stocați niciodată ca zecimale rotunjite"
+      - "Istoric de audit pentru fiecare modificare"
+requirements:
+  - "Un calculator cu o placă grafică NVIDIA modernă (24 GB)"
+  - "Se folosește din browser; se instalează cu Docker"
+  - "Reglat pentru extrasele băncilor din România; alte bănci pot fi adăugate"
+tailoring:
+  - "Mai mulți utilizatori și registre comune pentru familie"
+  - "Registre pentru firme și exporturi pentru contabil"
+  - "Suport pentru formatul extraselor băncii tale"
+  - "Interfață în limba română"
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';

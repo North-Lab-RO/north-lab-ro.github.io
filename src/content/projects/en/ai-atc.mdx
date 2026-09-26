@@ -1,7 +1,7 @@
 ---
 title: AI_ATC
 category: Voice AI · aviation
-tagline: A self-hosted air traffic controller for X-Plane 12. You speak on the radio, and a local model answers in ICAO phraseology.
+tagline: "AI_ATC adds realistic, spoken air traffic control to X-Plane 12: you talk on the radio, and a controller answers in proper ICAO phraseology, from clearance to landing."
 summary: >-
   AI_ATC replaces the simulator's scripted ATC with a controller that actually listens. A plugin streams the
   aircraft's live state to a local server. The pilot speaks, and speech recognition, a specialist controller agent and
@@ -46,6 +46,59 @@ stack:
   - PostgreSQL
   - Qdrant
   - Docker
+# ── Sales block ──
+promise: "An air traffic controller that listens, and answers in seconds."
+audienceShort:
+  - "Flight-sim pilots"
+  - "Virtual airlines"
+  - "Sim centres & home cockpits"
+outcomes:
+  - title: "Real radio practice"
+    body: "Speak, listen and read back like a real pilot, with a controller that understands natural speech."
+  - title: "Every phase covered"
+    body: "Clearance, ground, tower, approach and center hand you over as you fly."
+  - title: "No subscription"
+    body: "Runs on your own PC, with no monthly or per-minute fee."
+audiences:
+  - title: "Flight-sim enthusiasts"
+    body: "Bring the simulator to life with a controller that actually listens."
+  - title: "Virtual airlines"
+    body: "Consistent, realistic ATC for group flights and training evenings."
+  - title: "Sim centres & home cockpits"
+    body: "Radio immersion for visitors, and a place to practise phraseology."
+tour: atc
+capabilities:
+  - group: "Radio"
+    items:
+      - "Push-to-talk from your yoke or from the web portal"
+      - "The controller’s voice through the aircraft’s COM1 radio"
+      - "Two radios with active and standby frequencies"
+      - "A written log of every exchange"
+  - group: "Flight planning"
+    items:
+      - "Load a plan from SimBrief, or upload one"
+      - "Pick runway, departure, arrival and approach"
+      - "File the plan and see the route on the map"
+  - group: "Guidance"
+    items:
+      - "A checklist of every flight phase"
+      - "Hints for the next call"
+      - "Five controllers, chosen by flight phase"
+      - "Demo mode for a complete flight"
+  - group: "The world"
+    items:
+      - "Live map with airports, runways and traffic"
+      - "Weather and METAR for your area"
+      - "Traffic levels from solo to busy"
+requirements:
+  - "X-Plane 12"
+  - "A PC with an NVIDIA graphics card for the AI services (it can be a second PC on the same network)"
+  - "A microphone and a headset"
+tailoring:
+  - "Installation and set-up done for you"
+  - "Scenarios for training evenings or events"
+  - "More airports, voices and languages"
+note: "For simulation and practice only; not a certified air traffic control or training system."
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';

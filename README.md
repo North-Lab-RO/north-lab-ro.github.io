@@ -126,6 +126,33 @@ Every project has one file per language, with the same file name:
 
 To show a "next project" placeholder card on the home page, set `showComingSoon = true` in `src/config.ts`.
 
+### The sales part of a project page
+
+Every project page opens with a client-facing section, driven by these frontmatter fields (write them in both language files):
+
+| Field | What it is |
+|---|---|
+| `promise` | The headline benefit, one short sentence. |
+| `tagline` | One or two sentences on what the product does for the client. |
+| `audienceShort` | Short "For:" labels shown in the hero and on the home card. |
+| `outcomes` | Three `{title, body}` cards: what changes for the client. |
+| `audiences` | `{title, body}` cards: who it is for, with a concrete use each. |
+| `tour` | Which product tour to show (`counselor`, `cases`, `atc`, `banky`, or `none`). Tours live in `src/components/tours/`. |
+| `capabilities` | Groups of `{group, items[]}`: the full feature checklist. |
+| `requirements` | What the client needs, in plain terms. |
+| `tailoring` | What can be customised for the client. |
+| `note` | Optional small print under the delivery section. |
+
+Everything technical (the MDX body, metrics, pipeline, code) appears below a **"For your technical team"** divider.
+
+### Real screenshots
+
+Drop PNG, JPG or WebP files into `src/assets/projects/<slug>/screens/`. They appear under **"The real app"** on that project's page in both languages, in file-name order (so name them `01-…`, `02-…`). The section stays hidden while the folder is empty. Check screenshots for personal data before committing.
+
+### Contact and "Request a demo"
+
+Set `email` and/or `linkedin` in `src/config.ts`. The **Request a demo** buttons (hero, project pages, closing band) and the footer contact block appear only once at least one is set. The email opens pre-filled with the product name in the subject.
+
 ### Add a PDF report
 
 Drop the file into `public/reports/`, then point a `reports` entry at it (in both language files):

@@ -1,0 +1,261 @@
+---
+import type { ImageMetadata } from 'astro';
+import Gallery from '../project/Gallery.astro';
+import CounselorTour from '../tours/CounselorTour.astro';
+import CasesTour from '../tours/CasesTour.astro';
+import AtcTour from '../tours/AtcTour.astro';
+import BankyTour from '../tours/BankyTour.astro';
+import type { Project } from '../../lib';
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  entry: Project;
+}
+const { lang, entry } = Astro.props;
+const d = entry.data;
+const s = t(lang).sales;
+
+// Real screenshots: every image dropped into src/assets/projects/<slug>/screens/ appears here, in file-name order.
+const shots = import.meta.glob<{ default: ImageMetadata }>('/src/assets/projects/*/screens/*.{png,jpg,jpeg,webp}', { eager: true });
+const real = Object.entries(shots)
+  .filter(([path]) => path.includes(`/projects/${entry.slug}/screens/`))
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, mod], i) => ({
+    src: mod.default,
+    alt: lang === 'ro' ? `${d.title}: captură de ecran ${i + 1}` : `${d.title}: screenshot ${i + 1}`,
+  }));
+// Language of each product's real interface; the note says so when it differs from the page.
+const uiLang: Record<string, Lang> = { counselor: 'ro', cases: 'en', 'ai-atc': 'en', banky: 'en' };
+const realNote = (uiLang[entry.slug] ?? lang) !== lang ? s.realNoteOther : s.realNote;
+
+const tours = { counselor: CounselorTour, cases: CasesTour, atc: AtcTour, banky: BankyTour } as const;
+const Tour = d.tour !== 'none' ? tours[d.tour] : null;
+const checkIcon = 'M5 12l4 4L19 6';
+---
+
+{
+  d.outcomes.length > 0 && (
+    <section class="wrap block">
+      <h2 class="label" data-reveal>{s.outcomes}</h2>
+      <ul class="outcomes">
+        {d.outcomes.map((o, i) => (
+          <li class="outcome" data-reveal style={`--delay:${i * 0.07}s`}>
+            <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="h-sub">{o.title}</h3>
+            <p class="muted">{o.body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  d.audiences.length > 0 && (
+    <section class="wrap block">
+      <h2 class="h-section sm" data-reveal>{s.audiences}</h2>
+      <ul class="aud">
+        {d.audiences.map((a, i) => (
+          <li class="panel audc" data-reveal style={`--delay:${(i % 4) * 0.06}s`}>
+            <h3 class="h-sub">{a.title}</h3>
+            <p class="muted">{a.body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  Tour && (
+    <section class="wrap block" id="tour">
+      <h2 class="h-section sm" data-reveal>{s.tour}</h2>
+      <Tour lang={lang} />
+    </section>
+  )
+}
+
+{
+  d.capabilities.length > 0 && (
+    <section class="wrap block">
+      <h2 class="h-section sm" data-reveal>{s.capabilities}</h2>
+      <div class="caps">
+        {d.capabilities.map((g, i) => (
+          <div class="capg" data-reveal style={`--delay:${(i % 3) * 0.06}s`}>
+            <p class="label">{g.group}</p>
+            <ul>
+              {g.items.map((it) => (
+                <li>
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                    <path d={checkIcon} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  {it}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+{
+  real.length > 0 && (
+    <section class="wrap block">
+      <h2 class="h-section sm" data-reveal>{s.real}</h2>
+      <Gallery lang={lang} items={real} note={realNote} />
+    </section>
+  )
+}
+
+{
+  (d.requirements.length > 0 || d.tailoring.length > 0) && (
+    <section class="wrap block">
+      <h2 class="h-section sm" data-reveal>{s.delivery}</h2>
+      <div class="deliv">
+        {d.requirements.length > 0 && (
+          <div class="panel dcol" data-reveal>
+            <p class="label">{s.needs}</p>
+            <ul>
+              {d.requirements.map((r) => (
+                <li>{r}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {d.tailoring.length > 0 && (
+          <div class="panel dcol" data-reveal style="--delay:.06s">
+            <p class="label">{s.tailoring}</p>
+            <p class="muted small">{s.tailoringNote}</p>
+            <ul>
+              {d.tailoring.map((r) => (
+                <li>{r}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      {d.note && <p class="note muted">{d.note}</p>}
+    </section>
+  )
+}
+
+<style>
+  .block {
+    padding-top: clamp(64px, 9vw, 112px);
+  }
+  .h-section.sm {
+    font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+    margin-bottom: 28px;
+  }
+  .outcomes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .outcome {
+    padding: 26px 0;
+    border-top: 1px solid var(--color-line);
+  }
+  .idx {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+  .outcome h3 {
+    margin-top: 10px;
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+  }
+  .outcome p {
+    margin-top: 10px;
+  }
+  .aud {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .audc {
+    padding: 24px;
+  }
+  .audc p {
+    margin-top: 8px;
+  }
+  .caps {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px 40px;
+  }
+  .capg ul {
+    display: grid;
+    gap: 9px;
+    margin-top: 12px;
+  }
+  .capg li {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    font-size: 0.95rem;
+  }
+  .capg svg {
+    margin-top: 4px;
+    color: var(--accent);
+  }
+  .deliv {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .dcol {
+    padding: 26px;
+  }
+  .dcol ul {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .dcol li {
+    padding-left: 18px;
+    position: relative;
+  }
+  .dcol li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 8px;
+    height: 2px;
+    background: var(--accent);
+  }
+  .small {
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  .note {
+    margin-top: 16px;
+    font-size: 0.88rem;
+  }
+  @media (min-width: 760px) {
+    .outcomes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 32px;
+    }
+    .aud {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .caps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .deliv {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1100px) {
+    .caps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

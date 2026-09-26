@@ -25,7 +25,15 @@ const href = projectHref(lang, project.slug);
   <div class="text">
     <p class="label badge"><span class="swatch" aria-hidden="true"></span>{p.featured} · {d.category}</p>
     <h3 class="title">{d.title}</h3>
-    <p class="tagline">{d.tagline}</p>
+    <p class="promise">{d.promise ?? d.tagline}</p>
+    {d.promise && <p class="tagline">{d.tagline}</p>}
+    {
+      d.audienceShort.length > 0 && (
+        <p class="for">
+          <span class="label">{p.forLabel}</span> {d.audienceShort.join(' · ')}
+        </p>
+      )
+    }
     <dl class="metrics">
       {
         d.metrics.slice(0, 4).map((m) => (
@@ -99,8 +107,25 @@ const href = projectHref(lang, project.slug);
     line-height: 1;
     overflow-wrap: anywhere;
   }
+  .promise {
+    margin-top: 16px;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .for {
+    margin-top: 14px;
+    font-size: 0.88rem;
+    color: var(--color-mist);
+  }
+  .for .label {
+    color: var(--accent);
+    margin-right: 4px;
+  }
   .tagline {
-    margin-top: 18px;
+    margin-top: 12px;
     font-size: 1.12rem;
     max-width: 46ch;
     color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));

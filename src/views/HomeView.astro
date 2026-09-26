@@ -4,7 +4,9 @@ import Hero from '../components/sections/Hero.astro';
 import Services from '../components/sections/Services.astro';
 import ProjectsGrid from '../components/sections/ProjectsGrid.astro';
 import About from '../components/sections/About.astro';
+import Process from '../components/sections/Process.astro';
 import TechWall from '../components/sections/TechWall.astro';
+import CtaBand from '../components/sales/CtaBand.astro';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
@@ -18,5 +20,7 @@ const { lang } = Astro.props;
   <Services lang={lang} />
   <ProjectsGrid lang={lang} />
   <About lang={lang} />
+  <Process lang={lang} />
   <TechWall lang={lang} />
+  <CtaBand lang={lang} />
 </Base>

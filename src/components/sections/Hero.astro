@@ -1,5 +1,7 @@
 ---
 import Scene from '../3d/Scene.astro';
+import DemoButton from '../sales/DemoButton.astro';
+import { site } from '../../config';
 import { t, type Lang } from '../../i18n/ui';
 
 interface Props {
@@ -7,6 +9,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const h = t(lang).hero;
+const hasContact = Boolean(site.email || site.linkedin);
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -23,8 +26,9 @@ const h = t(lang).hero;
     </h1>
     <p class="lede" data-rise style="--delay:.16s">{h.lede}</p>
     <div class="actions" data-rise style="--delay:.24s">
-      <a href="#services" class="btn btn-primary">{h.ctaServices} <span aria-hidden="true">↓</span></a>
-      <a href="#projects" class="btn btn-ghost">{h.ctaProjects}</a>
+      <DemoButton lang={lang} />
+      <a href="#projects" class:list={['btn', hasContact ? 'btn-ghost' : 'btn-primary']}>{h.ctaProjects} <span aria-hidden="true">↓</span></a>
+      {!hasContact && <a href="#services" class="btn btn-ghost">{h.ctaServices}</a>}
     </div>
   </div>
 </section>

@@ -1,7 +1,7 @@
 ---
 title: BANKY
 category: Personal finance · private
-tagline: Your bank statements, read by a model on your own GPU. Every number is checked against the page before it reaches your ledger.
+tagline: "BANKY reads your bank statements and receipts on your own computer, categorises every payment and gives you budgets, goals and monthly reports, with you confirming every line."
 summary: >-
   BANKY is a personal finance app for people who won't hand their bank statements to a cloud service. It imports PDF,
   Excel and CSV statements, scanned pages and receipt photos, then extracts and categorises each transaction with a
@@ -50,6 +50,65 @@ stack:
 reports:
   - title: Monthly report (PDF)
     description: Spending by category, budgets and the 50/30/20 split for one month.
+# ── Sales block ──
+promise: "Your finances, organised by AI, without sharing a single statement."
+audienceShort:
+  - "Individuals & families"
+  - "Freelancers"
+  - "Privacy-minded households"
+outcomes:
+  - title: "Every account in one place"
+    body: "Bank, savings, cash, cards and investments together, in every currency you use."
+  - title: "Categorised for you, checked by you"
+    body: "Import a statement and the rows arrive categorised. Nothing reaches your ledger until you confirm it."
+  - title: "Nothing leaves your computer"
+    body: "Statements, receipts and spending stay on your machine. No bank logins, no cloud upload."
+audiences:
+  - title: "Individuals & families"
+    body: "See where the money goes, set budgets and save towards goals, without a finance app that profits from your data."
+  - title: "Freelancers"
+    body: "Keep personal finances clear alongside irregular income, with printable monthly reports."
+  - title: "Privacy-minded households"
+    body: "Automatic categorisation, without uploading a statement anywhere."
+tour: banky
+capabilities:
+  - group: "Import"
+    items:
+      - "PDF, Excel and CSV statements"
+      - "Scanned pages and receipt photos, read on your computer"
+      - "Duplicates detected on import"
+      - "Side-by-side review before anything is saved"
+  - group: "Everyday"
+    items:
+      - "Dashboard with balance, income, spending and savings"
+      - "Search like “Lidl >100”, with filters"
+      - "Categories that learn your shops"
+      - "Categorise many transactions at once"
+  - group: "Planning"
+    items:
+      - "Monthly budgets per category"
+      - "50/30/20: needs, wants and savings"
+      - "Goals with progress"
+      - "Investments: worth, invested, gain"
+  - group: "Reports"
+    items:
+      - "Analytics: net worth, trends, top merchants"
+      - "Printable monthly report"
+      - "One-file backup and restore, and CSV export"
+  - group: "Trust"
+    items:
+      - "Every number checked against the original statement"
+      - "Money never stored as rounded decimals"
+      - "An audit trail of every edit"
+requirements:
+  - "One computer with a modern NVIDIA graphics card (24 GB)"
+  - "Used from your browser; installed with Docker"
+  - "Tuned for Romanian bank statements; other banks can be added"
+tailoring:
+  - "Several users and shared household ledgers"
+  - "Business ledgers and exports for your accountant"
+  - "Support for your bank’s statement format"
+  - "A Romanian-language interface"
 ---
 
 import Pipeline from '../../../components/diagrams/Pipeline.astro';

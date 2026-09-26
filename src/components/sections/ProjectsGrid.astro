@@ -42,7 +42,12 @@ const [featured, ...rest] = await getProjects(lang);
               {pr.data.category}
             </p>
             <h3 class="title">{pr.data.title}</h3>
-            <p class="tagline">{pr.data.tagline}</p>
+            <p class="tagline">{pr.data.promise ?? pr.data.tagline}</p>
+            {pr.data.audienceShort.length > 0 && (
+              <p class="for">
+                <span class="label">{p.forLabel}</span> {pr.data.audienceShort.join(' · ')}
+              </p>
+            )}
             <dl class="metrics">
               {pr.data.metrics.slice(0, 3).map((m) => (
                 <div>
@@ -139,8 +144,20 @@ const [featured, ...rest] = await getProjects(lang);
   }
   .tagline {
     margin-top: 14px;
-    color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));
+    font-size: 1.05rem;
+    color: color-mix(in srgb, var(--color-frost) 90%, var(--color-mist));
+  }
+  .for {
     flex: 1;
+  }
+  .for {
+    margin-top: 12px;
+    font-size: 0.86rem;
+    color: var(--color-mist);
+  }
+  .for .label {
+    color: var(--accent);
+    margin-right: 4px;
   }
   .metrics {
     display: grid;

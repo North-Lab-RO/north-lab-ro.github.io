@@ -1,0 +1,1388 @@
+---
+import TourFrame from './TourFrame.astro';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const C = {
+  en: {
+    label: 'COUNSELOR product tour',
+    steps: [
+      {
+        tab: 'Today',
+        title: 'Your morning, on one screen',
+        points: [
+          'A live ticker of the stories that matter, updated as new sources report them.',
+          'Alerts only for important events, each with a one-line “why it matters”.',
+          'Rising stories: what is gaining coverage in the last 12 hours.',
+          'Twenty panels you arrange your way: drag, resize and save them as named workspaces.',
+          'A world globe of today’s stories, coloured by importance.',
+        ],
+      },
+      {
+        tab: 'Story',
+        title: 'Every story, read from every side',
+        points: [
+          'Read it short, medium or detailed. Save it or keep it for later.',
+          'Where the sources sit, from left to right, at a glance.',
+          'How much the sources agree, and how confident the analysis is.',
+          'What is known and what is still unclear, kept apart.',
+          'How the story developed through the day.',
+        ],
+      },
+      {
+        tab: 'Global monitor',
+        title: 'The world map of what is happening',
+        points: [
+          'Each story is a marker: bigger with more sources, coloured by importance.',
+          'Look at the last 24 hours, 48 hours or 7 days.',
+          'Hotspot countries, with their own story feed.',
+          'Live TV channels and your own camera feeds beside the map.',
+        ],
+      },
+      {
+        tab: 'Briefing',
+        title: 'A briefing that writes itself',
+        points: [
+          'An executive summary to read in five minutes.',
+          'Your country and the world, each from its own stories.',
+          'Deep dives: what happened, why it matters, where sources differ, what is unclear.',
+          'Fact-checks with verdicts, backed by named sources.',
+          'Every morning at 07:00 and every 4 hours, or on demand, as a PDF.',
+        ],
+      },
+      {
+        tab: 'On your phone',
+        title: 'Told the moment it matters',
+        points: [
+          'A push notification for important events only, with the reason in one line.',
+          'Tap it to open the full story.',
+          'Choose how much you hear: off, news only, or everything.',
+          'Installs on your phone like an app.',
+        ],
+      },
+      {
+        tab: 'Sources & control',
+        title: 'You decide what it reads',
+        points: [
+          'Add any outlet by pasting its address; the feed is found for you.',
+          'Every source’s health, at a glance.',
+          'Turn sources on or off at any time.',
+          'See what the AI is working on, and when it will finish.',
+        ],
+      },
+    ],
+    ui: {
+      tagline: 'NEWS COUNSELOR',
+      working: 'Working · 3',
+      nav: ['Search', 'Saved', 'Admin'],
+      tabs: ['Today', 'News', 'Map', 'Reports', 'Sources', 'AI'],
+      live: 'LIVE',
+      ticker: 'Heat warning extended across southern Romania · 9 sources · 08:14     Central bank keeps its key rate unchanged · 11 sources · 08:02     Danube levels drop below the seasonal average · 6 sources · 07:48',
+      hello: 'Good morning',
+      clocks: ['UTC 05:14', 'Bucharest 08:14', 'Brussels 07:14'],
+      spaces: ['Main', 'Energy', '+'],
+      days: ['Today', 'Yesterday', 'All days'],
+      alerts: 'Alerts',
+      alertItems: [
+        ['Heat warning extended to 14 counties', 'Why it matters: public services and the power grid under strain'],
+        ['Central bank keeps its key rate unchanged', 'Why it matters: loan costs stay where they are this quarter'],
+      ],
+      headlines: 'Headlines',
+      headItems: [
+        ['Heat warning extended across southern Romania', 9],
+        ['Central bank keeps its key rate unchanged', 11],
+        ['EU ministers meet on grid interconnection', 7],
+        ['New metro section opens for testing', 5],
+      ],
+      rising: 'Rising',
+      risingItems: [
+        ['Wildfire contained near a coastal resort', '+4'],
+        ['Danube levels drop below the average', '+3'],
+        ['Rail strike called off after talks', '+2'],
+      ],
+      bias: 'Bias spectrum',
+      biasScale: ['Left', 'Centre', 'Right'],
+      back: '← Stories',
+      storyTitle: 'Heat warning extended across southern Romania',
+      storyMeta: '9 sources · 6 Romanian · 3 international · updated 08:12',
+      lengths: ['Short', 'Medium', 'Detailed'],
+      save: '☆ Save',
+      later: 'Read later',
+      summary:
+        'The heat warning has been extended to Sunday for 14 counties. Sources agree on temperatures and duration, but differ on measures for schools and on the pressure the heat puts on the power grid.',
+      known: 'What we know',
+      knownItems: ['Warning covers 14 counties', 'Valid until Sunday, 22:00', 'Peaks of 39 °C expected'],
+      unknown: 'What we don’t know',
+      unknownItems: ['Whether schools will close', 'Impact on the power grid'],
+      spectrum: 'Sources',
+      consensus: 'Consensus',
+      confidence: 'Confidence',
+      high: 'high',
+      evolution: 'How the story developed',
+      evo: [
+        ['06:10', 'first report'],
+        ['07:40', '3 sources'],
+        ['08:12', '9 sources'],
+      ],
+      windows: ['24H', '48H', '7D'],
+      toggles: ['Heat', 'Live'],
+      monitor: 'GLOBAL MONITOR',
+      hotspots: 'Hotspots',
+      hot: [
+        ['Romania', 12],
+        ['Ukraine', 9],
+        ['Germany', 6],
+        ['France', 5],
+      ],
+      tv: '13 live TV channels · your cameras',
+      briefTitle: 'Morning briefing',
+      briefMeta: '07:00 · covers 24 h · 13 stories · 38 sources',
+      exec: 'Executive summary',
+      execText:
+        'A heat warning dominates the domestic agenda, with broad agreement on the facts and open questions about schools. Abroad, energy ministers meet on grid links; markets react calmly to an unchanged interest rate.',
+      home: 'Romania',
+      world: 'International',
+      homeItems: ['Heat warning extended to 14 counties', 'Metro section opens for testing'],
+      worldItems: ['Ministers meet on grid links', 'Rate unchanged, markets calm'],
+      deep: 'Deep dive',
+      deepHeads: ['What happened', 'Why it matters', 'Where sources differ', 'What is unclear'],
+      checks: 'Fact-checks',
+      checkItems: [
+        ['Peaks of 39 °C in the south', 'confirmed'],
+        ['Schools close on Friday', 'contested'],
+      ],
+      pdf: '↓ Download PDF',
+      notifApp: 'COUNSELOR',
+      now: 'now',
+      notifTitle: 'Heat warning extended to 14 counties',
+      notifBody: 'Why it matters: public services and the power grid under strain.',
+      modes: 'Notifications',
+      modeItems: ['Off', 'News only', 'Everything'],
+      install: 'Add to home screen',
+      addSource: 'Add a source',
+      paste: 'https://example-news.ro',
+      add: 'Add',
+      found: '✓ RSS feed found · 42 articles',
+      feeds: 'Feeds',
+      feedRows: [
+        ['National daily', '✓', 'on'],
+        ['Business weekly', '✓', 'on'],
+        ['Regional outlet', '✕ 2 failures', 'on'],
+        ['International wire', '✓', 'off'],
+      ],
+      ai: 'What the AI is doing',
+      aiRows: [
+        ['Reading articles', 86],
+        ['Grouping into stories', 64],
+        ['Analysing stories', 38],
+      ],
+      eta: 'Analysing 3 stories · about 2 min',
+    },
+  },
+  ro: {
+    label: 'Turul produsului COUNSELOR',
+    steps: [
+      {
+        tab: 'Astăzi',
+        title: 'Dimineața ta, pe un singur ecran',
+        points: [
+          'O bandă live cu poveștile care contează, actualizată pe măsură ce apar surse noi.',
+          'Alerte doar pentru evenimentele importante, fiecare cu un rând „de ce contează”.',
+          'Povești în creștere: ce câștigă atenție în ultimele 12 ore.',
+          'Douăzeci de panouri aranjate cum vrei: le muți, le redimensionezi și le salvezi ca spații de lucru.',
+          'Un glob cu poveștile zilei, colorate după importanță.',
+        ],
+      },
+      {
+        tab: 'Poveste',
+        title: 'Fiecare poveste, citită din toate unghiurile',
+        points: [
+          'O citești scurt, mediu sau detaliat. O salvezi sau o păstrezi pentru mai târziu.',
+          'Unde se situează sursele, de la stânga la dreapta, dintr-o privire.',
+          'Cât de mult sunt de acord sursele și cât de sigură este analiza.',
+          'Ce se știe și ce este încă neclar, ținute separat.',
+          'Cum a evoluat povestea pe parcursul zilei.',
+        ],
+      },
+      {
+        tab: 'Monitor global',
+        title: 'Harta lumii cu ce se întâmplă',
+        points: [
+          'Fiecare poveste este un marcaj: mai mare cu mai multe surse, colorat după importanță.',
+          'Privești ultimele 24 de ore, 48 de ore sau 7 zile.',
+          'Țările fierbinți, fiecare cu propriul flux de povești.',
+          'Canale TV live și propriile camere, lângă hartă.',
+        ],
+      },
+      {
+        tab: 'Sinteză',
+        title: 'O sinteză care se scrie singură',
+        points: [
+          'Un rezumat executiv de citit în cinci minute.',
+          'Țara ta și lumea, fiecare din propriile povești.',
+          'Analize aprofundate: ce s-a întâmplat, de ce contează, unde diferă sursele, ce e neclar.',
+          'Verificări cu verdicte, susținute de surse numite.',
+          'În fiecare dimineață la 07:00 și la fiecare 4 ore, sau la cerere, în format PDF.',
+        ],
+      },
+      {
+        tab: 'Pe telefon',
+        title: 'Afli exact când contează',
+        points: [
+          'O notificare push doar pentru evenimentele importante, cu motivul într-un rând.',
+          'O atingi și se deschide povestea completă.',
+          'Alegi cât auzi: nimic, doar știri sau tot.',
+          'Se instalează pe telefon ca o aplicație.',
+        ],
+      },
+      {
+        tab: 'Surse și control',
+        title: 'Tu decizi ce citește',
+        points: [
+          'Adaugi orice publicație lipind adresa ei; fluxul este găsit automat.',
+          'Starea fiecărei surse, dintr-o privire.',
+          'Pornești sau oprești sursele oricând.',
+          'Vezi la ce lucrează AI-ul și când termină.',
+        ],
+      },
+    ],
+    ui: {
+      tagline: 'CONSILIER DE ȘTIRI',
+      working: 'Lucrează · 3',
+      nav: ['Căutare', 'Salvate', 'Administrare'],
+      tabs: ['Astăzi', 'Știri', 'Hartă', 'Rapoarte', 'Surse', 'AI'],
+      live: 'LIVE',
+      ticker: 'Cod galben de caniculă prelungit în sudul țării · 9 surse · 08:14     Banca centrală menține dobânda de referință · 11 surse · 08:02     Nivelul Dunării scade sub media sezonieră · 6 surse · 07:48',
+      hello: 'Bună dimineața',
+      clocks: ['UTC 05:14', 'București 08:14', 'Bruxelles 07:14'],
+      spaces: ['Principal', 'Energie', '+'],
+      days: ['Azi', 'Ieri', 'Toate zilele'],
+      alerts: 'Alerte',
+      alertItems: [
+        ['Avertizarea de caniculă, extinsă la 14 județe', 'De ce contează: serviciile publice și rețeaua electrică sunt sub presiune'],
+        ['Banca centrală menține dobânda de referință', 'De ce contează: costul creditelor rămâne același în acest trimestru'],
+      ],
+      headlines: 'Titluri',
+      headItems: [
+        ['Cod galben de caniculă prelungit în sudul țării', 9],
+        ['Banca centrală menține dobânda de referință', 11],
+        ['Miniștrii UE discută interconectarea rețelelor', 7],
+        ['Un nou tronson de metrou intră în teste', 5],
+      ],
+      rising: 'În creștere',
+      risingItems: [
+        ['Incendiu stins lângă o stațiune de pe litoral', '+4'],
+        ['Nivelul Dunării scade sub medie', '+3'],
+        ['Greva feroviară, anulată după negocieri', '+2'],
+      ],
+      bias: 'Spectrul surselor',
+      biasScale: ['Stânga', 'Centru', 'Dreapta'],
+      back: '← Povești',
+      storyTitle: 'Cod galben de caniculă prelungit în sudul țării',
+      storyMeta: '9 surse · 6 românești · 3 internaționale · actualizat 08:12',
+      lengths: ['Scurt', 'Mediu', 'Detaliat'],
+      save: '☆ Salvează',
+      later: 'Citește mai târziu',
+      summary:
+        'Avertizarea de caniculă a fost prelungită până duminică pentru 14 județe. Sursele sunt de acord asupra temperaturilor și duratei, dar diferă privind măsurile pentru școli și presiunea asupra rețelei electrice.',
+      known: 'Ce știm',
+      knownItems: ['Avertizarea acoperă 14 județe', 'Valabilă până duminică, 22:00', 'Maxime de 39 °C așteptate'],
+      unknown: 'Ce nu știm',
+      unknownItems: ['Dacă școlile se închid', 'Impactul asupra rețelei electrice'],
+      spectrum: 'Surse',
+      consensus: 'Consens',
+      confidence: 'Încredere',
+      high: 'ridicat',
+      evolution: 'Evoluția poveștii',
+      evo: [
+        ['06:10', 'prima relatare'],
+        ['07:40', '3 surse'],
+        ['08:12', '9 surse'],
+      ],
+      windows: ['24H', '48H', '7Z'],
+      toggles: ['Căldură', 'Live'],
+      monitor: 'MONITOR GLOBAL',
+      hotspots: 'Focare',
+      hot: [
+        ['România', 12],
+        ['Ucraina', 9],
+        ['Germania', 6],
+        ['Franța', 5],
+      ],
+      tv: '13 canale TV live · camerele tale',
+      briefTitle: 'Sinteza de dimineață',
+      briefMeta: '07:00 · acoperă 24 h · 13 povești · 38 de surse',
+      exec: 'Rezumat executiv',
+      execText:
+        'Avertizarea de caniculă domină agenda internă, cu acord larg asupra faptelor și întrebări deschise despre școli. În străinătate, miniștrii energiei discută interconectarea rețelelor; piețele reacționează calm la dobânda neschimbată.',
+      home: 'România',
+      world: 'Internațional',
+      homeItems: ['Caniculă extinsă la 14 județe', 'Tronson de metrou în teste'],
+      worldItems: ['Miniștrii discută rețelele', 'Dobândă neschimbată, piețe calme'],
+      deep: 'În detaliu',
+      deepHeads: ['Ce s-a întâmplat', 'De ce contează', 'Unde diferă sursele', 'Ce rămâne neclar'],
+      checks: 'Verificarea faptelor',
+      checkItems: [
+        ['Maxime de 39 °C în sud', 'confirmat'],
+        ['Școlile se închid vineri', 'contestat'],
+      ],
+      pdf: '↓ Descarcă PDF',
+      notifApp: 'COUNSELOR',
+      now: 'acum',
+      notifTitle: 'Avertizarea de caniculă, extinsă la 14 județe',
+      notifBody: 'De ce contează: serviciile publice și rețeaua electrică sunt sub presiune.',
+      modes: 'Notificări',
+      modeItems: ['Oprite', 'Doar știri', 'Tot'],
+      install: 'Adaugă pe ecranul principal',
+      addSource: 'Adaugă o sursă',
+      paste: 'https://exemplu-stiri.ro',
+      add: 'Adaugă',
+      found: '✓ Flux RSS găsit · 42 de articole',
+      feeds: 'Fluxuri',
+      feedRows: [
+        ['Cotidian național', '✓', 'on'],
+        ['Săptămânal economic', '✓', 'on'],
+        ['Publicație regională', '✕ 2 erori', 'on'],
+        ['Agenție internațională', '✓', 'off'],
+      ],
+      ai: 'Ce face AI-ul',
+      aiRows: [
+        ['Citește articole', 86],
+        ['Grupează în povești', 64],
+        ['Analizează povești', 38],
+      ],
+      eta: 'Analizează 3 povești · aproximativ 2 min',
+    },
+  },
+}[lang];
+const u = C.ui;
+const dots = [0.12, 0.26, 0.4, 0.47, 0.52, 0.58, 0.66, 0.78, 0.9];
+// globe markers: x, y, radius, colour (importance band)
+const markers: [number, number, number, string][] = [
+  [0.58, 0.36, 9, '#ff4444'],
+  [0.64, 0.3, 6, '#ff8800'],
+  [0.5, 0.33, 5, '#ffaa00'],
+  [0.46, 0.44, 4, '#ffaa00'],
+  [0.7, 0.5, 5, '#ff8800'],
+  [0.3, 0.42, 4, '#44aa44'],
+  [0.36, 0.6, 3, '#44aa44'],
+  [0.78, 0.62, 4, '#ffaa00'],
+];
+---
+
+<TourFrame lang={lang} label={C.label} steps={C.steps} url="counselor.local">
+  <!-- 1 · Today -->
+  <div data-screen aria-hidden="true" class="cs">
+    <header class="hd">
+      <span class="logo">▶</span>
+      <span class="brand">COUNSELOR<small>{u.tagline}</small></span>
+      <span class="ai"><i></i>{u.working}</span>
+      <span class="navr">{u.nav.map((n) => <span>{n}</span>)}</span>
+    </header>
+    <nav class="tb">{u.tabs.map((t, i) => <span class:list={[i === 0 && 'on']}>{t}</span>)}</nav>
+    <div class="ticker"><b>● {u.live}</b><span class="crawl">{u.ticker}</span></div>
+    <div class="row">
+      <span class="hello">{u.hello}</span>
+      <span class="clocks">{u.clocks.map((c) => <span>{c}</span>)}</span>
+      <span class="spaces">{u.spaces.map((s, i) => <span class:list={[i === 0 && 'on']}>{s}</span>)}</span>
+      <span class="days">{u.days.map((d, i) => <span class:list={[i === 0 && 'on']}>{d}</span>)}</span>
+    </div>
+    <div class="grid">
+      <div class="globe">
+        <svg viewBox="0 0 300 300">
+          <circle cx="150" cy="150" r="128" fill="#07140f" stroke="#0f5040" />
+          {[40, 80, 120].map((r) => <ellipse cx="150" cy="150" rx={r} ry="128" fill="none" stroke="#0f5040" stroke-opacity=".5" />)}
+          {[-80, -40, 0, 40, 80].map((y) => <ellipse cx="150" cy={150 + y} rx={Math.sqrt(128 * 128 - y * y)} ry="6" fill="none" stroke="#0f5040" stroke-opacity=".4" />)}
+          {markers.map(([x, y, r, c]) => <circle cx={x * 300} cy={y * 300} r={r} fill={c} fill-opacity=".85" class="mk" />)}
+        </svg>
+      </div>
+      <div class="panels">
+        <section class="pn">
+          <h5>{u.alerts} <em>2</em></h5>
+          {u.alertItems.map(([t, w], i) => (
+            <div class:list={['alert', i === 0 ? 'crit' : 'high']}>
+              <b>{t}</b>
+              <span>{w}</span>
+            </div>
+          ))}
+        </section>
+        <section class="pn">
+          <h5>{u.headlines} <em>4</em></h5>
+          {u.headItems.map(([t, n]) => (
+            <div class="line">
+              <span>{t}</span>
+              <i>{n}</i>
+            </div>
+          ))}
+        </section>
+        <section class="pn">
+          <h5>{u.rising} <em>3</em></h5>
+          {u.risingItems.map(([t, n]) => (
+            <div class="line">
+              <span>{t}</span>
+              <i class="up">↑ {n}</i>
+            </div>
+          ))}
+        </section>
+        <section class="pn">
+          <h5>{u.bias}</h5>
+          <div class="spec">{dots.map((d) => <i style={`left:${d * 100}%`} />)}</div>
+          <div class="scale">{u.biasScale.map((s) => <span>{s}</span>)}</div>
+        </section>
+      </div>
+    </div>
+    <span class="co" style="--x:52%;--y:18.5%">1</span>
+    <span class="co" style="--x:44%;--y:36%">2</span>
+    <span class="co" style="--x:96%;--y:60%">3</span>
+    <span class="co" style="--x:96%;--y:36%">4</span>
+    <span class="co" style="--x:18%;--y:44%">5</span>
+  </div>
+
+  <!-- 2 · Story -->
+  <div data-screen aria-hidden="true" class="cs">
+    <header class="hd">
+      <span class="logo">▶</span>
+      <span class="brand">COUNSELOR<small>{u.tagline}</small></span>
+      <span class="ai"><i></i>{u.working}</span>
+      <span class="navr">{u.nav.map((n) => <span>{n}</span>)}</span>
+    </header>
+    <div class="story">
+      <div class="main">
+        <p class="back">{u.back}</p>
+        <h3 class="st">{u.storyTitle}</h3>
+        <p class="meta">{u.storyMeta}</p>
+        <div class="acts">
+          <span class="seg">{u.lengths.map((l, i) => <span class:list={[i === 1 && 'on']}>{l}</span>)}</span>
+          <span class="btn">{u.save}</span>
+          <span class="btn">{u.later}</span>
+        </div>
+        <p class="sum">{u.summary}</p>
+        <div class="kv">
+          <div>
+            <h6>{u.known}</h6>
+            {u.knownItems.map((k) => <p>— {k}</p>)}
+          </div>
+          <div>
+            <h6>{u.unknown}</h6>
+            {u.unknownItems.map((k) => <p>— {k}</p>)}
+          </div>
+        </div>
+        <div class="evo">
+          <h6>{u.evolution}</h6>
+          <div class="evl">
+            {u.evo.map(([t, d]) => (
+              <span>
+                <b>{t}</b>
+                {d}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <aside class="side">
+        <h6>{u.spectrum}</h6>
+        <div class="bands">{['#3e6fb0', '#6e9ad1', '#98a2ae', '#d09a63', '#b4553a'].map((c, i) => <span style={`background:${c};height:${[20, 34, 60, 30, 14][i]}px`} />)}</div>
+        <div class="scale">{u.biasScale.map((s) => <span>{s}</span>)}</div>
+        <h6>{u.consensus} · 78%</h6>
+        <div class="meter"><span style="width:78%" /></div>
+        <h6>{u.confidence} · {u.high}</h6>
+        <div class="meter"><span style="width:86%" /></div>
+      </aside>
+    </div>
+    <span class="co" style="--x:14%;--y:30%">1</span>
+    <span class="co" style="--x:72%;--y:18%">2</span>
+    <span class="co" style="--x:72%;--y:47%">3</span>
+    <span class="co" style="--x:6%;--y:50%">4</span>
+    <span class="co" style="--x:6%;--y:66%">5</span>
+  </div>
+
+  <!-- 3 · Global monitor -->
+  <div data-screen aria-hidden="true" class="cs">
+    <header class="hd">
+      <span class="logo">▶</span>
+      <span class="brand">COUNSELOR<small>{u.tagline}</small></span>
+      <span class="ai"><i></i>{u.working}</span>
+      <span class="navr">{u.nav.map((n) => <span>{n}</span>)}</span>
+    </header>
+    <nav class="tb">{u.tabs.map((t, i) => <span class:list={[i === 2 && 'on']}>{t}</span>)}</nav>
+    <div class="mon">
+      <div class="mapwrap">
+        <div class="mapbar">
+          <b>{u.monitor}</b>
+          <span class="seg">{u.windows.map((w, i) => <span class:list={[i === 0 && 'on']}>{w}</span>)}</span>
+          <span class="seg">{u.toggles.map((w) => <span class="on">{w}</span>)}</span>
+        </div>
+        <svg viewBox="0 0 640 380" class="map">
+          <rect width="640" height="380" fill="#020a08" />
+          {Array.from({ length: 9 }, (_, i) => <line x1="0" x2="640" y1={i * 45 + 10} y2={i * 45 + 10} stroke="#0a2018" />)}
+          {Array.from({ length: 15 }, (_, i) => <line y1="0" y2="380" x1={i * 45 + 5} x2={i * 45 + 5} stroke="#0a2018" />)}
+          <path d="M60 120 Q120 70 190 95 T300 110 L320 170 Q260 210 200 200 T90 190 Z" fill="#0a2018" stroke="#0f5040" />
+          <path d="M320 80 Q380 60 450 70 T560 100 L570 160 Q500 200 430 180 T330 150 Z" fill="#0a2018" stroke="#0f5040" />
+          <path d="M340 190 Q380 190 400 230 T380 320 Q350 330 335 280 Z" fill="#0a2018" stroke="#0f5040" />
+          <path d="M150 220 Q190 230 200 280 T170 350 Q140 330 140 280 Z" fill="#0a2018" stroke="#0f5040" />
+          <path d="M500 250 Q560 250 580 290 T540 330 Q500 320 495 290 Z" fill="#0a2018" stroke="#0f5040" />
+          {[
+            [400, 105, 14, '#ff4444'],
+            [430, 95, 10, '#ff8800'],
+            [372, 100, 8, '#ffaa00'],
+            [360, 118, 6, '#ffaa00'],
+            [470, 140, 7, '#ff8800'],
+            [210, 130, 6, '#44aa44'],
+            [370, 250, 5, '#44aa44'],
+            [540, 285, 5, '#ffaa00'],
+          ].map(([x, y, r, c]) => (
+            <g>
+              <circle cx={x} cy={y} r={Number(r) * 2} fill={String(c)} fill-opacity=".12" class="ring" />
+              <circle cx={x} cy={y} r={r} fill={String(c)} fill-opacity=".9" />
+            </g>
+          ))}
+        </svg>
+        <p class="tv">▶ {u.tv}</p>
+      </div>
+      <aside class="hot">
+        <h6>{u.hotspots}</h6>
+        {u.hot.map(([c, n]) => (
+          <div class="line">
+            <span>{c}</span>
+            <i>{n}</i>
+          </div>
+        ))}
+      </aside>
+    </div>
+    <span class="co" style="--x:44%;--y:36%">1</span>
+    <span class="co" style="--x:34%;--y:25%">2</span>
+    <span class="co" style="--x:86%;--y:30%">3</span>
+    <span class="co" style="--x:30%;--y:91%">4</span>
+  </div>
+
+  <!-- 4 · Briefing -->
+  <div data-screen aria-hidden="true" class="cs">
+    <div class="paper">
+      <div class="mast">
+        <b>COUNSELOR</b>
+        <span>{u.briefTitle}</span>
+        <em>{u.pdf}</em>
+      </div>
+      <p class="bmeta">{u.briefMeta}</p>
+      <h6>{u.exec}</h6>
+      <p class="exec">{u.execText}</p>
+      <div class="cols">
+        <div>
+          <h6>{u.home}</h6>
+          {u.homeItems.map((x) => <p>• {x}</p>)}
+        </div>
+        <div>
+          <h6>{u.world}</h6>
+          {u.worldItems.map((x) => <p>• {x}</p>)}
+        </div>
+      </div>
+      <div class="deep">
+        <h6>{u.deep}</h6>
+        <div class="dh">{u.deepHeads.map((d) => <span>{d}</span>)}</div>
+      </div>
+      <div class="fc">
+        <h6>{u.checks}</h6>
+        {u.checkItems.map(([c, v], i) => (
+          <div class="line">
+            <span>{c}</span>
+            <i class:list={['vd', i === 0 ? 'ok' : 'bad']}>{v}</i>
+          </div>
+        ))}
+      </div>
+    </div>
+    <span class="co" style="--x:14%;--y:27%">1</span>
+    <span class="co" style="--x:14%;--y:47%">2</span>
+    <span class="co" style="--x:14%;--y:58%">3</span>
+    <span class="co" style="--x:14%;--y:71%">4</span>
+    <span class="co" style="--x:88%;--y:9%">5</span>
+  </div>
+
+  <!-- 5 · Phone -->
+  <div data-screen aria-hidden="true" class="cs phone-screen">
+    <div class="phone">
+      <div class="notch"></div>
+      <p class="time">08:14</p>
+      <div class="notif">
+        <p class="nh"><span class="ic">▶</span>{u.notifApp}<em>{u.now}</em></p>
+        <b>{u.notifTitle}</b>
+        <span>{u.notifBody}</span>
+      </div>
+    </div>
+    <div class="phone second">
+      <div class="notch"></div>
+      <p class="mini-h">COUNSELOR</p>
+      <p class="mini-t">{u.storyTitle}</p>
+      <div class="meter"><span style="width:78%" /></div>
+      <p class="mini-s">{u.summary}</p>
+    </div>
+    <div class="modes">
+      <h6>{u.modes}</h6>
+      <span class="seg">{u.modeItems.map((m, i) => <span class:list={[i === 1 && 'on']}>{m}</span>)}</span>
+      <p class="inst">⊕ {u.install}</p>
+    </div>
+    <span class="co" style="--x:23%;--y:30%">1</span>
+    <span class="co" style="--x:50%;--y:22%">2</span>
+    <span class="co" style="--x:70%;--y:34%">3</span>
+    <span class="co" style="--x:70%;--y:58%">4</span>
+  </div>
+
+  <!-- 6 · Sources & control -->
+  <div data-screen aria-hidden="true" class="cs">
+    <header class="hd">
+      <span class="logo">▶</span>
+      <span class="brand">COUNSELOR<small>{u.tagline}</small></span>
+      <span class="ai"><i></i>{u.working}</span>
+      <span class="navr">{u.nav.map((n) => <span>{n}</span>)}</span>
+    </header>
+    <div class="ctl">
+      <div class="left">
+        <h6>{u.addSource}</h6>
+        <div class="inp">
+          <span>{u.paste}</span>
+          <b>{u.add}</b>
+        </div>
+        <p class="found">{u.found}</p>
+        <h6>{u.feeds}</h6>
+        {u.feedRows.map(([n, s, on]) => (
+          <div class="feed">
+            <span>{n}</span>
+            <i class:list={[s.startsWith('✕') && 'err']}>{s}</i>
+            <span class:list={['tg', on === 'on' && 'on']}><i /></span>
+          </div>
+        ))}
+      </div>
+      <div class="right">
+        <h6>{u.ai}</h6>
+        {u.aiRows.map(([n, v]) => (
+          <div class="stage-row">
+            <span>{n}</span>
+            <div class="meter">
+              <span style={`width:${v}%`} />
+            </div>
+          </div>
+        ))}
+        <p class="eta"><i></i>{u.eta}</p>
+      </div>
+    </div>
+    <span class="co" style="--x:6%;--y:24%">1</span>
+    <span class="co" style="--x:6%;--y:52%">2</span>
+    <span class="co" style="--x:50%;--y:58%">3</span>
+    <span class="co" style="--x:57%;--y:24%">4</span>
+  </div>
+</TourFrame>
+
+<style>
+  .cs {
+    background: #0a0a0a;
+    color: #e8e8e8;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .hd {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 48px;
+    padding: 0 18px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .logo {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    background: #fff;
+    color: #0a0a0a;
+    font-size: 12px;
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 15px;
+    line-height: 1;
+  }
+  .brand small {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: #888;
+    margin-top: 3px;
+  }
+  .ai {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #888;
+  }
+  .ai i,
+  .eta i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #44ff88;
+    box-shadow: 0 0 8px #44ff88;
+  }
+  .navr {
+    margin-left: auto;
+    display: flex;
+    gap: 18px;
+    color: #888;
+    font-size: 12px;
+  }
+  .tb {
+    display: flex;
+    gap: 2px;
+    padding: 0 18px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .tb span {
+    padding: 9px 14px;
+    color: #888;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tb .on {
+    color: #fff;
+    box-shadow: inset 0 -2px #fff;
+  }
+  .ticker {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 30px;
+    background: #ffe500;
+    color: #0a0a0a;
+    overflow: hidden;
+    white-space: pre;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .ticker b {
+    padding: 0 12px;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: #0a0a0a;
+    color: #ffe500;
+  }
+  .crawl {
+    display: inline-block;
+    animation: crawl 26s linear infinite;
+  }
+  @keyframes crawl {
+    from {
+      transform: translateX(10%);
+    }
+    to {
+      transform: translateX(-60%);
+    }
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 18px;
+    border-bottom: 1px solid #1e1e1e;
+    font-size: 12px;
+  }
+  .hello {
+    font-family: Georgia, serif;
+    font-size: 17px;
+  }
+  .clocks,
+  .spaces,
+  .days {
+    display: flex;
+    gap: 10px;
+    font-family: var(--font-mono);
+    color: #888;
+    font-size: 11px;
+  }
+  .spaces span,
+  .days span {
+    padding: 3px 8px;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+  }
+  .spaces .on,
+  .days .on {
+    color: #fff;
+    border-color: #666;
+  }
+  .days {
+    margin-left: auto;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 10px;
+    padding: 10px 18px;
+  }
+  .globe svg {
+    width: 300px;
+    height: 300px;
+  }
+  .mk {
+    animation: blink 2.4s ease-in-out infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0.45;
+    }
+  }
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .pn {
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    background: #141414;
+    padding: 10px 12px;
+    min-height: 0;
+  }
+  .pn h5 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #aaa;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .pn h5 em {
+    font-style: normal;
+    font-family: var(--font-mono);
+    background: #2a2a2a;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
+  }
+  .alert {
+    padding: 6px 8px;
+    border-left: 2px solid;
+    margin-bottom: 6px;
+    background: #1a1a1a;
+  }
+  .alert.crit {
+    border-color: #ff4444;
+  }
+  .alert.high {
+    border-color: #ff8800;
+  }
+  .alert b {
+    display: block;
+    font-size: 12px;
+  }
+  .alert span {
+    font-size: 11px;
+    color: #999;
+  }
+  .line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #1e1e1e;
+    font-size: 12px;
+  }
+  .line i {
+    font-style: normal;
+    font-family: var(--font-mono);
+    color: #888;
+    white-space: nowrap;
+  }
+  .line i.up {
+    color: #44ff88;
+  }
+  .spec {
+    position: relative;
+    height: 10px;
+    margin-top: 24px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #3e6fb0, #6e9ad1, #98a2ae, #d09a63, #b4553a);
+  }
+  .spec i {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #141414;
+  }
+  .scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  /* story */
+  .story {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 24px;
+    padding: 18px 26px;
+  }
+  .back {
+    color: #888;
+    font-size: 12px;
+  }
+  .st {
+    font-family: Georgia, serif;
+    font-size: 26px;
+    line-height: 1.2;
+    margin-top: 8px;
+    font-weight: 400;
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #888;
+    margin-top: 6px;
+  }
+  .acts {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    align-items: center;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+  }
+  .seg span {
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #888;
+  }
+  .seg .on {
+    background: #fff;
+    color: #0a0a0a;
+  }
+  .btn {
+    padding: 4px 10px;
+    border: 1px solid #2a2a2a;
+    font-size: 11px;
+    color: #ccc;
+  }
+  .sum {
+    font-family: Georgia, serif;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-top: 16px;
+    color: #ddd;
+  }
+  h6 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #888;
+    font-weight: 600;
+    margin: 14px 0 6px;
+  }
+  .kv {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .kv p {
+    font-size: 12px;
+    color: #ccc;
+    margin: 3px 0;
+  }
+  .evl {
+    display: flex;
+    gap: 14px;
+  }
+  .evl span {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    border-left: 2px solid #44ff88;
+    font-size: 11px;
+    color: #aaa;
+  }
+  .evl b {
+    font-family: var(--font-mono);
+    color: #fff;
+  }
+  .side {
+    border-left: 1px solid #2a2a2a;
+    padding-left: 20px;
+  }
+  .bands {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 70px;
+  }
+  .bands span {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+  }
+  .meter {
+    height: 8px;
+    background: #2a2a2a;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .meter span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #6e9ad1, #44ff88);
+  }
+  /* monitor */
+  .mon {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 14px;
+    padding: 12px 18px;
+  }
+  .mapbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .mapbar b {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .map {
+    width: 100%;
+    height: 400px;
+    border: 1px solid #0f5040;
+  }
+  .ring {
+    animation: blink 2s ease-in-out infinite;
+  }
+  .tv {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #aaa;
+    font-family: var(--font-mono);
+  }
+  .hot {
+    border: 1px solid #2a2a2a;
+    background: #141414;
+    padding: 4px 12px;
+  }
+  /* briefing */
+  .paper {
+    margin: 22px auto;
+    width: 760px;
+    height: 580px;
+    background: #f4f1ea;
+    color: #1c1c1c;
+    padding: 24px 34px;
+    font-family: Georgia, serif;
+    box-shadow: 0 20px 40px rgb(0 0 0 / 0.5);
+    overflow: hidden;
+  }
+  .mast {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-bottom: 2px solid #1c1c1c;
+    padding-bottom: 8px;
+  }
+  .mast b {
+    font-family: var(--font-sans);
+    letter-spacing: 3px;
+    font-size: 14px;
+  }
+  .mast span {
+    font-size: 22px;
+  }
+  .mast em {
+    margin-left: auto;
+    font-style: normal;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    background: #1c1c1c;
+    color: #f4f1ea;
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+  .bmeta {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: #666;
+    margin-top: 6px;
+  }
+  .paper h6 {
+    color: #8a5a00;
+  }
+  .exec {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .cols p {
+    font-size: 13px;
+    margin: 3px 0;
+  }
+  .dh {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .dh span {
+    padding: 8px;
+    border: 1px solid #d8d2c4;
+    font-size: 11px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    min-height: 44px;
+  }
+  .fc .line {
+    border-color: #e2dccf;
+    font-size: 13px;
+  }
+  .vd {
+    font-style: normal;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 1px 8px;
+    border: 1px solid;
+    border-radius: 3px;
+  }
+  .vd.ok {
+    color: #1f7a4d;
+  }
+  .vd.bad {
+    color: #b3261e;
+  }
+  /* phone */
+  .phone-screen {
+    background: radial-gradient(60% 60% at 30% 40%, #13202b, #0a0a0a);
+  }
+  .phone {
+    position: absolute;
+    left: 110px;
+    top: 34px;
+    width: 250px;
+    height: 540px;
+    border-radius: 36px;
+    border: 8px solid #1d1d1f;
+    background: linear-gradient(160deg, #1f3347, #0c1320);
+    padding: 34px 14px;
+    box-shadow: 0 30px 60px rgb(0 0 0 / 0.6);
+  }
+  .phone.second {
+    left: 400px;
+    top: 60px;
+    width: 230px;
+    height: 500px;
+    background: #0a0a0a;
+    padding: 34px 16px;
+  }
+  .notch {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 80px;
+    height: 18px;
+    margin-left: -40px;
+    border-radius: 10px;
+    background: #1d1d1f;
+  }
+  .time {
+    text-align: center;
+    font-size: 44px;
+    font-weight: 300;
+    color: #fff;
+    margin: 20px 0 30px;
+  }
+  .notif {
+    padding: 12px;
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.85);
+    color: #111;
+    animation: drop 1s var(--ease-out) both;
+  }
+  @keyframes drop {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+  }
+  .nh {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #555;
+    margin-bottom: 4px;
+  }
+  .nh em {
+    margin-left: auto;
+    font-style: normal;
+  }
+  .ic {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    background: #0a0a0a;
+    color: #fff;
+    font-size: 8px;
+  }
+  .notif b {
+    display: block;
+    font-size: 13px;
+  }
+  .notif span {
+    font-size: 12px;
+    color: #333;
+  }
+  .mini-h {
+    font-size: 11px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .mini-t {
+    font-family: Georgia, serif;
+    font-size: 17px;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  .mini-s {
+    font-family: Georgia, serif;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #ccc;
+    margin-top: 12px;
+  }
+  .modes {
+    position: absolute;
+    left: 680px;
+    top: 150px;
+    width: 280px;
+  }
+  .modes .seg span {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .inst {
+    margin-top: 40px;
+    padding: 10px 14px;
+    border: 1px dashed #444;
+    font-size: 13px;
+    color: #ccc;
+  }
+  /* control */
+  .ctl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 20px 30px;
+  }
+  .inp {
+    display: flex;
+    border: 1px solid #444;
+    border-radius: 2px;
+  }
+  .inp span {
+    flex: 1;
+    padding: 9px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #ccc;
+  }
+  .inp b {
+    padding: 9px 16px;
+    background: #fff;
+    color: #0a0a0a;
+  }
+  .found {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #44ff88;
+    font-family: var(--font-mono);
+  }
+  .feed {
+    display: grid;
+    grid-template-columns: 1fr auto 40px;
+    gap: 12px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .feed i {
+    font-style: normal;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #44ff88;
+  }
+  .feed i.err {
+    color: #ff4444;
+  }
+  .tg {
+    width: 34px;
+    height: 18px;
+    border-radius: 9px;
+    background: #2a2a2a;
+    position: relative;
+  }
+  .tg i {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #888;
+  }
+  .tg.on {
+    background: #1f5f3a;
+  }
+  .tg.on i {
+    left: 19px;
+    background: #44ff88;
+  }
+  .stage-row {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: 12px;
+    align-items: center;
+    margin: 12px 0;
+  }
+  .eta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #aaa;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .crawl {
+      animation-duration: 60s;
+    }
+  }
+</style>
