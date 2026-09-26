@@ -1,9 +1,11 @@
 ---
 # ─────────────────────────────────────────────────────────────
 #  NEW PROJECT TEMPLATE
-#  1. Copy this file to  src/content/projects/<slug>.mdx
-#     (the slug becomes the URL: /projects/<slug>/)
-#  2. Fill in the fields below.
+#  The site is bilingual: every project has an English and a Romanian file.
+#  1. Copy this file to  src/content/projects/en/<slug>.mdx
+#     and  ro/_template.mdx  to  src/content/projects/ro/<slug>.mdx
+#     (same <slug> in both; it becomes /projects/<slug>/ and /ro/projects/<slug>/)
+#  2. Fill in the fields below, in English here and in Romanian in the ro/ file.
 #  3. Put images in  src/assets/projects/<slug>/  and PDFs in  public/reports/
 #  Files starting with "_" are never published, so this template stays private.
 # ─────────────────────────────────────────────────────────────
@@ -15,10 +17,10 @@ summary: >-
 order: 4                               # position in the Work list
 draft: true                            # set to false to publish
 accent: violet                         # ice | aurora | ember | violet
-scene: none                            # none | globe | board | radar
-# cover: ../../assets/projects/<slug>/cover.jpg   # used as card art when scene is "none"
+scene: none                            # none | globe | board | radar | ledger
+# cover: ../../../assets/projects/<slug>/cover.jpg   # used as card art when scene is "none"
 # coverAlt: Describe the cover image
-# logo: ../../assets/projects/<slug>/logo.png
+# logo: ../../../assets/projects/<slug>/logo.png
 metrics:                               # the first three appear on the home card
   - value: '0'
     label: what this number measures
@@ -28,7 +30,7 @@ features:
 stack:
   - Python
 gallery: []
-#  - src: ../../assets/projects/<slug>/screen-1.jpg
+#  - src: ../../../assets/projects/<slug>/screen-1.jpg
 #    alt: What the image shows
 #    caption: Optional short caption
 reports: []
@@ -38,8 +40,8 @@ reports: []
 # credits: Third-party code or assets to acknowledge.
 ---
 
-import Pipeline from '../../components/diagrams/Pipeline.astro';
-import CodeSnippet from '../../components/project/CodeSnippet.astro';
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
 
 ## How it works
 

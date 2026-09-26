@@ -4,12 +4,15 @@ export interface SceneContext {
   scene: Scene;
   camera: PerspectiveCamera;
   renderer: WebGLRenderer;
+  host: HTMLElement;
   /** Smoothed pointer in [-1, 1], (0,0) at centre. Touch-drag and device tilt feed it too. */
   pointer: { x: number; y: number };
   /** 0 → 1 as the host scrolls from the top of the viewport to fully past it. */
   scroll: { progress: number };
   /** True on small or low-core devices: scenes should draw less. */
   lite: boolean;
+  /** True when the visitor prefers reduced motion: scenes keep moving, but gently and without parallax. */
+  calm: boolean;
   width: number;
   height: number;
 }
@@ -23,7 +26,8 @@ export interface SceneInstance {
 export type SceneFactory = (ctx: SceneContext) => SceneInstance;
 
 const clamp = (v: number) => Math.max(-1, Math.min(1, v));
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CALM_SPEED = 0.35;
+const DPR_STEPS = [2, 1.5, 1, 0.75];
 
 export function mountScene(host: HTMLElement, factory: SceneFactory): () => void {
   const canvas = host.querySelector('canvas');
@@ -39,6 +43,7 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
 
   const small = window.innerWidth < 768;
   const lite = small || (navigator.hardwareConcurrency ?? 8) <= 4;
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let dpr = Math.min(window.devicePixelRatio, small ? 1.5 : 2);
   renderer.setPixelRatio(dpr);
   renderer.setClearColor(0x000000, 0);
@@ -50,37 +55,40 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
     scene,
     camera,
     renderer,
+    host,
     pointer: { x: 0, y: 0 },
     scroll: { progress: 0 },
     lite,
+    calm,
     width: 1,
     height: 1,
   };
 
   const instance = factory(ctx);
-  const t0 = performance.now();
-  let last = t0;
-  const elapsed = () => (performance.now() - t0) / 1000;
+  const speed = calm ? CALM_SPEED : 1;
+  let simTime = 4;
+  let last = performance.now();
   let visible = false;
   let raf = 0;
-  let still = reducedMotion();
 
-  // Frame-time governor: if a device can't hold ~30 fps, drop resolution, then settle on a still frame.
+  // Frame-time governor: a slow device first loses resolution, then frame rate. The scene never freezes.
+  let minFrameMs = 0;
+  let fps = 0;
   const samples: number[] = [];
   const govern = (ms: number) => {
     samples.push(ms);
-    if (samples.length < 20) return;
+    if (samples.length < 30) return;
     const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
     samples.length = 0;
+    fps = Math.round(1000 / avg);
     if (avg < 34) return;
-    if (dpr > 0.75 && avg < 80) {
-      dpr = dpr > 1 ? 1 : 0.75;
+    const next = DPR_STEPS.find((s) => s < dpr - 0.01);
+    if (next) {
+      dpr = next;
       renderer.setPixelRatio(dpr);
       resize();
-    } else {
-      still = true;
-      stop();
-      host.classList.add('is-static');
+    } else if (!minFrameMs) {
+      minFrameMs = 1000 / 30 - 2;
     }
   };
 
@@ -93,7 +101,7 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     instance.resize?.(w, h);
-    if (still) renderOnce();
+    renderer.render(scene, camera);
   };
 
   const readScroll = () => {
@@ -101,28 +109,26 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
     ctx.scroll.progress = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height)));
   };
 
-  const renderOnce = () => {
-    readScroll();
-    instance.update(elapsed() + 4, 0);
-    renderer.render(scene, camera);
-  };
-
   const loop = () => {
     raf = requestAnimationFrame(loop);
     const now = performance.now();
     const frameMs = now - last;
-    const delta = Math.min(frameMs / 1000, 0.05);
+    if (frameMs < minFrameMs) return;
     last = now;
-    ctx.pointer.x += (target.x - ctx.pointer.x) * 0.05;
-    ctx.pointer.y += (target.y - ctx.pointer.y) * 0.05;
+    const delta = Math.min(frameMs / 1000, 0.05) * speed;
+    simTime += delta;
+    if (!calm) {
+      ctx.pointer.x += (target.x - ctx.pointer.x) * 0.05;
+      ctx.pointer.y += (target.y - ctx.pointer.y) * 0.05;
+    }
     readScroll();
-    instance.update(elapsed(), delta);
+    instance.update(simTime, delta);
     renderer.render(scene, camera);
     govern(frameMs);
   };
 
   const start = () => {
-    if (raf || still) return;
+    if (raf) return;
     last = performance.now();
     loop();
   };
@@ -142,8 +148,8 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
   };
   const onTilt = (e: DeviceOrientationEvent) => {
     if (e.gamma == null || e.beta == null) return;
-    target.x = Math.max(-1, Math.min(1, e.gamma / 30));
-    target.y = Math.max(-1, Math.min(1, (45 - e.beta) / 30));
+    target.x = clamp(e.gamma / 30);
+    target.y = clamp((45 - e.beta) / 30);
   };
 
   const io = new IntersectionObserver(
@@ -159,17 +165,45 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   io.observe(host);
-  window.addEventListener('pointermove', onPointer, { passive: true });
-  host.addEventListener('pointerleave', onLeave);
-  if (small) window.addEventListener('deviceorientation', onTilt, { passive: true });
+  if (!calm) {
+    window.addEventListener('pointermove', onPointer, { passive: true });
+    host.addEventListener('pointerleave', onLeave);
+    if (small) window.addEventListener('deviceorientation', onTilt, { passive: true });
+  }
   document.addEventListener('visibilitychange', onVisibility);
 
   resize();
-  renderOnce();
+  readScroll();
+  instance.update(simTime, 0);
+  renderer.render(scene, camera);
   requestAnimationFrame(() => host.classList.add('is-live'));
+
+  // ?debug=1 shows what the scene is doing on this device.
+  let debugTimer = 0;
+  if (new URLSearchParams(location.search).has('debug')) {
+    const gl = renderer.getContext();
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const gpu = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : 'hidden';
+    const box = document.createElement('pre');
+    box.className = 'scene-debug';
+    host.appendChild(box);
+    const paint = () => {
+      box.textContent = [
+        `gpu      ${gpu.slice(0, 60)}`,
+        `software ${/swiftshader|llvmpipe|software/i.test(gpu) ? 'YES (hardware acceleration off)' : 'no'}`,
+        `fps      ${fps || '…'}${minFrameMs ? ' (capped 30)' : ''}`,
+        `dpr      ${dpr}`,
+        `calm     ${calm ? 'yes (reduced motion is on)' : 'no'}`,
+        `running  ${raf ? 'yes' : 'paused (off-screen)'}`,
+      ].join('\n');
+    };
+    paint();
+    debugTimer = window.setInterval(paint, 1000);
+  }
 
   return () => {
     stop();
+    clearInterval(debugTimer);
     ro.disconnect();
     io.disconnect();
     window.removeEventListener('pointermove', onPointer);

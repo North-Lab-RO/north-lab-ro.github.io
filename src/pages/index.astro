@@ -1,19 +1,5 @@
 ---
-import Base from '../layouts/Base.astro';
-import Hero from '../components/sections/Hero.astro';
-import About from '../components/sections/About.astro';
-import ProjectsGrid from '../components/sections/ProjectsGrid.astro';
-import Capabilities from '../components/sections/Capabilities.astro';
-import TechWall from '../components/sections/TechWall.astro';
-import { getProjects } from '../lib';
-
-const projects = await getProjects();
+import HomeView from '../views/HomeView.astro';
 ---
 
-<Base>
-  <Hero projectCount={projects.length} />
-  <ProjectsGrid />
-  <About />
-  <Capabilities />
-  <TechWall />
-</Base>
+<HomeView lang="en" />

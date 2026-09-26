@@ -1,83 +1,117 @@
 ---
 // Illustrative story: layout and fields mirror the app's story view; the event is invented.
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
 const sources = [0.18, 0.31, 0.42, 0.47, 0.5, 0.55, 0.61, 0.7, 0.84];
-const checks = [
-  { claim: 'Temperatures will reach 39 °C in the south', verdict: 'confirmat', en: 'confirmed · 3 outlets', tone: 'ok' },
-  { claim: 'Water restrictions start in two counties', verdict: 'o singură sursă', en: 'single source', tone: 'single' },
-  { claim: 'Schools will close on Friday', verdict: 'contestat', en: 'contested · 1 outlet disagrees', tone: 'bad' },
-];
+const copy = {
+  en: {
+    top: 'Story · 9 sources · 6 Romanian, 3 international',
+    importance: 'Importance 44 · critical',
+    title: 'Heat warning extended across southern Romania',
+    summary:
+      'The heat warning has been extended to Sunday for 14 counties. Sources agree on temperatures and duration, but differ on measures for schools.',
+    bias: 'Bias spectrum',
+    biasAria: 'Nine sources spread from left to right, clustered around the centre',
+    scale: ['Left', 'Centre', 'Right'],
+    consensus: 'Consensus',
+    agreement: 'high agreement',
+    known: 'What we know',
+    knownItems: ['The warning covers 14 counties', 'Valid until Sunday, 22:00'],
+    unclear: 'Still unclear',
+    unclearItems: ['Whether schools will close', 'Impact on the power grid'],
+    checks: 'Fact-check · verdicts computed from other outlets',
+    items: [
+      { claim: 'Temperatures will reach 39 °C in the south', verdict: 'confirmed', note: '3 outlets corroborate', tone: 'ok' },
+      { claim: 'Water restrictions start in two counties', verdict: 'single source', note: 'no independent confirmation yet', tone: 'single' },
+      { claim: 'Schools will close on Friday', verdict: 'contested', note: '1 outlet reports the opposite', tone: 'bad' },
+    ],
+    caption:
+      "Illustrative sample, translated for this page. The app writes its analyses in Romanian; the fields and layout match its story view, and the event is invented.",
+  },
+  ro: {
+    top: 'Poveste · 9 surse · 6 românești, 3 internaționale',
+    importance: 'Importanță 44 · critică',
+    title: 'Cod galben de caniculă prelungit în sudul țării',
+    summary:
+      'Avertizarea de caniculă a fost prelungită până duminică pentru 14 județe. Sursele sunt de acord asupra temperaturilor și duratei, dar diferă privind măsurile pentru școli.',
+    bias: 'Spectrul surselor',
+    biasAria: 'Nouă surse răspândite de la stânga la dreapta, grupate spre centru',
+    scale: ['Stânga', 'Centru', 'Dreapta'],
+    consensus: 'Consens',
+    agreement: 'acord ridicat',
+    known: 'Ce știm',
+    knownItems: ['Avertizarea acoperă 14 județe', 'Valabilă până duminică, ora 22:00'],
+    unclear: 'Încă neclar',
+    unclearItems: ['Dacă școlile se vor închide', 'Impactul asupra rețelei electrice'],
+    checks: 'Verificare · verdicte calculate din alte publicații',
+    items: [
+      { claim: 'Temperaturile vor ajunge la 39 °C în sud', verdict: 'confirmat', note: '3 publicații confirmă', tone: 'ok' },
+      { claim: 'Restricțiile de apă încep în două județe', verdict: 'o singură sursă', note: 'nicio confirmare independentă încă', tone: 'single' },
+      { claim: 'Școlile se închid vineri', verdict: 'contestat', note: 'o publicație raportează contrariul', tone: 'bad' },
+    ],
+    caption: 'Exemplu ilustrativ. Câmpurile și aspectul corespund paginii de poveste din aplicație; evenimentul este inventat.',
+  },
+}[lang];
 ---
 
 <figure class="story" data-reveal>
   <div class="frame">
     <header class="top">
-      <span class="label">Story · 9 sources · 6 RO, 3 intl.</span>
-      <span class="chip importance">Importance 7.4</span>
+      <span class="label">{copy.top}</span>
+      <span class="chip importance">{copy.importance}</span>
     </header>
-    <h3 class="title">Cod galben de caniculă prelungit în sudul țării</h3>
-    <p class="en muted">Heat warning extended across southern Romania</p>
+    <h3 class="title">{copy.title}</h3>
 
     <div class="summary">
-      <p lang="ro">
-        Avertizarea de caniculă a fost prelungită până duminică pentru 14 județe. Sursele sunt de acord asupra
-        temperaturilor și duratei, dar diferă privind măsurile pentru școli.
-      </p>
-      <p class="muted en-t">
-        The heat warning has been extended to Sunday for 14 counties. Sources agree on temperatures and duration, but
-        differ on measures for schools.
-      </p>
+      <p>{copy.summary}</p>
     </div>
 
     <div class="meters">
       <div class="meter">
-        <p class="label">Bias spectrum</p>
-        <div class="spectrum" role="img" aria-label="Nine sources spread from left to right, clustered around the centre">
+        <p class="label">{copy.bias}</p>
+        <div class="spectrum" role="img" aria-label={copy.biasAria}>
           {sources.map((s) => <span class="dot" style={`left:${s * 100}%`} />)}
         </div>
-        <div class="scale label"><span>Left</span><span>Centre</span><span>Right</span></div>
+        <div class="scale label">{copy.scale.map((x) => <span>{x}</span>)}</div>
       </div>
       <div class="meter">
-        <p class="label">Consensus</p>
+        <p class="label">{copy.consensus}</p>
         <div class="bar"><span style="width:78%"></span></div>
-        <p class="val"><strong>78%</strong> <span class="muted">high agreement</span></p>
+        <p class="val"><strong>78%</strong> <span class="muted">{copy.agreement}</span></p>
       </div>
     </div>
 
     <div class="kv">
       <div>
-        <p class="label">What we know</p>
-        <ul>
-          <li>Warning covers 14 counties</li>
-          <li>Valid until Sunday, 22:00</li>
-        </ul>
+        <p class="label">{copy.known}</p>
+        <ul>{copy.knownItems.map((x) => <li>{x}</li>)}</ul>
       </div>
       <div>
-        <p class="label">Still unclear</p>
-        <ul>
-          <li>Whether schools will close</li>
-          <li>Impact on the power grid</li>
-        </ul>
+        <p class="label">{copy.unclear}</p>
+        <ul>{copy.unclearItems.map((x) => <li>{x}</li>)}</ul>
       </div>
     </div>
 
     <div class="checks">
-      <p class="label">Fact-check · verdicts computed from other outlets</p>
+      <p class="label">{copy.checks}</p>
       <ul>
         {
-          checks.map((c) => (
+          copy.items.map((c) => (
             <li>
               <span class="claim">{c.claim}</span>
-              <span class={`verdict ${c.tone}`} lang="ro">
-                {c.verdict}
-              </span>
-              <span class="muted en-v">{c.en}</span>
+              <span class={`verdict ${c.tone}`}>{c.verdict}</span>
+              <span class="muted en-v">{c.note}</span>
             </li>
           ))
         }
       </ul>
     </div>
   </div>
-  <figcaption class="muted">Illustrative sample. The fields and layout match the app's story view; the event is invented.</figcaption>
+  <figcaption class="muted">{copy.caption}</figcaption>
 </figure>
 
 <style>

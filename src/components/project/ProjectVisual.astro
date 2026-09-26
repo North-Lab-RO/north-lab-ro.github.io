@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
-  scene: 'none' | 'globe' | 'board' | 'radar';
+  scene: 'none' | 'globe' | 'board' | 'radar' | 'ledger';
   cover?: ImageMetadata;
   coverAlt?: string;
   logo?: ImageMetadata;
@@ -26,6 +26,15 @@ const sources = [
   [98, 180], [130, 62], [300, 190], [210, 250], [320, 96], [150, 230], [262, 38],
 ];
 const polaroids = gallery.slice(0, 3);
+// Ledger rows for the Banky art: widths of the description and amount bars, and whether the guard passed them.
+const ledgerRows = [
+  [0.46, 0.18, true],
+  [0.3, 0.14, true],
+  [0.52, 0.2, false],
+  [0.38, 0.16, true],
+  [0.44, 0.22, true],
+  [0.28, 0.12, true],
+] as const;
 ---
 
 <div class:list={['visual', `v-${scene}`]}>
@@ -75,6 +84,27 @@ const polaroids = gallery.slice(0, 3);
           </figure>
         ))}
       </div>
+    )
+  }
+  {
+    scene === 'ledger' && (
+      <svg viewBox="0 0 400 300" class="art ledger" aria-hidden="true">
+        <rect x="92" y="26" width="216" height="252" rx="6" fill="var(--color-panel)" stroke="var(--color-line)" />
+        <rect x="112" y="44" width="80" height="8" rx="2" fill="var(--color-mist)" opacity=".5" />
+        <rect x="244" y="44" width="44" height="8" rx="2" fill="var(--color-violet)" opacity=".7" />
+        {ledgerRows.map(([d, a, ok], i) => (
+          <g class="row" style={`--i:${i}`}>
+            <rect x="112" y={80 + i * 30} width={d * 216} height="6" rx="2" fill="var(--color-frost)" opacity=".35" />
+            <rect x={288 - a * 216} y={80 + i * 30} width={a * 216} height="6" rx="2" fill={ok ? 'var(--color-frost)' : 'var(--color-ember)'} opacity=".75" />
+            {ok ? (
+              <path class="mark" d={`M322 ${83 + i * 30}l5 5 9-10`} fill="none" stroke="var(--color-aurora)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            ) : (
+              <path class="mark" d={`M323 ${77 + i * 30}l10 10m0-10l-10 10`} fill="none" stroke="var(--color-ember)" stroke-width="2.4" stroke-linecap="round" />
+            )}
+          </g>
+        ))}
+        <rect class="beam" x="86" y="60" width="228" height="3" rx="1.5" fill="var(--color-violet)" />
+      </svg>
     )
   }
   {scene === 'none' && cover && <Image src={cover} alt={coverAlt} widths={[640, 960]} sizes="(min-width: 960px) 50vw, 100vw" class="cover" />}
@@ -160,6 +190,47 @@ const polaroids = gallery.slice(0, 3);
     }
     8% {
       opacity: 1;
+    }
+  }
+  .ledger .beam {
+    filter: drop-shadow(0 0 8px var(--color-violet));
+    animation: scan 4.8s var(--ease-out) infinite;
+  }
+  .ledger .mark {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: tick 4.8s linear infinite;
+    animation-delay: calc(var(--i) * 0.45s + 0.3s);
+  }
+  @keyframes scan {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    8% {
+      opacity: 1;
+    }
+    70% {
+      transform: translateY(190px);
+      opacity: 1;
+    }
+    85%,
+    100% {
+      transform: translateY(190px);
+      opacity: 0;
+    }
+  }
+  @keyframes tick {
+    0%,
+    6% {
+      stroke-dashoffset: 24;
+    }
+    14%,
+    88% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 24;
     }
   }
   .board {

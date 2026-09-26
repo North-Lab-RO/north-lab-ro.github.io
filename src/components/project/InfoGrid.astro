@@ -1,0 +1,55 @@
+---
+interface Props {
+  items: { title: string; body: string; tag?: string }[];
+  columns?: 2 | 3;
+}
+const { items, columns = 3 } = Astro.props;
+---
+
+<ul class:list={['info', `cols-${columns}`]}>
+  {
+    items.map((it, i) => (
+      <li class="item" data-reveal style={`--delay:${(i % columns) * 0.06}s`}>
+        {it.tag && <span class="chip tag">{it.tag}</span>}
+        <h3 class="h-sub">{it.title}</h3>
+        <p class="muted">{it.body}</p>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .info {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-block: 32px;
+  }
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--color-deep) 80%, transparent);
+  }
+  .tag {
+    align-self: flex-start;
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--color-line));
+  }
+  .item p {
+    font-size: 0.95rem;
+  }
+  @media (min-width: 720px) {
+    .info {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1100px) {
+    .cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

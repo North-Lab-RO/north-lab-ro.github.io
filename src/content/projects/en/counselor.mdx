@@ -1,0 +1,211 @@
+---
+title: COUNSELOR
+category: News intelligence
+tagline: An analyst, not a headline reader. It reads 41 outlets, groups their coverage into stories and explains where they agree, where they differ and what is still unknown.
+summary: >-
+  COUNSELOR ingests Romanian and international news around the clock, groups articles about the same event into a
+  single story and writes a balanced analysis for each one: a summary, where the sources sit on the bias spectrum,
+  what they agree and disagree on, what is known versus still unclear, and which statements are fact and which are
+  opinion. It ranks every story by importance, sends alerts for the ones that matter and delivers a briefing every
+  morning. Every model runs on one local machine; the only outbound traffic is the news feeds themselves.
+order: 1
+accent: ice
+scene: globe
+logo: ../../../assets/projects/counselor/logo.png
+metrics:
+  - value: '41'
+    label: news sources, polled every 5 minutes
+  - value: '2.2×'
+    label: more articles grouped per story than keyword matching
+  - value: '~354'
+    label: story analyses per hour on one GPU
+  - value: '0'
+    label: cloud AI calls
+features:
+  - title: One story, many sources
+    body: Semantic clustering groups coverage of the same event across outlets, so you read the event once and see exactly who covered it.
+  - title: Bias spectrum and consensus
+    body: Each story shows where its sources sit, how strongly they agree, and which viewpoints differ, attributed rather than adopted.
+  - title: Fact versus opinion
+    body: The analysis separates facts, claims and opinions, and "what we know" from "what we don't".
+  - title: Grounded fact-checks
+    body: Verdicts are computed from what other outlets actually reported. The model classifies quotes; code decides the verdict.
+  - title: Alerts and briefings
+    body: Importance-scored push alerts with a short "why it matters", a morning briefing at 07:00 and a rolling one through the day.
+  - title: Globe, search and PDF reports
+    body: A 3D globe of coverage, full-text search, bookmarks, a report archive and downloadable PDF reports.
+stack:
+  - Python
+  - FastAPI
+  - Celery
+  - PostgreSQL
+  - Redis
+  - Qdrant
+  - Ollama
+  - Qwen3 4B / 14B
+  - BGE-M3
+  - Next.js
+  - three.js
+  - WeasyPrint
+  - Docker
+reports:
+  - title: Morning briefing (PDF)
+    description: A full generated briefing, as delivered at 07:00.
+  - title: Story analysis report (PDF)
+    description: One story with its consensus, bias spectrum and fact-checks.
+credits: Parts of the web UI are adapted from World Monitor (AGPL-3.0).
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import StoryAnalysis from '../../../components/samples/StoryAnalysis.astro';
+import CounselorStory from '../../../components/project/CounselorStory.astro';
+import InfoGrid from '../../../components/project/InfoGrid.astro';
+import ScoreBars from '../../../components/project/ScoreBars.astro';
+
+## How it works
+
+Four stages turn a stream of headlines into a handful of stories worth reading. Scroll through them below.
+
+<CounselorStory lang="en" />
+
+Under the hood, the work runs as queued jobs on four separate queues, so bulk article processing never blocks the
+high-value story analysis. Two models split the load: a small one handles every article, and a larger one runs only
+where many sources meet.
+
+<Pipeline
+  title="Article → story → briefing"
+  caption="Every stage runs on one Linux host with a single GPU."
+  stages={[
+    { label: 'Fetch', detail: '41 RSS feeds polled every five minutes.', tag: 'feedparser' },
+    { label: 'Extract & clean', detail: 'Full-text extraction, language detection and de-duplication.', tag: 'trafilatura' },
+    { label: 'Embed', detail: 'Multilingual embeddings for every article, stored for similarity search.', tag: 'bge-m3 → qdrant' },
+    { label: 'Cluster into stories', detail: 'Cosine similarity ≥ 0.78 within a ±72-hour window; a story stops accepting articles after 48 hours.' },
+    { label: 'Per-article analysis', detail: 'Summary, bias estimate and headline translation for each article.', tag: 'qwen3 4B' },
+    { label: 'Per-story analysis', detail: 'Consensus, divergence, known vs. unknown, fact vs. opinion.', tag: 'qwen3 14B' },
+    { label: 'Score & deliver', detail: 'Importance scoring, push alerts, scheduled briefings and PDF reports.', items: ['alerts', 'briefings', 'PDF reports', 'search'] },
+  ]}
+/>
+
+## What you see
+
+A progressive web app for phone and desktop, built around five screens.
+
+<InfoGrid
+  items={[
+    { title: 'Dashboard', body: 'Twenty panels you can drag and resize: alerts, headlines, trending and rising topics, fact-checks, the bias spectrum, feed health and a news ticker.' },
+    { title: 'Global monitor', body: 'A 3D globe or flat map. Each story is a marker sized by its number of sources and coloured by its importance band; new stories pulse.' },
+    { title: 'Story view', body: 'Source spectrum, consensus and confidence meters, what we know and what we don’t, viewpoints, public reaction, entities and how the story developed.' },
+    { title: 'Reports', body: 'An archive of generated briefings, each with a stable reference, and on-demand reports for any day, downloadable as PDF.' },
+    { title: 'What the AI is doing', body: 'Live job activity with estimated completion times, so you can see the pipeline working rather than trust that it is.' },
+  ]}
+/>
+
+## Inside the analysis
+
+Nothing that decides what you see is left to the model's judgement alone. Importance is additive and explainable:
+
+<ScoreBars
+  title="Importance score · 0–100"
+  caption="Every point can be traced back to a signal."
+  items={[
+    { label: 'Number of sources', points: 30, note: 'full weight at 10 outlets' },
+    { label: 'Source credibility', points: 15 },
+    { label: 'Geographic reach', points: 15, note: 'full weight at 5 countries' },
+    { label: 'Government & military', points: 15 },
+    { label: 'Economy & finance', points: 10 },
+    { label: 'Your chosen categories', points: 10 },
+    { label: 'Velocity', points: 5, note: 'new sources per hour' },
+  ]}
+  bands={[
+    { label: 'Elevated', value: 'top 25%', color: '#ffaa00' },
+    { label: 'High', value: 'top 10%', color: '#ff8800' },
+    { label: 'Critical', value: 'top 3%', color: '#ff4444' },
+  ]}
+/>
+
+Bands are percentiles of the whole archive rather than fixed cut-offs. Measured over 1,844 stories, the highest score
+ever reached was 65.6, so fixed 75/50/25 lines would have painted everything grey.
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: 'clustering', title: 'Same event, same story', body: 'BGE-M3 embeddings in Qdrant, the ten nearest neighbours, cosine similarity of at least 0.78 and publication dates within 72 hours. At 0.72, three of four sampled merges were actually different stories.' },
+    { tag: 'confidence', title: 'Confidence is a formula', body: '0.2 + 0.12 × sources (up to 5) + 0.06 × distinct orientations (up to 4). More independent sources, from more sides, means more confidence.' },
+    { tag: 'schema', title: 'A fixed shape for every story', body: 'Short, medium and detailed summaries, key facts with support, what we know and don’t, viewpoints by orientation, quotes, entities, misinformation flags, consensus, location and categories.' },
+    { tag: 'language', title: 'Many languages in, Romanian out', body: 'Articles are detected in eight languages; every analysis is written in Romanian, and foreign headlines are translated.' },
+  ]}
+/>
+
+## Trust by design
+
+<InfoGrid
+  items={[
+    { title: 'Verdicts computed in code', body: 'For fact-checks, the model only labels each quote from another outlet as support, contradiction or unrelated. The verdict follows from the tallies.' },
+    { title: 'Quotes checked against the source', body: 'Public-reaction quotes must appear, word for word, in a real comment. Author and link come from that comment, never from the model.' },
+    { title: 'No invented disagreement', body: 'Single-source stories no longer get viewpoints or a consensus score: before this rule, 82% of them came back with disagreement that did not exist.' },
+  ]}
+/>
+
+## Measured on one RTX 3090
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: '~354 / hour', title: 'Story analyses', body: 'Sustained throughput with the GPU at about 85%, measured after tuning the job queues.' },
+    { tag: '21.3 / 24.5 GB', title: 'Three resident models', body: 'The 4B and 14B language models and the embedding model stay loaded together on a single 24 GB card.' },
+    { tag: '17,062', title: 'Articles clustered', body: 'The archive the trend and importance statistics are computed over.' },
+    { tag: '~90 s', title: 'A complete briefing', body: 'Thirteen stories across Romania and the world, with fact-checks, written in one pass.' },
+  ]}
+/>
+
+## Sample output
+
+<StoryAnalysis lang="en" />
+
+## Verdicts are computed, not generated
+
+A model that is free to answer "confirmed" can do so while citing nothing. COUNSELOR retrieves quotes from *other*
+outlets and asks the model only to classify each one. The verdict then follows from the tallies.
+
+<CodeSnippet
+  file="backend/app/services/fact_check.py"
+  lang="python"
+  caption="A claim's own article and its own outlet can never corroborate it, and a quote from an unknown source is dropped rather than cited under a guessed name."
+  code={`
+def gather_evidence(
+    hits: list[SearchHit],
+    *,
+    claim_article_id: int | None,
+    claim_source_id: int | None,
+    source_names: dict[int, str],
+) -> list[Evidence]:
+    best: dict[int, Evidence] = {}
+    for h in hits:
+        payload = h.payload or {}
+        source_id = payload.get("source_id")
+        article_id = payload.get("article_id")
+        text = (payload.get("text") or "").strip()
+        if not text or source_id is None:
+            continue
+        if article_id is not None and article_id == claim_article_id:
+            continue
+        if source_id == claim_source_id:
+            continue
+        name = source_names.get(source_id)
+        if not name:
+            continue
+        ...
+    return sorted(best.values(), key=lambda e: e.score, reverse=True)
+
+
+def decide_verdict(*, supporting: int, contradicting: int) -> str:
+    if contradicting > 0:
+        return CONTESTED
+    if supporting >= 2:
+        return CONFIRMED
+    if supporting == 1:
+        return SINGLE_SOURCE
+    return UNVERIFIABLE
+`}
+/>

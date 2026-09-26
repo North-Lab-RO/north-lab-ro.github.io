@@ -1,0 +1,68 @@
+---
+import { altPath, t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  class?: string;
+}
+const { lang, class: className = '' } = Astro.props;
+const path = Astro.url.pathname;
+const options: Lang[] = ['en', 'ro'];
+---
+
+<div class:list={['switch', className]} role="group" aria-label={t(lang).nav.language}>
+  {
+    options.map((l) => (
+      <a
+        href={altPath(path, l)}
+        hreflang={l}
+        lang={l}
+        data-set-lang={l}
+        aria-current={l === lang ? 'true' : undefined}
+        class:list={[l === lang && 'on']}
+      >
+        {l.toUpperCase()}
+      </a>
+    ))
+  }
+</div>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>('[data-set-lang]').forEach((a) =>
+    a.addEventListener('click', () => {
+      try {
+        localStorage.setItem('nl-lang', a.dataset.setLang!);
+      } catch {
+        /* storage blocked: the switch still navigates */
+      }
+      if (location.hash) a.href = a.href.split('#')[0] + location.hash;
+    }),
+  );
+</script>
+
+<style>
+  .switch {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+  a {
+    padding: 5px 10px;
+    border-radius: 999px;
+    color: var(--color-mist);
+    transition:
+      color 0.2s,
+      background-color 0.2s;
+  }
+  a:hover {
+    color: var(--color-frost);
+  }
+  a.on {
+    background: var(--color-frost);
+    color: var(--color-night);
+  }
+</style>

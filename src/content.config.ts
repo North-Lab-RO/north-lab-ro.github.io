@@ -3,8 +3,8 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 const projects = defineCollection({
-  // Files starting with "_" (like _template.mdx) are never loaded.
-  loader: glob({ base: './src/content/projects', pattern: '[^_]*.{md,mdx}' }),
+  // One folder per language (en/, ro/). Files starting with "_" (like _template.mdx) are never loaded.
+  loader: glob({ base: './src/content/projects', pattern: '{en,ro}/[^_]*.{md,mdx}' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -14,7 +14,7 @@ const projects = defineCollection({
       order: z.number(),
       draft: z.boolean().default(false),
       accent: z.enum(['ice', 'aurora', 'ember', 'violet']).default('ice'),
-      scene: z.enum(['none', 'globe', 'board', 'radar']).default('none'),
+      scene: z.enum(['none', 'globe', 'board', 'radar', 'ledger']).default('none'),
       cover: image().optional(),
       coverAlt: z.string().optional(),
       logo: image().optional(),

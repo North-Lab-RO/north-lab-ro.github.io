@@ -1,28 +1,45 @@
 ---
-import { nav } from '../config';
 import Wordmark from './Wordmark.astro';
+import LangSwitch from './LangSwitch.astro';
+import { t, homeHref, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const n = t(lang).nav;
+const nav = [
+  { href: homeHref(lang, '#services'), label: n.services },
+  { href: homeHref(lang, '#projects'), label: n.projects },
+  { href: homeHref(lang, '#about'), label: n.about },
+  { href: homeHref(lang, '#stack'), label: n.stack },
+];
 ---
 
 <header class="nav" data-nav>
   <div class="wrap nav-inner">
-    <a href="/" class="brand" aria-label="North-Lab-RO home">
+    <a href={homeHref(lang)} class="brand" aria-label={n.home}>
       <Wordmark />
     </a>
 
-    <nav aria-label="Primary" class="links">
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-    </nav>
+    <div class="right">
+      <nav aria-label={n.primary} class="links">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
+      <LangSwitch lang={lang} class="lang-desk" />
+    </div>
 
     <button class="menu-btn" aria-expanded="false" aria-controls="mobile-menu" data-menu-btn>
-      <span class="sr-only">Menu</span>
+      <span class="sr-only">{n.menu}</span>
       <span class="bar"></span>
       <span class="bar"></span>
     </button>
   </div>
 
   <div id="mobile-menu" class="sheet" data-menu hidden>
-    <nav aria-label="Mobile" class="wrap">
+    <nav aria-label={n.mobile} class="wrap">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <LangSwitch lang={lang} class="lang-mob" />
     </nav>
   </div>
 </header>
@@ -74,8 +91,13 @@ import Wordmark from './Wordmark.astro';
     display: inline-flex;
     color: var(--color-frost);
   }
-  .links {
+  .right {
     display: none;
+    align-items: center;
+    gap: 32px;
+  }
+  .links {
+    display: flex;
     gap: 36px;
     font-size: 0.92rem;
     font-weight: 500;
@@ -118,7 +140,11 @@ import Wordmark from './Wordmark.astro';
     flex-direction: column;
     padding-top: 24px;
   }
-  .sheet a {
+  .sheet :global(.lang-mob) {
+    align-self: flex-start;
+    margin-top: 28px;
+  }
+  .sheet > nav > a {
     padding: 18px 0;
     border-bottom: 1px solid var(--color-line);
     font-family: var(--font-display);
@@ -126,8 +152,8 @@ import Wordmark from './Wordmark.astro';
     font-size: 1.9rem;
     letter-spacing: -0.02em;
   }
-  @media (min-width: 768px) {
-    .links {
+  @media (min-width: 900px) {
+    .right {
       display: flex;
     }
     .menu-btn,

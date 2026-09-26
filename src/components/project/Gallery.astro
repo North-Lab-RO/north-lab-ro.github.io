@@ -1,21 +1,24 @@
 ---
 import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { t, type Lang } from '../../i18n/ui';
 
 interface Props {
+  lang: Lang;
   items: { src: ImageMetadata; alt: string; caption?: string }[];
   note?: string;
 }
-const { items, note } = Astro.props;
+const { lang, items, note } = Astro.props;
+const tp = t(lang).project;
 const large = await Promise.all(items.map((it) => getImage({ src: it.src, width: 1600, format: 'webp' })));
 ---
 
-<section class="gallery" aria-label="Gallery">
+<section class="gallery" aria-label={tp.gallery}>
   <div class="track" data-reveal>
     {
       items.map((it, i) => (
         <figure class="shot">
-          <button class="open" data-full={large[i].src} data-alt={it.alt} data-caption={it.caption ?? ''} aria-label={`Enlarge: ${it.alt}`}>
+          <button class="open" data-full={large[i].src} data-alt={it.alt} data-caption={it.caption ?? ''} aria-label={`${tp.enlarge}: ${it.alt}`}>
             <Image src={it.src} alt={it.alt} widths={[420, 720]} sizes="(min-width: 960px) 30vw, 78vw" loading="lazy" />
           </button>
           {it.caption && <figcaption class="muted">{it.caption}</figcaption>}
@@ -27,7 +30,7 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
 
   <dialog class="lightbox" data-lightbox>
     <form method="dialog">
-      <button class="close" aria-label="Close">✕</button>
+      <button class="close" aria-label={tp.close}>✕</button>
     </form>
     <img alt="" data-lightbox-img />
     <p class="muted" data-lightbox-cap></p>

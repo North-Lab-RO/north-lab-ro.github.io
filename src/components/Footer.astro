@@ -1,13 +1,19 @@
 ---
 import { site } from '../config';
 import Wordmark from './Wordmark.astro';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
 ---
 
 <footer class="footer">
   <div class="wrap inner">
     <div class="brand">
       <Wordmark size={22} />
-      <p class="muted">Private AI systems, built and run on our own hardware.</p>
+      <p class="muted">{t(lang).footer.tagline}</p>
     </div>
     <div class="meta">
       <a href={site.github} class="gh" rel="noopener">

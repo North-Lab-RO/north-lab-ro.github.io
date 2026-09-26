@@ -1,13 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
+import { t } from '../i18n/ui';
+const en = t('en').notFound;
+const ro = t('ro').notFound;
 ---
 
-<Base title="Page not found">
+<Base lang="en" title="404" autodetect={false}>
   <section class="wrap nf">
-    <p class="label">404 · off course</p>
-    <h1 class="display">This page isn't on the chart.</h1>
-    <p class="lede">The link may be old, or the page may have moved.</p>
-    <a href="/" class="btn btn-primary">Back to the home page</a>
+    <p class="label">{en.label}</p>
+    <h1 class="display">{en.title}</h1>
+    <p class="lede">{en.lede}</p>
+    <a href="/" class="btn btn-primary">{en.back}</a>
+    <div class="ro" lang="ro">
+      <p class="label">{ro.label}</p>
+      <p class="h-sub">{ro.title}</p>
+      <p class="muted">{ro.lede}</p>
+      <a href="/ro/" class="btn btn-ghost">{ro.back}</a>
+    </div>
   </section>
 </Base>
 
@@ -18,7 +27,8 @@ import Base from '../layouts/Base.astro';
     flex-direction: column;
     justify-content: center;
     gap: 24px;
-    padding-top: 72px;
+    padding-top: 96px;
+    padding-bottom: 64px;
   }
   h1 {
     font-size: clamp(2.4rem, 7vw, 5rem);
@@ -26,5 +36,12 @@ import Base from '../layouts/Base.astro';
   }
   .btn {
     align-self: flex-start;
+  }
+  .ro {
+    display: grid;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--color-line);
   }
 </style>

@@ -1,8 +1,15 @@
 ---
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const st = t(lang).stack;
 const stack = [
   'Python', 'FastAPI', 'TypeScript', 'React', 'Next.js', 'Fastify', 'Prisma', 'PostgreSQL',
   'Redis', 'Qdrant', 'Ollama', 'Qwen', 'Mistral', 'BGE-M3', 'Whisper', 'Kokoro', 'SDXL',
-  'ComfyUI', 'Celery', 'BullMQ', 'Docker', 'three.js', 'Lua', 'Vitest',
+  'ComfyUI', 'PaddleOCR', 'Celery', 'BullMQ', 'Docker', 'three.js', 'Lua', 'Vitest',
 ];
 const half = Math.ceil(stack.length / 2);
 const rows = [stack.slice(0, half), stack.slice(half)];
@@ -11,12 +18,9 @@ const rows = [stack.slice(0, half), stack.slice(half)];
 <section id="stack" class="section tech" aria-labelledby="stack-title">
   <div class="wrap layout">
     <header class="head">
-      <p class="label" data-reveal>Stack</p>
-      <h2 id="stack-title" class="h-section" data-reveal style="--delay:.06s">Open models. Open tools. Our hardware.</h2>
-      <p class="lede" data-reveal style="--delay:.1s">
-        Everything here is open source or open-weight, so every system can be inspected, rebuilt and run without a
-        vendor account.
-      </p>
+      <p class="label" data-reveal>{st.label}</p>
+      <h2 id="stack-title" class="h-section" data-reveal style="--delay:.06s">{st.title}</h2>
+      <p class="lede" data-reveal style="--delay:.1s">{st.lede}</p>
     </header>
 
     <div class="sphere" data-sphere aria-hidden="true">
@@ -57,8 +61,10 @@ const rows = [stack.slice(0, half), stack.slice(half)];
     });
     let ax = 0.3;
     let ay = 0;
-    let vx = 0.0012;
-    let vy = 0.004;
+    // Reduced motion: the sphere still turns, just slowly.
+    const pace = reduce ? 0.35 : 1;
+    let vx = 0.0012 * pace;
+    let vy = 0.004 * pace;
     let running = false;
     let raf = 0;
 
@@ -86,17 +92,17 @@ const rows = [stack.slice(0, half), stack.slice(half)];
     const setRunning = (on: boolean) => {
       if (on === running) return;
       running = on;
-      if (on && !reduce) loop();
+      if (on) loop();
       else cancelAnimationFrame(raf);
     };
-    host.addEventListener('pointermove', (e) => {
+    if (!reduce) host.addEventListener('pointermove', (e) => {
       const r = host.getBoundingClientRect();
       vy = ((e.clientX - r.left) / r.width - 0.5) * 0.02;
       vx = -((e.clientY - r.top) / r.height - 0.5) * 0.02;
     });
     host.addEventListener('pointerleave', () => {
-      vx = 0.0012;
-      vy = 0.004;
+      vx = 0.0012 * pace;
+      vy = 0.004 * pace;
     });
     const io = new IntersectionObserver(([e]) => setRunning(e.isIntersecting && desktop.matches));
     io.observe(host);

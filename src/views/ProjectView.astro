@@ -1,0 +1,307 @@
+---
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Scene from '../components/3d/Scene.astro';
+import Gallery from '../components/project/Gallery.astro';
+import ReportSlot from '../components/project/ReportSlot.astro';
+import ProjectVisual from '../components/project/ProjectVisual.astro';
+import { accentVar, type Project } from '../lib';
+import { t, projectHref, homeHref, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  entry: Project;
+  next: Project;
+}
+const { lang, entry, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const tp = t(lang).project;
+const sceneLabels = {
+  en: {
+    globe: 'A rotating globe of points, with arcs travelling from many news sources into one story',
+    board: 'An evidence board of pinned photographs joined by red string',
+    radar: 'A radar scope with a rotating sweep and aircraft blips on approach paths',
+    ledger: 'A bank statement being scanned, with checked numbers settling into ledger rows',
+  },
+  ro: {
+    globe: 'Un glob de puncte care se rotește, cu arce care pornesc din multe surse de știri spre o singură poveste',
+    board: 'Un panou de probe cu fotografii prinse în ace și legate cu sfoară roșie',
+    radar: 'Un ecran radar cu baleiaj rotativ și aeronave pe traiectorii de apropiere',
+    ledger: 'Un extras de cont scanat, cu cifrele verificate așezându-se în rândurile registrului',
+  },
+} as const;
+---
+
+<Base lang={lang} title={d.title} description={d.tagline}>
+  <article class="project" style={`--accent:${accentVar[d.accent]}`}>
+    <header class="hero wrap">
+      <div class="intro">
+        <a href={homeHref(lang, '#projects')} class="back label">{tp.back}</a>
+        <p class="label cat" data-rise><span class="swatch" aria-hidden="true"></span>{d.category}</p>
+        <h1 class="display title" data-rise style="--delay:.06s">{d.title}</h1>
+        <p class="tagline" data-rise style="--delay:.12s">{d.tagline}</p>
+        <p class="badge" data-rise style="--delay:.18s">
+          {
+            d.repo.visibility === 'public' && d.repo.url ? (
+              <a href={d.repo.url} class="chip" rel="noopener">{tp.source}</a>
+            ) : (
+              <span class="chip">
+                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>
+                {tp.private}
+              </span>
+            )
+          }
+        </p>
+      </div>
+      <div class="stage">
+        {
+          d.scene !== 'none' ? (
+            <Scene name={d.scene} class="scene" label={sceneLabels[lang][d.scene]} />
+          ) : (
+            <ProjectVisual scene="none" cover={d.cover} coverAlt={d.coverAlt} />
+          )
+        }
+      </div>
+    </header>
+
+    <section class="wrap overview">
+      <p class="lede" data-reveal>{d.summary}</p>
+      {
+        d.metrics.length > 0 && (
+          <dl class="metrics" data-reveal>
+            {d.metrics.map((m) => (
+              <div class="metric">
+                <dt class="value">{m.value}</dt>
+                <dd class="muted">{m.label}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+    </section>
+
+    {
+      d.features.length > 0 && (
+        <section class="wrap block">
+          <h2 class="h-section sm" data-reveal>{tp.whatItDoes}</h2>
+          <ul class="features">
+            {d.features.map((f, i) => (
+              <li class="feature" data-reveal style={`--delay:${(i % 3) * 0.06}s`}>
+                <h3 class="h-sub">{f.title}</h3>
+                <p class="muted">{f.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="wrap block prose">
+      <Content />
+      {d.gallery.length > 0 && <Gallery lang={lang} items={d.gallery} />}
+    </section>
+
+    {
+      d.reports.length > 0 && (
+        <section class="wrap block">
+          <h2 class="h-section sm" data-reveal>{tp.reports}</h2>
+          <ReportSlot lang={lang} reports={d.reports} />
+        </section>
+      )
+    }
+
+    <section class="wrap block built">
+      <p class="label">{tp.builtWith}</p>
+      <ul class="stack">
+        {d.stack.map((s) => <li class="chip">{s}</li>)}
+      </ul>
+      {d.credits && <p class="muted credits">{d.credits}</p>}
+    </section>
+
+    {
+      next.id !== entry.id && (
+        <nav class="wrap next" aria-label={tp.next}>
+          <a href={projectHref(lang, next.slug)} style={`--accent:${accentVar[next.data.accent]}`}>
+            <span class="label">{tp.next}</span>
+            <span class="display name">{next.data.title}</span>
+            <span class="muted">{next.data.tagline}</span>
+          </a>
+        </nav>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding-top: 88px;
+    align-items: center;
+  }
+  .stage {
+    order: -1;
+    margin-inline: calc(var(--gutter) * -1);
+  }
+  .stage :global(.scene) {
+    height: min(62svh, 520px);
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 28px;
+    transition: color 0.2s;
+  }
+  .back:hover {
+    color: var(--color-frost);
+  }
+  .cat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .swatch {
+    width: 18px;
+    height: 2px;
+    background: var(--accent);
+  }
+  .title {
+    margin-top: 14px;
+    font-size: clamp(2.2rem, 10.5vw, 6.4rem);
+  }
+  .tagline {
+    margin-top: 22px;
+    font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+    line-height: 1.5;
+    max-width: 40ch;
+  }
+  .badge {
+    margin-top: 26px;
+  }
+  .badge .chip {
+    color: var(--color-mist);
+    white-space: normal;
+  }
+  .overview {
+    padding-top: clamp(48px, 7vw, 96px);
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 56px;
+    border-top: 1px solid var(--color-line);
+  }
+  .metric {
+    padding: 24px 16px 24px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .value {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 4.4vw, 3.2rem);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .metric dd {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 26ch;
+  }
+  .block {
+    padding-top: clamp(72px, 10vw, 128px);
+  }
+  .h-section.sm {
+    font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+    margin-bottom: 36px;
+  }
+  .features {
+    display: grid;
+    gap: 0 40px;
+    border-top: 1px solid var(--color-line);
+  }
+  .feature {
+    padding-block: 24px;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .feature p {
+    margin-top: 8px;
+  }
+
+  /* MDX body */
+  .prose :global(h2) {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-top: clamp(64px, 8vw, 104px);
+    margin-bottom: 20px;
+  }
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .prose :global(p) {
+    max-width: 68ch;
+    color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));
+  }
+  .prose :global(em) {
+    color: var(--color-frost);
+  }
+
+  .built .label {
+    margin-bottom: 14px;
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .credits {
+    margin-top: 18px;
+    font-size: 0.88rem;
+  }
+  .next {
+    padding-block: clamp(72px, 10vw, 128px);
+  }
+  .next a {
+    display: grid;
+    gap: 10px;
+    padding-top: 36px;
+    border-top: 1px solid var(--color-line);
+  }
+  .next .name {
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    transition: color 0.4s var(--ease-out);
+  }
+  .next a:hover .name {
+    color: var(--accent);
+  }
+  @media (min-width: 720px) {
+    .metrics {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .features {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+      gap: 40px;
+      min-height: 88svh;
+    }
+    .stage {
+      order: 0;
+      margin-inline: 0;
+    }
+    .stage :global(.scene) {
+      height: min(72svh, 640px);
+    }
+    .features {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

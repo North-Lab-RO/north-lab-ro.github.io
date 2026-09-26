@@ -1,0 +1,123 @@
+---
+title: BANKY
+category: Personal finance · private
+tagline: Your bank statements, read by a model on your own GPU. Every number is checked against the page before it reaches your ledger.
+summary: >-
+  BANKY is a personal finance app for people who won't hand their bank statements to a cloud service. It imports PDF,
+  Excel and CSV statements, scanned pages and receipt photos, then extracts and categorises each transaction with a
+  language model running on local hardware. Balances, budgets, 50/30/20 analysis, goals, investments and printable
+  reports are all computed from a ledger you confirm row by row. The model only suggests: every number it writes must
+  exist on the source page, and all the money maths is plain code.
+order: 4
+accent: violet
+scene: ledger
+metrics:
+  - value: '95.1%'
+    label: of fields read correctly (117 of 123, model loaded)
+  - value: '0'
+    label: numbers the guard had to reject in the model benchmark
+  - value: '1,615'
+    label: automated tests (1,186 backend, 429 frontend)
+  - value: '0'
+    label: floats used for money
+features:
+  - title: Import anything a bank gives you
+    body: PDF, Excel and CSV statements with bank-specific parsers, plus scanned pages and receipt photos through local OCR. Duplicates are detected on import.
+  - title: Review before the ledger
+    body: Parsed rows wait in a side-by-side review screen. Nothing becomes a transaction until you confirm it.
+  - title: Categories that learn
+    body: Local classification learns your merchants, and whole groups of rows can be accepted at once.
+  - title: Transfers that can't hide spending
+    body: Internal transfers are enforced by the database, so moving money between your own accounts never masks a real expense.
+  - title: Search that speaks Romanian
+    body: Diacritic-insensitive search with amount queries like ">500", and an audit trail on every edit.
+  - title: Budgets, goals and reports
+    body: 50/30/20 analysis, budgets, goals, investments, themes, printable reports and a one-file backup and restore.
+stack:
+  - Python
+  - FastAPI
+  - SQLAlchemy
+  - PostgreSQL
+  - Ollama
+  - Qwen 3.6 27B
+  - PaddleOCR
+  - React
+  - TypeScript
+  - Vite
+  - Tailwind
+  - Recharts
+  - Docker
+reports:
+  - title: Monthly report (PDF)
+    description: Spending by category, budgets and the 50/30/20 split for one month.
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import ImportReview from '../../../components/samples/ImportReview.astro';
+import InfoGrid from '../../../components/project/InfoGrid.astro';
+
+## How it works
+
+The language model does the one thing code can't: turning a messy page into structured rows. Everything before and
+after it is deterministic. The model runs on an isolated network with no internet access.
+
+<Pipeline
+  title="Statement → reviewed ledger"
+  caption="The model suggests; code checks; you confirm."
+  stages={[
+    { label: 'Upload', detail: 'PDF, XLSX or CSV statements, scanned pages and receipt photos.' },
+    { label: 'Parse or read', detail: 'Bank-specific parsers for known layouts and Romanian number formats; local OCR for scans and receipts.', tag: 'PaddleOCR' },
+    { label: 'Structure', detail: 'The language model turns text into dated, described, signed rows.', tag: 'qwen3.6 27B' },
+    { label: 'Digit guard', detail: 'Every number in the output must equal a whole number on the page. Anything else is dropped.' },
+    { label: 'Review', detail: 'Rows wait for you in a side-by-side review screen, with duplicates flagged.' },
+    { label: 'Ledger', detail: 'Confirmed rows become transactions stored as NUMERIC(18,2), with an audit trail.' },
+  ]}
+/>
+
+Written insights take five passes (draft, verify, critique, revise, verify), and a fixed rule-based guard has the final
+say. On a 24 GB card, several passes of a model that fits in memory beat a single pass of a larger one.
+
+## Why a guard, not trust
+
+<InfoGrid
+  items={[
+    { tag: 'the failure', title: 'Plausible and wrong', body: 'A model reading 1.284,50 and writing 128450.00 produces a number that balances against nothing. No later check could tell it was invented.' },
+    { tag: 'the rule', title: 'Whole numbers only', body: 'Only digits are compared, never punctuation, and each number must match a whole number on the page. 84.32 is a slice of 184,32, so it fails.' },
+    { tag: 'the result', title: 'Suggestions, not entries', body: 'A rejected value is left empty for you to fill in. The ledger only ever contains numbers you have confirmed.' },
+  ]}
+/>
+
+## Sample output
+
+<ImportReview lang="en" />
+
+## The guard, in code
+
+<CodeSnippet
+  file="backend/app/ai/extraction_guard.py"
+  lang="python"
+  caption="Each numeral in the model's output must equal a numeral that was read. Substring matches are not enough: that is exactly how a dropped leading digit would slip through."
+  code={`
+_DIGITS = re.compile(r"\\D")
+_DIGIT_RUN = re.compile(r"\\d[\\d.,]*\\d|\\d")
+
+
+def digits(text: str) -> str:
+    return _DIGITS.sub("", text or "")
+
+
+def is_grounded(value: str, sources: list[str]) -> bool:
+    if not value:
+        return True
+
+    source_runs = [digits(run) for block in sources for run in _DIGIT_RUN.findall(block)]
+    for run in _DIGIT_RUN.findall(value):
+        needle = digits(run)
+        if not needle:
+            continue
+        if needle not in source_runs:
+            return False
+    return True
+`}
+/>

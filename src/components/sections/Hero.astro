@@ -1,51 +1,32 @@
 ---
 import Scene from '../3d/Scene.astro';
+import { t, type Lang } from '../../i18n/ui';
 
 interface Props {
-  projectCount: number;
+  lang: Lang;
 }
-const { projectCount } = Astro.props;
-
-const readout = [
-  { k: 'Inference', v: 'On-premise' },
-  { k: 'Cloud AI calls', v: '0' },
-  { k: 'Systems built', v: String(projectCount) },
-];
+const { lang } = Astro.props;
+const h = t(lang).hero;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <Scene name="northstar" class="hero-scene" label="A slowly turning crystal star inside a compass ring, with an aurora behind it" />
+  <Scene name="northstar" class="hero-scene" label={h.scene} />
   <div class="veil" aria-hidden="true"></div>
 
   <div class="wrap content">
     <p class="label eyebrow" data-rise>
       <span class="local-dot" aria-hidden="true"></span>
-      Independent AI lab · Romania
+      {h.eyebrow}
     </p>
     <h1 id="hero-title" class="display title" data-rise style="--delay:.08s">
-      AI that runs<br />where your<br /><em>data lives.</em>
+      {h.title[0]}<br />{h.title[1]}<br /><em>{h.title[2]}</em>
     </h1>
-    <p class="lede" data-rise style="--delay:.16s">
-      We design and build private AI systems (language models, retrieval, speech and image pipelines) that run
-      entirely on your own hardware. No cloud inference. Nothing leaves the building.
-    </p>
+    <p class="lede" data-rise style="--delay:.16s">{h.lede}</p>
     <div class="actions" data-rise style="--delay:.24s">
-      <a href="#work" class="btn btn-primary">See the work <span aria-hidden="true">↓</span></a>
-      <a href="#capabilities" class="btn btn-ghost">What we build</a>
+      <a href="#services" class="btn btn-primary">{h.ctaServices} <span aria-hidden="true">↓</span></a>
+      <a href="#projects" class="btn btn-ghost">{h.ctaProjects}</a>
     </div>
   </div>
-
-  <dl class="readout wrap" data-rise style="--delay:.4s">
-    {
-      readout.map((r) => (
-        <div class="row">
-          <dt>{r.k}</dt>
-          <span class="leader" aria-hidden="true" />
-          <dd>{r.v}</dd>
-        </div>
-      ))
-    }
-  </dl>
 </section>
 
 <style>
@@ -56,7 +37,7 @@ const readout = [
     flex-direction: column;
     justify-content: flex-end;
     padding-top: 72px;
-    padding-bottom: clamp(28px, 5vw, 56px);
+    padding-bottom: clamp(40px, 7vw, 88px);
     isolation: isolate;
   }
   .hero :global(.hero-scene) {
@@ -82,8 +63,8 @@ const readout = [
     margin-bottom: 22px;
   }
   .title {
-    font-size: clamp(2.7rem, 9.6vw, 7.6rem);
-    max-width: 11ch;
+    font-size: clamp(2.4rem, 8vw, 6.2rem);
+    max-width: 13ch;
   }
   .title em {
     font-style: normal;
@@ -95,7 +76,7 @@ const readout = [
   }
   .lede {
     margin-top: 28px;
-    max-width: 46ch;
+    max-width: 48ch;
   }
   .actions {
     display: flex;
@@ -103,50 +84,12 @@ const readout = [
     gap: 12px;
     margin-top: 32px;
   }
-  .readout {
-    margin-top: 48px;
-    display: grid;
-    gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .row {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    max-width: 420px;
-  }
-  dt {
-    color: var(--color-mist);
-  }
-  .leader {
-    flex: 1;
-    border-bottom: 1px dotted var(--color-line);
-    transform: translateY(-3px);
-  }
-  dd {
-    color: var(--color-frost);
-  }
   @media (min-width: 900px) {
     .content {
       padding-top: 0;
     }
     .hero {
       justify-content: center;
-    }
-    .readout {
-      position: absolute;
-      right: 0;
-      bottom: clamp(28px, 5vw, 56px);
-      width: auto;
-      margin: 0;
-      max-width: none;
-      padding-inline: var(--gutter);
-    }
-    .row {
-      width: 340px;
     }
   }
 </style>

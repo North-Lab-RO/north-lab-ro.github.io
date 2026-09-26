@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/sections/Hero.astro';
+import Services from '../components/sections/Services.astro';
+import ProjectsGrid from '../components/sections/ProjectsGrid.astro';
+import About from '../components/sections/About.astro';
+import TechWall from '../components/sections/TechWall.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+
+<Base lang={lang}>
+  <Hero lang={lang} />
+  <Services lang={lang} />
+  <ProjectsGrid lang={lang} />
+  <About lang={lang} />
+  <TechWall lang={lang} />
+</Base>

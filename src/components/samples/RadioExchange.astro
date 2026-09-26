@@ -1,36 +1,60 @@
 ---
-const lines = [
-  {
-    who: 'Pilot',
-    text: 'Otopeni Tower, TAROM three zero one, holding point runway zero eight right, ready for departure.',
-    trace: ['speech → text', 'intent: ready for departure', 'phase: holding → Tower'],
-  },
-  {
-    who: 'Tower',
-    text: 'TAROM three zero one, wind zero seven zero degrees eight knots, runway zero eight right, cleared for take-off.',
-    trace: ['runway clear check', 'reply verified', 'text → speech'],
-  },
-  {
-    who: 'Pilot',
-    text: 'Cleared for take-off runway zero eight right, TAROM three zero one.',
-    trace: ['readback matches clearance'],
-  },
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+// Radio transmissions are ICAO English in both languages; everything around them is translated.
+const radio = [
+  'Otopeni Tower, TAROM three zero one, holding point runway zero eight right, ready for departure.',
+  'TAROM three zero one, wind zero seven zero degrees eight knots, runway zero eight right, cleared for take-off.',
+  'Cleared for take-off runway zero eight right, TAROM three zero one.',
 ];
+const copy = {
+  en: {
+    head: 'LROP · Tower · on-device',
+    pilot: 'Pilot',
+    tower: 'Tower',
+    traces: [
+      ['speech → text', 'intent: ready for departure', 'phase: holding → Tower'],
+      ['runway clear check', 'reply verified', 'text → speech'],
+      ['readback matches clearance'],
+    ],
+    clip: 'Recorded output · synthesised locally',
+    caption:
+      'The exchange above is illustrative. The audio clip is real output from the system\'s speech stage. Note the ICAO “tree” for three.',
+  },
+  ro: {
+    head: 'LROP · Turn · pe dispozitiv',
+    pilot: 'Pilot',
+    tower: 'Turn',
+    traces: [
+      ['voce → text', 'intenție: gata de decolare', 'fază: așteptare → Turn'],
+      ['verificare pistă liberă', 'răspuns verificat', 'text → voce'],
+      ['colaționarea corespunde autorizării'],
+    ],
+    clip: 'Înregistrare reală · sintetizată local',
+    caption:
+      'Schimbul de mai sus este ilustrativ; comunicările radio rămân în engleză, limba standard ICAO în aviație. Clipul audio este o ieșire reală a etapei de sinteză vocală. Observă pronunția ICAO „tree” pentru „three”.',
+  },
+}[lang];
+const lines = radio.map((text, i) => ({ who: i === 1 ? copy.tower : copy.pilot, atc: i === 1, text, trace: copy.traces[i] }));
 ---
 
 <figure class="radio" data-reveal>
   <div class="frame">
     <header class="top">
-      <span class="label"><span class="local-dot" aria-hidden="true"></span> LROP · Tower · on-device</span>
+      <span class="label"><span class="local-dot" aria-hidden="true"></span> {copy.head}</span>
       <span class="chip">COM1</span>
     </header>
     <ol class="log">
       {
         lines.map((l) => (
-          <li class:list={['line', l.who === 'Tower' && 'atc']}>
+          <li class:list={['line', l.atc && 'atc']}>
             <span class="who label">{l.who}</span>
             <div>
-              <p class="text">{l.text}</p>
+              <p class="text" lang="en">{l.text}</p>
               <p class="trace">
                 {l.trace.map((t) => (
                   <span>{t}</span>
@@ -43,15 +67,12 @@ const lines = [
     </ol>
 
     <div class="clip">
-      <p class="label">Recorded output · synthesised locally</p>
+      <p class="label">{copy.clip}</p>
       <audio controls preload="none" src="/audio/atc-roger.mp3"></audio>
-      <p class="quote">“Romeo Oscar Tango, tree zero one, roger.”</p>
+      <p class="quote" lang="en">“Romeo Oscar Tango, tree zero one, roger.”</p>
     </div>
   </div>
-  <figcaption class="muted">
-    The exchange above is illustrative. The audio clip is real output from the system's speech stage. Note the ICAO
-    “tree” for three.
-  </figcaption>
+  <figcaption class="muted">{copy.caption}</figcaption>
 </figure>
 
 <style>

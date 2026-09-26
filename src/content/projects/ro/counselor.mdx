@@ -1,0 +1,212 @@
+---
+title: COUNSELOR
+category: Analiză de știri
+tagline: Un analist, nu un cititor de titluri. Citește 41 de publicații, grupează articolele în povești și explică unde sunt de acord, unde diferă și ce nu se știe încă.
+summary: >-
+  COUNSELOR preia non-stop știri românești și internaționale, grupează articolele despre același eveniment într-o
+  singură poveste și scrie pentru fiecare o analiză echilibrată: un rezumat, unde se situează sursele pe spectrul
+  politic, în ce privințe sunt de acord și unde diferă, ce se știe și ce este încă neclar, ce afirmații sunt fapte și
+  care sunt opinii. Fiecare poveste primește un scor de importanță, cele relevante declanșează alerte, iar în fiecare
+  dimineață sosește o sinteză. Toate modelele rulează pe o singură mașină locală; singurul trafic spre exterior sunt
+  fluxurile de știri.
+order: 1
+accent: ice
+scene: globe
+logo: ../../../assets/projects/counselor/logo.png
+metrics:
+  - value: '41'
+    label: surse de știri, interogate la fiecare 5 minute
+  - value: '2,2×'
+    label: mai multe articole grupate pe poveste decât prin cuvinte cheie
+  - value: '~354'
+    label: analize de povești pe oră, pe un singur GPU
+  - value: '0'
+    label: apeluri AI în cloud
+features:
+  - title: O poveste, multe surse
+    body: Gruparea semantică adună articolele despre același eveniment din toate publicațiile, ca să citești evenimentul o singură dată și să vezi exact cine l-a relatat.
+  - title: Spectrul surselor și consensul
+    body: Fiecare poveste arată unde se situează sursele, cât de mult sunt de acord și ce puncte de vedere diferă, atribuite, nu preluate.
+  - title: Fapt versus opinie
+    body: Analiza separă faptele, afirmațiile și opiniile, precum și „ce știm” de „ce nu știm”.
+  - title: Verificări ancorate în surse
+    body: Verdictele sunt calculate din ce au relatat efectiv alte publicații. Modelul clasifică citatele; codul decide verdictul.
+  - title: Alerte și sinteze
+    body: Alerte push ordonate după importanță, cu o scurtă explicație „de ce contează”, o sinteză de dimineață la 07:00 și una actualizată pe parcursul zilei.
+  - title: Glob, căutare și rapoarte PDF
+    body: Un glob 3D al relatărilor, căutare în tot textul, marcaje, o arhivă de rapoarte și rapoarte PDF descărcabile.
+stack:
+  - Python
+  - FastAPI
+  - Celery
+  - PostgreSQL
+  - Redis
+  - Qdrant
+  - Ollama
+  - Qwen3 4B / 14B
+  - BGE-M3
+  - Next.js
+  - three.js
+  - WeasyPrint
+  - Docker
+reports:
+  - title: Sinteza de dimineață (PDF)
+    description: O sinteză completă generată, așa cum este livrată la 07:00.
+  - title: Raport de analiză a unei povești (PDF)
+    description: O poveste cu consensul, spectrul surselor și verificările ei.
+credits: Părți din interfața web sunt adaptate după World Monitor (AGPL-3.0).
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import StoryAnalysis from '../../../components/samples/StoryAnalysis.astro';
+import CounselorStory from '../../../components/project/CounselorStory.astro';
+import InfoGrid from '../../../components/project/InfoGrid.astro';
+import ScoreBars from '../../../components/project/ScoreBars.astro';
+
+## Cum funcționează
+
+Patru etape transformă un flux de titluri în câteva povești care merită citite. Derulează mai jos pentru a le vedea.
+
+<CounselorStory lang="ro" />
+
+În spate, munca rulează ca sarcini în patru cozi separate, astfel încât procesarea în masă a articolelor nu blochează
+niciodată analiza poveștilor importante. Două modele își împart efortul: unul mic se ocupă de fiecare articol, iar
+unul mai mare rulează doar acolo unde se întâlnesc multe surse.
+
+<Pipeline
+  title="Articol → poveste → sinteză"
+  caption="Fiecare etapă rulează pe un singur server Linux, cu un singur GPU."
+  stages={[
+    { label: 'Preluare', detail: '41 de fluxuri RSS interogate la fiecare cinci minute.', tag: 'feedparser' },
+    { label: 'Extragere și curățare', detail: 'Extragerea textului integral, detectarea limbii și eliminarea duplicatelor.', tag: 'trafilatura' },
+    { label: 'Embedding', detail: 'Vectori multilingvi pentru fiecare articol, stocați pentru căutare după similaritate.', tag: 'bge-m3 → qdrant' },
+    { label: 'Grupare în povești', detail: 'Similaritate cosinus ≥ 0,78 într-o fereastră de ±72 de ore; după 48 de ore, o poveste nu mai acceptă articole.' },
+    { label: 'Analiza fiecărui articol', detail: 'Rezumat, estimarea orientării și traducerea titlului pentru fiecare articol.', tag: 'qwen3 4B' },
+    { label: 'Analiza poveștii', detail: 'Consens, divergențe, ce se știe și ce nu, fapt versus opinie.', tag: 'qwen3 14B' },
+    { label: 'Scor și livrare', detail: 'Scor de importanță, alerte push, sinteze programate și rapoarte PDF.', items: ['alerte', 'sinteze', 'rapoarte PDF', 'căutare'] },
+  ]}
+/>
+
+## Ce vezi
+
+O aplicație web progresivă pentru telefon și desktop, construită în jurul a cinci ecrane.
+
+<InfoGrid
+  items={[
+    { title: 'Panou principal', body: 'Douăzeci de panouri pe care le poți muta și redimensiona: alerte, titluri, subiecte în trend și în creștere, verificări, spectrul surselor, starea fluxurilor și o bandă de știri.' },
+    { title: 'Monitor global', body: 'Un glob 3D sau o hartă plană. Fiecare poveste este un marcaj dimensionat după numărul de surse și colorat după nivelul de importanță; poveștile noi pulsează.' },
+    { title: 'Pagina poveștii', body: 'Spectrul surselor, indicatori de consens și încredere, ce știm și ce nu, puncte de vedere, reacția publicului, entități și evoluția poveștii.' },
+    { title: 'Rapoarte', body: 'O arhivă de sinteze generate, fiecare cu o referință stabilă, plus rapoarte la cerere pentru orice zi, descărcabile în PDF.' },
+    { title: 'Ce face AI-ul', body: 'Activitatea sarcinilor în timp real, cu timpi estimați de finalizare, ca să vezi fluxul lucrând în loc să presupui că lucrează.' },
+  ]}
+/>
+
+## În interiorul analizei
+
+Nimic din ce decide ce vezi nu este lăsat doar la latitudinea modelului. Importanța este aditivă și explicabilă:
+
+<ScoreBars
+  title="Scor de importanță · 0–100"
+  caption="Fiecare punct poate fi urmărit până la semnalul care l-a produs."
+  items={[
+    { label: 'Numărul de surse', points: 30, note: 'pondere maximă la 10 publicații' },
+    { label: 'Credibilitatea surselor', points: 15 },
+    { label: 'Acoperire geografică', points: 15, note: 'pondere maximă la 5 țări' },
+    { label: 'Guvern și armată', points: 15 },
+    { label: 'Economie și finanțe', points: 10 },
+    { label: 'Categoriile alese de tine', points: 10 },
+    { label: 'Viteză', points: 5, note: 'surse noi pe oră' },
+  ]}
+  bands={[
+    { label: 'Ridicat', value: 'primele 25%', color: '#ffaa00' },
+    { label: 'Mare', value: 'primele 10%', color: '#ff8800' },
+    { label: 'Critic', value: 'primele 3%', color: '#ff4444' },
+  ]}
+/>
+
+Nivelurile sunt percentile ale întregii arhive, nu praguri fixe. Măsurat pe 1.844 de povești, cel mai mare scor atins
+vreodată a fost 65,6, așa că niște praguri fixe de 75/50/25 ar fi colorat totul în gri.
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: 'grupare', title: 'Același eveniment, aceeași poveste', body: 'Embedding-uri BGE-M3 în Qdrant, cei mai apropiați zece vecini, similaritate cosinus de cel puțin 0,78 și date de publicare la cel mult 72 de ore distanță. La 0,72, trei din patru grupări verificate erau de fapt povești diferite.' },
+    { tag: 'încredere', title: 'Încrederea este o formulă', body: '0,2 + 0,12 × surse (până la 5) + 0,06 × orientări distincte (până la 4). Mai multe surse independente, din mai multe direcții, înseamnă mai multă încredere.' },
+    { tag: 'schemă', title: 'O formă fixă pentru fiecare poveste', body: 'Rezumate scurte, medii și detaliate, fapte cheie cu susținere, ce știm și ce nu, puncte de vedere după orientare, citate, entități, semnale de dezinformare, consens, locație și categorii.' },
+    { tag: 'limbă', title: 'Multe limbi la intrare, română la ieșire', body: 'Articolele sunt detectate în opt limbi; fiecare analiză este scrisă în română, iar titlurile străine sunt traduse.' },
+  ]}
+/>
+
+## Încredere prin construcție
+
+<InfoGrid
+  items={[
+    { title: 'Verdicte calculate în cod', body: 'La verificări, modelul doar etichetează fiecare citat din altă publicație ca susținere, contrazicere sau fără legătură. Verdictul rezultă din numărătoare.' },
+    { title: 'Citate verificate la sursă', body: 'Citatele din reacția publicului trebuie să apară cuvânt cu cuvânt într-un comentariu real. Autorul și linkul provin din acel comentariu, niciodată de la model.' },
+    { title: 'Fără dezacord inventat', body: 'Poveștile cu o singură sursă nu mai primesc puncte de vedere sau scor de consens: înainte de această regulă, 82% dintre ele veneau cu un dezacord care nu exista.' },
+  ]}
+/>
+
+## Măsurat pe un singur RTX 3090
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: '~354 / oră', title: 'Analize de povești', body: 'Ritm susținut cu GPU-ul la aproximativ 85%, măsurat după reglarea cozilor de sarcini.' },
+    { tag: '21,3 / 24,5 GB', title: 'Trei modele rezidente', body: 'Modelele de limbaj de 4B și 14B și modelul de embedding rămân încărcate împreună pe o singură placă de 24 GB.' },
+    { tag: '17.062', title: 'Articole grupate', body: 'Arhiva pe care sunt calculate statisticile de trend și de importanță.' },
+    { tag: '~90 s', title: 'O sinteză completă', body: 'Treisprezece povești din România și din lume, cu verificări, scrise într-o singură trecere.' },
+  ]}
+/>
+
+## Exemplu de rezultat
+
+<StoryAnalysis lang="ro" />
+
+## Verdictele sunt calculate, nu generate
+
+Un model lăsat liber să răspundă „confirmat” poate face asta fără să citeze nimic. COUNSELOR caută citate din *alte*
+publicații și îi cere modelului doar să le clasifice. Verdictul rezultă apoi din numărătoare.
+
+<CodeSnippet
+  file="backend/app/services/fact_check.py"
+  lang="python"
+  caption="Articolul care face afirmația și publicația lui nu o pot confirma niciodată, iar un citat dintr-o sursă necunoscută este eliminat, nu atribuit unui nume ghicit."
+  code={`
+def gather_evidence(
+    hits: list[SearchHit],
+    *,
+    claim_article_id: int | None,
+    claim_source_id: int | None,
+    source_names: dict[int, str],
+) -> list[Evidence]:
+    best: dict[int, Evidence] = {}
+    for h in hits:
+        payload = h.payload or {}
+        source_id = payload.get("source_id")
+        article_id = payload.get("article_id")
+        text = (payload.get("text") or "").strip()
+        if not text or source_id is None:
+            continue
+        if article_id is not None and article_id == claim_article_id:
+            continue
+        if source_id == claim_source_id:
+            continue
+        name = source_names.get(source_id)
+        if not name:
+            continue
+        ...
+    return sorted(best.values(), key=lambda e: e.score, reverse=True)
+
+
+def decide_verdict(*, supporting: int, contradicting: int) -> str:
+    if contradicting > 0:
+        return CONTESTED
+    if supporting >= 2:
+        return CONFIRMED
+    if supporting == 1:
+        return SINGLE_SOURCE
+    return UNVERIFIABLE
+`}
+/>

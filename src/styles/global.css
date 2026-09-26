@@ -248,17 +248,33 @@ canvas {
   opacity: 1;
 }
 
+/* Reduced motion: keep gentle ambient motion (fades, slow loops), drop large movement. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  html {
+    scroll-behavior: auto;
   }
   .js [data-reveal] {
-    opacity: 1;
     transform: none;
+    transition-property: opacity;
   }
+  [data-rise] {
+    animation: none;
+  }
+}
+
+/* ?debug=1 overlay for 3D scenes */
+.scene-debug {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 5;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgb(5 10 22 / 0.85);
+  border: 1px solid var(--color-line);
+  color: var(--color-aurora);
+  font: 11px/1.5 var(--font-mono);
+  white-space: pre;
+  pointer-events: none;
 }

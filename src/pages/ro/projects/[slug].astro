@@ -1,9 +1,9 @@
 ---
-import ProjectView from '../../views/ProjectView.astro';
-import { getProjects } from '../../lib';
+import ProjectView from '../../../views/ProjectView.astro';
+import { getProjects } from '../../../lib';
 
 export async function getStaticPaths() {
-  const projects = await getProjects('en');
+  const projects = await getProjects('ro');
   return projects.map((entry, i) => ({
     params: { slug: entry.slug },
     props: { entry, next: projects[(i + 1) % projects.length] },
@@ -13,4 +13,4 @@ export async function getStaticPaths() {
 const { entry, next } = Astro.props;
 ---
 
-<ProjectView lang="en" entry={entry} next={next} />
+<ProjectView lang="ro" entry={entry} next={next} />

@@ -1,0 +1,136 @@
+---
+import { getProjects } from '../../lib';
+import { t, projectHref, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang).services;
+const projects = await getProjects(lang);
+const titles = new Map(projects.map((p) => [p.slug, p.data.title]));
+---
+
+<section id="services" class="section services" aria-labelledby="services-title">
+  <div class="wrap">
+    <header class="head">
+      <p class="label" data-reveal>{s.label}</p>
+      <h2 id="services-title" class="h-section" data-reveal style="--delay:.06s">{s.title}</h2>
+      <p class="lede" data-reveal style="--delay:.1s">{s.lede}</p>
+    </header>
+
+    <ul class="grid">
+      {
+        s.items.map((item, i) => (
+          <li class="card panel" data-reveal style={`--delay:${(i % 3) * 0.07}s`}>
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22">
+                <path d={item.icon} fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <h3 class="h-sub">{item.title}</h3>
+            <p class="muted body">{item.body}</p>
+            <p class="proof">
+              <span class="label">{s.seenIn}</span>
+              {item.proof
+                .filter((slug) => titles.has(slug))
+                .map((slug) => (
+                  <a href={projectHref(lang, slug)} class="chip">
+                    {titles.get(slug)}
+                  </a>
+                ))}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .head {
+    max-width: 820px;
+    margin-bottom: 56px;
+  }
+  .head .label {
+    margin-bottom: 20px;
+  }
+  .head .lede {
+    margin-top: 22px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+    overflow: hidden;
+    transition:
+      border-color 0.4s var(--ease-out),
+      transform 0.4s var(--ease-out);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, var(--color-ice) 12%, transparent), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+    pointer-events: none;
+  }
+  .card:hover {
+    border-color: color-mix(in srgb, var(--color-ice) 45%, var(--color-line));
+    transform: translateY(-3px);
+  }
+  .card:hover::before {
+    opacity: 1;
+  }
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--color-line);
+    color: var(--color-ice);
+    background: color-mix(in srgb, var(--color-night) 60%, transparent);
+    margin-bottom: 6px;
+  }
+  .body {
+    flex: 1;
+  }
+  .proof {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .proof .label {
+    font-size: 0.66rem;
+    margin-right: 4px;
+  }
+  .proof .chip {
+    position: relative;
+    z-index: 1;
+  }
+  .proof .chip:hover {
+    border-color: var(--color-ice);
+    color: var(--color-ice);
+  }
+  @media (min-width: 700px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1100px) {
+    .grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

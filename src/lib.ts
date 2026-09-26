@@ -1,8 +1,14 @@
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import type { Lang } from './i18n/ui';
 
-export async function getProjects() {
-  const all = await getCollection('projects', ({ data }) => !data.draft);
-  return all.sort((a, b) => a.data.order - b.data.order);
+export type Project = CollectionEntry<'projects'> & { slug: string };
+
+/** Published projects for one language, ordered. `slug` is the id without its language folder. */
+export async function getProjects(lang: Lang): Promise<Project[]> {
+  const all = await getCollection('projects', ({ id, data }) => id.startsWith(`${lang}/`) && !data.draft);
+  return all
+    .map((e) => Object.assign(e, { slug: e.id.slice(lang.length + 1) }))
+    .sort((a, b) => a.data.order - b.data.order);
 }
 
 export const accentVar = {

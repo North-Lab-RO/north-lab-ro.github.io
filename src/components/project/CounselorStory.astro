@@ -1,0 +1,294 @@
+---
+import Scene from '../3d/Scene.astro';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const copy = {
+  en: {
+    label: 'The pipeline, step by step',
+    aria: 'Animation of the COUNSELOR pipeline: sources, clustering, analysis and delivery',
+    steps: 'Step',
+    chapters: [
+      {
+        k: 'Sources',
+        title: '41 outlets, every five minutes.',
+        body: 'Romanian and international feeds are polled around the clock. Each article is extracted to full text, its language detected and duplicates removed before anything else happens.',
+      },
+      {
+        k: 'Cluster',
+        title: 'Coverage finds its story.',
+        body: 'Every article becomes a BGE-M3 embedding. Articles about the same event (cosine similarity ≥ 0.78, published within 72 hours of each other) join one story, whichever outlet wrote them.',
+      },
+      {
+        k: 'Analyse',
+        title: 'One story, read from every side.',
+        body: 'A 14B model reads the whole cluster and returns a fixed schema: summaries, key facts, what is known and unknown, viewpoints by orientation and a consensus score. Confidence and the bias spectrum are computed in code.',
+      },
+      {
+        k: 'Deliver',
+        title: 'Only what matters reaches you.',
+        body: 'An importance score from 0 to 100 (sources, credibility, countries, category, velocity) ranks every story. Above your threshold you get a push alert with a short “why it matters”, and every morning at 07:00, a briefing.',
+      },
+    ],
+  },
+  ro: {
+    label: 'Fluxul, pas cu pas',
+    aria: 'Animație a fluxului COUNSELOR: surse, grupare, analiză și livrare',
+    steps: 'Pasul',
+    chapters: [
+      {
+        k: 'Surse',
+        title: '41 de publicații, la fiecare cinci minute.',
+        body: 'Fluxurile românești și internaționale sunt interogate non-stop. Fiecare articol este extras integral, i se detectează limba, iar duplicatele sunt eliminate înainte de orice altceva.',
+      },
+      {
+        k: 'Grupare',
+        title: 'Articolele își găsesc povestea.',
+        body: 'Fiecare articol devine un embedding BGE-M3. Articolele despre același eveniment (similaritate cosinus ≥ 0,78, publicate la cel mult 72 de ore unul de altul) intră în aceeași poveste, indiferent de publicație.',
+      },
+      {
+        k: 'Analiză',
+        title: 'O poveste, citită din toate unghiurile.',
+        body: 'Un model de 14B citește întregul grup și returnează o schemă fixă: rezumate, fapte cheie, ce se știe și ce nu, puncte de vedere după orientare și un scor de consens. Încrederea și spectrul surselor sunt calculate în cod.',
+      },
+      {
+        k: 'Livrare',
+        title: 'Ajunge la tine doar ce contează.',
+        body: 'Un scor de importanță de la 0 la 100 (surse, credibilitate, țări, categorie, viteză) ordonează fiecare poveste. Peste pragul tău primești o alertă push cu o scurtă explicație „de ce contează”, iar în fiecare dimineață la 07:00, o sinteză.',
+      },
+    ],
+  },
+}[lang];
+---
+
+<section class="cstory" data-cstory aria-label={copy.label}>
+  <div class="stage-col">
+    <div class="sticky">
+      <Scene name="counselorstory" class="cscene" label={copy.aria} />
+      <div class="dots" role="tablist" aria-label={copy.label}>
+        {
+          copy.chapters.map((c, i) => (
+            <button role="tab" data-dot={i} aria-selected={i === 0 ? 'true' : 'false'} aria-label={`${copy.steps} ${i + 1}: ${c.k}`}>
+              <span />
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+  <ol class="chapters">
+    {
+      copy.chapters.map((c, i) => (
+        <li data-chapter={i} class:list={['chapter', i === 0 && 'on']}>
+          <p class="label num">
+            <span>{String(i + 1).padStart(2, '0')}</span> {c.k}
+          </p>
+          <h3 class="ch-title">{c.title}</h3>
+          <p class="ch-body">{c.body}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-cstory]').forEach((section) => {
+    const host = section.querySelector<HTMLElement>('[data-scene]')!;
+    const chapters = [...section.querySelectorAll<HTMLElement>('[data-chapter]')];
+    const dots = [...section.querySelectorAll<HTMLButtonElement>('[data-dot]')];
+    const desktop = window.matchMedia('(min-width: 1000px)');
+    let current = -1;
+    let timer = 0;
+    let inView = false;
+
+    const show = (i: number, stage = i) => {
+      host.dataset.stage = String(stage);
+      if (i === current) return;
+      current = i;
+      chapters.forEach((c, k) => c.classList.toggle('on', k === i));
+      dots.forEach((d, k) => d.setAttribute('aria-selected', String(k === i)));
+    };
+
+    // Desktop: the scroll position through the chapters drives the scene continuously.
+    const onScroll = () => {
+      if (!desktop.matches) return;
+      const mid = window.innerHeight * 0.5;
+      let stage = 0;
+      chapters.forEach((c, k) => {
+        const r = c.getBoundingClientRect();
+        const p = (mid - r.top) / r.height;
+        if (p >= 0) stage = Math.min(3, k + Math.min(1, p) - 0.5);
+      });
+      stage = Math.max(0, stage);
+      show(Math.round(stage), stage);
+    };
+
+    // Phones: chapters advance on their own while the section is on screen; dots jump directly.
+    const tick = () => show((current + 1) % chapters.length);
+    const restart = () => {
+      clearInterval(timer);
+      if (!desktop.matches && inView) timer = window.setInterval(tick, 4200);
+    };
+    dots.forEach((d, k) =>
+      d.addEventListener('click', () => {
+        show(k);
+        restart();
+      }),
+    );
+    new IntersectionObserver(([e]) => {
+      inView = e.isIntersecting;
+      restart();
+    }).observe(section);
+
+    let ticking = false;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          onScroll();
+          ticking = false;
+        });
+      },
+      { passive: true },
+    );
+    desktop.addEventListener('change', () => {
+      restart();
+      onScroll();
+    });
+    show(0);
+    onScroll();
+  });
+</script>
+
+<style>
+  .cstory {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-block: 48px;
+    border: 1px solid var(--color-line);
+    border-radius: 24px;
+    background:
+      radial-gradient(60% 50% at 70% 30%, color-mix(in srgb, var(--color-ice) 8%, transparent), transparent 70%),
+      var(--color-deep);
+  }
+  .stage-col {
+    border-bottom: 1px solid var(--color-line);
+  }
+  .sticky {
+    position: relative;
+  }
+  .sticky :global(.cscene) {
+    height: min(58svh, 460px);
+    border-radius: 24px 24px 0 0;
+  }
+  .dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+  .dots button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+  }
+  .dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-line);
+    transition:
+      background-color 0.3s,
+      width 0.3s var(--ease-out);
+  }
+  .dots [aria-selected='true'] span {
+    width: 22px;
+    border-radius: 4px;
+    background: var(--color-ice);
+  }
+  .chapters {
+    padding: clamp(24px, 4vw, 40px);
+  }
+  .chapter {
+    display: none;
+  }
+  .chapter.on {
+    display: block;
+    animation: chapter-in 0.6s var(--ease-out);
+  }
+  @keyframes chapter-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  .num {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .num span {
+    color: var(--color-ice);
+  }
+  .ch-title {
+    margin-top: 14px;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+  .ch-body {
+    margin-top: 14px;
+    max-width: 46ch;
+  }
+  @media (min-width: 1000px) {
+    .cstory {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+    .stage-col {
+      order: 2;
+      border-bottom: 0;
+      border-left: 1px solid var(--color-line);
+    }
+    .sticky {
+      position: sticky;
+      top: 88px;
+    }
+    .sticky :global(.cscene) {
+      height: calc(100vh - 120px);
+      max-height: 760px;
+      border-radius: 0 24px 24px 0;
+    }
+    .dots {
+      display: none;
+    }
+    .chapters {
+      padding: 0 clamp(28px, 4vw, 56px);
+    }
+    .chapter,
+    .chapter.on {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 78vh;
+      animation: none;
+      opacity: 0.28;
+      transition: opacity 0.5s var(--ease-out);
+    }
+    .chapter.on {
+      opacity: 1;
+    }
+  }
+</style>

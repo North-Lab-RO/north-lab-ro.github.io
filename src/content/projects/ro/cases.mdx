@@ -1,0 +1,174 @@
+---
+title: CASES
+category: Joc generativ
+tagline: Un model local scrie un caz polițist complet, iar codul demonstrează că poate fi rezolvat înainte ca cineva să îl joace.
+summary: >-
+  CASES generează infracțiuni fictive complete și lasă o echipă să le rezolve în jurul unui singur ecran comun. Scrie
+  mai întâi adevărul ascuns, apoi derivă din el suspecții, probele, interogatoriile, rezultatele de laborator și
+  documentele, astfel încât povestea să nu se poată contrazice. Validatori automați demonstrează că fiecare caz este
+  corect și rezolvabil, apoi un model de imagine creează portretele, scenele și probele. Jucătorii percheziționează
+  locuri, interoghează suspecți, trimit probe la laborator, tipăresc exponate pentru un panou fizic, depun un raport
+  și urmăresc un proces animat care dă verdictul.
+order: 2
+accent: ember
+scene: board
+cover: ../../../assets/projects/cases/cover.jpg
+coverAlt: O pădure de pini tăiată, în lumina joasă a soarelui, imaginea de copertă a unui caz generat
+metrics:
+  - value: '10'
+    label: etape de generare, întâi adevărul ascuns
+  - value: 8–15 min
+    label: pentru generarea unui caz pe un RTX 3090
+  - value: '≥ 3'
+    label: descoperiri independente necesare pentru dovadă
+  - value: '0'
+    label: apeluri GPU în timpul jocului
+features:
+  - title: Întâi adevărul
+    body: Soluția este scrisă înaintea oricărui alt lucru, iar fiecare etapă ulterioară este derivată din ea, cu JSON constrâns de schemă.
+  - title: Rezolvabil, demonstrat
+    body: O verificare de accesibilitate peste condițiile fiecărei acțiuni confirmă că probele decisive pot fi obținute în timpul disponibil.
+  - title: Fidel epocii
+    body: Fără probe ADN înainte de 1986, documente potrivite perioadei și un stil fotografic care se potrivește anului.
+  - title: Imagini consecvente
+    body: Portretele, scenele crimei, probele și locurile păstrează aceeași înfățișare a personajelor pe tot parcursul unui caz.
+  - title: O anchetă adevărată
+    body: Un depozit de probe, interogatorii care pot demasca minciuni, un laborator criminalistic cu trei locuri la coadă, o hartă, o cronologie și un ceas de joc.
+  - title: Proces și verdict
+    body: Un punctaj determinist alimentează o sală de judecată animată cu cinci verdicte posibile. Sunt incluse fișe de probe tipăribile pentru un panou fizic.
+stack:
+  - TypeScript
+  - React
+  - Vite
+  - Fastify
+  - Prisma
+  - PostgreSQL
+  - Redis
+  - BullMQ
+  - Ollama
+  - Mistral Small 3.2 24B
+  - ComfyUI
+  - SDXL
+  - Docker
+gallery:
+  - src: ../../../assets/projects/cases/scene-wide.jpg
+    alt: Imagine largă a unei poieni cu copaci doborâți, locul crimei
+    caption: Locul crimei · general
+  - src: ../../../assets/projects/cases/portrait-1.jpg
+    alt: Portretul unui bărbat de cincizeci și ceva de ani, cu ochelari și cămașă de lucru
+    caption: Portret de suspect
+  - src: ../../../assets/projects/cases/evidence-knives.jpg
+    alt: Două cuțite pe o masă gri de probe
+    caption: Fotografie de probă
+  - src: ../../../assets/projects/cases/scene-detail.jpg
+    alt: Prim-plan cu bușteni tăiați și ferigi pe solul pădurii
+    caption: Locul crimei · detaliu
+  - src: ../../../assets/projects/cases/portrait-2.jpg
+    alt: Portretul unei femei cu ochelari, într-o cămașă verde
+    caption: Portret de martor
+  - src: ../../../assets/projects/cases/evidence-shirt.jpg
+    alt: O cămașă albastră cu o pată roșie, întinsă pe beton
+    caption: Fotografie de probă
+  - src: ../../../assets/projects/cases/location-diner.jpg
+    alt: Un restaurant roșu de lângă șosea, cu o mașină clasică turcoaz parcată în față
+    caption: Loc · restaurant
+  - src: ../../../assets/projects/cases/evidence-camera.jpg
+    alt: Un aparat foto negru pe o masă gri de probe
+    caption: Fotografie de probă
+  - src: ../../../assets/projects/cases/location-trail.jpg
+    alt: O potecă prin pădure, cu o masă de picnic din lemn
+    caption: Loc · potecă
+reports:
+  - title: Fișe de probe tipăribile (PDF)
+    description: Setul de exponate pe care jucătorii îl tipăresc pentru panoul fizic de anchetă.
+  - title: Export al dosarului (PDF)
+    description: Informarea, persoanele de interes și registrul de probe pentru un caz.
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import CaseFile from '../../../components/samples/CaseFile.astro';
+
+## Cum funcționează
+
+Modelul de limbaj și cel de imagine nu încap simultan pe o placă de 24 GB, așa că un mecanism de rezervare a GPU-ului
+le rulează pe rând. Totul este generat dinainte, deci jocul propriu-zis nu are nevoie deloc de GPU.
+
+<Pipeline
+  title="Premisă → caz demonstrat → caz ilustrat"
+  caption="Generarea rulează ca sarcini în fundal; erorile sunt reparate în etapa care le-a produs."
+  stages={[
+    {
+      label: 'Generare în etape',
+      detail: 'Zece etape constrânse de schemă, fiecare derivată din adevărul ascuns.',
+      tag: 'mistral-small 24B',
+      items: ['premisă', 'adevăr ascuns', 'personaje', 'locuri', 'probe', 'rezultate de laborator', 'interogatorii', 'documente', 'starea inițială', 'lista de imagini'],
+      numberedItems: true,
+    },
+    {
+      label: 'Validatori',
+      detail: 'Referințe, cronologie, fidelitate față de epocă, corectitudine și rezolvabilitate.',
+      items: ['structură', 'cronologie', 'epocă', 'corectitudine', 'rezolvabilitate'],
+      loop: 'până la 3 reparații țintite',
+    },
+    { label: 'Ilustrare', detail: 'Portrete, scene ale crimei, probe și locuri, cu personaje care își păstrează înfățișarea.', tag: 'SDXL · ComfyUI' },
+    { label: 'Revizuire', detail: 'Un editor verifică întregul caz, inclusiv soluția ascunsă, și îl publică.' },
+    { label: 'Joc', detail: 'Ancheta, interogatoriile, testele de laborator, raportul și procesul. Fără GPU.' },
+  ]}
+/>
+
+## Exemplu de rezultat
+
+<CaseFile lang="ro" />
+
+## Rezolvabilitatea este o demonstrație, nu o speranță
+
+Fiecare acțiune pe care o poate face echipa (o percheziție, un interogatoriu, un test de laborator, o cerere de
+documente) are condiții, dezvăluiri și un cost în timp. Validatorul calculează tot ce poate fi aflat pornind de la
+informațiile inițiale, apoi verifică dacă cel mai scurt drum spre probele decisive încape în timpul disponibil.
+
+<CodeSnippet
+  file="packages/shared/src/knowledge.ts"
+  lang="ts"
+  caption="O închidere de tip punct fix peste acțiunile cazului. Orice probă decisivă rămasă în afara ei trimite cazul înapoi la etapa care o poate produce."
+  code={`
+export function computeClosure(
+  initial: readonly KnowledgeKey[],
+  actions: readonly DiscoveryAction[],
+): Set<KnowledgeKey> {
+  const held = new Set<KnowledgeKey>(initial);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const act of actions) {
+      if (!isSatisfied(held, act.requires)) continue;
+      for (const key of act.reveals) {
+        if (!held.has(key)) {
+          held.add(key);
+          grew = true;
+        }
+      }
+    }
+  }
+  return held;
+}
+
+// validation/solvability.ts
+const closure = computeClosure(initial, actions);
+const unreachable = draft.truth.provingEvidence.filter((key) => !closure.has(key));
+
+const path = computeCriticalPath(initial, actions, draft.truth.provingEvidence);
+const budgetSeconds = draft.profile.timeBudgetMinutes * 60;
+const fraction = path.costSeconds / budgetSeconds;
+if (fraction > draft.profile.maxCriticalPathFraction) {
+  const used = Math.round(fraction * 100);
+  const allowed = Math.round(draft.profile.maxCriticalPathFraction * 100);
+  issues.push(issue(7,
+    \`Critical path costs \${used}% of the time budget, above the \${allowed}% ceiling.\`));
+}
+`}
+/>
+
+## Imagini generate
+
+Toate imaginile de mai jos au fost create de modelul local de imagine pentru un singur caz generat, diferit de dosarul de mai sus.

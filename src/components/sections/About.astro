@@ -1,37 +1,27 @@
 ---
-const principles = [
-  {
-    title: 'Private by construction',
-    body: 'Inference, embeddings and speech run on-premise. The only outbound traffic is data you asked for, like a news feed or a weather report.',
-    icon: 'M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z',
-  },
-  {
-    title: 'Built to run offline',
-    body: 'The core loops (speech, reasoning, generation) keep working without an internet connection, because nothing in them depends on one.',
-    icon: 'M4 12h16M12 4v16M6.3 6.3l11.4 11.4M17.7 6.3L6.3 17.7',
-  },
-  {
-    title: 'Models propose, code decides',
-    body: 'Fact-check verdicts, case solvability and radio instructions are checked by deterministic code before they reach a person.',
-    icon: 'M5 12l4 4L19 6',
-  },
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = t(lang).about;
+const icons = [
+  'M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z',
+  'M4 12h16M12 4v16M6.3 6.3l11.4 11.4M17.7 6.3L6.3 17.7',
+  'M5 12l4 4L19 6',
 ];
+const principles = a.principles.map((p, i) => ({ ...p, icon: icons[i] }));
 ---
 
-<section id="lab" class="section about" aria-labelledby="lab-title">
+<section id="about" class="section about" aria-labelledby="about-title">
   <div class="wrap grid">
     <div class="intro">
-      <p class="label" data-reveal>The lab</p>
-      <h2 id="lab-title" class="h-section" data-reveal style="--delay:.06s">
-        Local-first isn't a setting. It's the architecture.
-      </h2>
+      <p class="label" data-reveal>{a.label}</p>
+      <h2 id="about-title" class="h-section" data-reveal style="--delay:.06s">{a.title}</h2>
     </div>
     <div class="body">
-      <p class="lede" data-reveal style="--delay:.1s">
-        Every system we build runs its models on hardware the owner controls: one GPU workstation, or a rack in their own
-        building. That constraint shapes everything. Models are chosen to fit the memory budget. Queues keep the GPU busy
-        without starving interactive requests. Validation layers check model output before anyone relies on it.
-      </p>
+      <p class="lede" data-reveal style="--delay:.1s">{a.lede}</p>
       <ul class="principles">
         {
           principles.map((p, i) => (

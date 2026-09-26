@@ -2,13 +2,14 @@
 
 **Private AI systems, built and run on our own hardware.**
 
-This repository is the source of the North-Lab-RO portfolio site: **https://north-lab-ro.github.io**
+This repository is the source of the North-Lab-RO portfolio site: **https://north-lab-ro.github.io** (English) · **https://north-lab-ro.github.io/ro/** (Română)
 
 | Project | Domain | What it does |
 |---|---|---|
 | [COUNSELOR](https://north-lab-ro.github.io/projects/counselor/) | News intelligence | Reads 41 outlets, groups coverage into stories and explains where the sources agree, with fact-checks computed from other outlets. |
 | [CASES](https://north-lab-ro.github.io/projects/cases/) | Generative game | A local model writes a complete detective case, and validators prove it can be solved before anyone plays it. |
 | [AI_ATC](https://north-lab-ro.github.io/projects/ai-atc/) | Voice AI · aviation | A self-hosted air traffic controller for X-Plane 12: speech in, ICAO phraseology out, entirely on-device. |
+| [BANKY](https://north-lab-ro.github.io/projects/banky/) | Personal finance | Bank statements read by a local model; every number is checked against the page before it reaches the ledger. |
 
 ---
 
@@ -63,15 +64,32 @@ flowchart LR
     VER --> TTS[Kokoro TTS] --> COM[COM1 radio in sim]
 ```
 
+### BANKY
+
+```mermaid
+flowchart LR
+    UP[Upload<br/>PDF · XLSX · CSV · scans] --> P{Known bank layout?}
+    P -- yes --> BP[Bank parser]
+    P -- no --> OCR[Local OCR<br/>PaddleOCR]
+    BP --> LLM[Structure rows<br/>Qwen 3.6 27B]
+    OCR --> LLM
+    LLM --> G{Digit guard<br/>every number on the page?}
+    G -- no --> DROP[Value dropped<br/>left for the user]
+    G -- yes --> REV[Review screen]
+    DROP --> REV
+    REV -- confirmed --> LED[(Ledger<br/>NUMERIC 18,2)]
+```
+
 ---
 
 ## About this site
 
 ```mermaid
 flowchart TB
-    MDX[src/content/projects/*.mdx] --> COL[Content collection<br/>schema-validated]
-    COL --> HOME[Home page<br/>/]
-    COL --> PAGE[Project pages<br/>/projects/slug/]
+    MDX[src/content/projects/en/*.mdx<br/>src/content/projects/ro/*.mdx] --> COL[Content collection<br/>schema-validated]
+    UI[src/i18n/ui.ts<br/>interface text EN + RO] --> HOME
+    COL --> HOME[Home<br/>/ and /ro/]
+    COL --> PAGE[Project pages<br/>/projects/slug/ and /ro/projects/slug/]
     ASSETS[src/assets/projects/*] --> IMG[astro:assets → WebP]
     IMG --> PAGE
     PAGE --> ISL[3D islands<br/>three.js loaded on demand]
@@ -80,7 +98,8 @@ flowchart TB
 ```
 
 - **Astro** static site. Every page is plain HTML with no framework runtime.
-- **three.js** scenes load only when they scroll into view. They cap the pixel ratio on phones, pause when off-screen and respect *reduced motion*.
+- **Two languages.** English at `/`, Romanian at `/ro/`. First-time visitors whose browser prefers Romanian are sent to `/ro/`; the EN | RO switch remembers the choice. Interface text lives in `src/i18n/ui.ts`, project text in one file per language.
+- **three.js** scenes load only when they scroll into view. They cap the pixel ratio on phones and pause when off-screen. With *reduced motion* on they keep moving, slowly and without parallax; on slow devices they lower resolution and frame rate instead of freezing. Add `?debug=1` to any URL to see what the 3D is doing on your device.
 - **Tailwind CSS 4** for design tokens. Fonts are Unbounded, Hanken Grotesk and IBM Plex Mono.
 
 ### Develop locally
@@ -96,18 +115,20 @@ npm run preview   # serve the built site
 
 ### Add a project
 
-1. Copy `src/content/projects/_template.mdx` to `src/content/projects/<slug>.mdx`. The slug becomes the URL `/projects/<slug>/`.
-2. Fill in the frontmatter: title, category, tagline, metrics, features, stack, and optionally `gallery`, `reports` and `scene`.
-3. Put images in `src/assets/projects/<slug>/`. They're converted to WebP at build time.
-4. Set `draft: false` and push. The card on the home page and the project page are generated automatically.
+Every project has one file per language, with the same file name:
 
-`order` controls the position in the Work list. `accent` picks the project colour (`ice`, `aurora`, `ember`, `violet`). `scene` picks a 3D hero (`globe`, `board`, `radar`), or use `none` to show the cover image instead.
+1. Copy `src/content/projects/en/_template.mdx` to `src/content/projects/en/<slug>.mdx`, and `src/content/projects/ro/_template.mdx` to `src/content/projects/ro/<slug>.mdx`. The slug becomes `/projects/<slug>/` and `/ro/projects/<slug>/`.
+2. Fill in the frontmatter in each language: title, category, tagline, metrics, features, stack, and optionally `gallery`, `reports` and `scene`.
+3. Put images in `src/assets/projects/<slug>/`. They're converted to WebP at build time.
+4. Set `draft: false` in both files and push. The home-page card and the project page are generated automatically.
+
+`order` controls the position in the Projects list (the first one is featured). `accent` picks the project colour (`ice`, `aurora`, `ember`, `violet`). `scene` picks a 3D hero (`globe`, `board`, `radar`, `ledger`), or use `none` to show the cover image instead.
 
 To show a "next project" placeholder card on the home page, set `showComingSoon = true` in `src/config.ts`.
 
 ### Add a PDF report
 
-Drop the file into `public/reports/`, then point a `reports` entry at it:
+Drop the file into `public/reports/`, then point a `reports` entry at it (in both language files):
 
 ```yaml
 reports:

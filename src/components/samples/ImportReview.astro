@@ -1,0 +1,172 @@
+---
+// Illustrative import-review screen. Merchants and amounts are invented; the guard behaviour is the real one.
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const rows = [
+  { date: '03.10', src: '1.284,50', out: '1284.50', ok: true },
+  { date: '05.10', src: '62,90', out: '62.90', ok: true },
+  { date: '08.10', src: '184,32', out: '84.32', ok: false },
+  { date: '11.10', src: '4.500,00', out: '4500.00', ok: true },
+];
+const copy = {
+  en: {
+    file: 'statement-october.pdf · 4 of 38 rows',
+    cols: ['Date', 'Description', 'On the page', 'Model read', 'Guard'],
+    desc: ['Rent transfer', 'Supermarket', 'Pharmacy', 'Salary'],
+    cats: ['Housing', 'Groceries', 'Health', 'Income'],
+    ok: 'grounded',
+    bad: 'rejected',
+    note: '“84.32” is a slice of “184,32”, not a number on the page. The value is dropped and the row waits for you to type it.',
+    confirm: 'Confirm 37 rows',
+    caption:
+      'Illustrative sample: merchants and amounts are invented. The guard behaviour is the real one: numbers must match a whole number on the page, and nothing reaches the ledger until you confirm.',
+  },
+  ro: {
+    file: 'extras-octombrie.pdf · 4 din 38 de rânduri',
+    cols: ['Data', 'Descriere', 'Pe pagină', 'Citit de model', 'Verificare'],
+    desc: ['Transfer chirie', 'Supermarket', 'Farmacie', 'Salariu'],
+    cats: ['Locuință', 'Alimente', 'Sănătate', 'Venit'],
+    ok: 'confirmat',
+    bad: 'respins',
+    note: '„84.32” este o bucată din „184,32”, nu un număr de pe pagină. Valoarea este eliminată, iar rândul așteaptă să o completezi tu.',
+    confirm: 'Confirmă 37 de rânduri',
+    caption:
+      'Exemplu ilustrativ: comercianții și sumele sunt inventate. Comportamentul verificării este cel real: numerele trebuie să corespundă unui număr întreg de pe pagină, iar nimic nu ajunge în registru până nu confirmi.',
+  },
+}[lang];
+---
+
+<figure class="review" data-reveal>
+  <div class="frame">
+    <header class="top">
+      <span class="label"><span class="local-dot" aria-hidden="true"></span> {copy.file}</span>
+    </header>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>{copy.cols.map((c) => <th scope="col">{c}</th>)}</tr>
+        </thead>
+        <tbody>
+          {
+            rows.map((r, i) => (
+              <tr class:list={[!r.ok && 'bad']}>
+                <td class="mono">{r.date}</td>
+                <td>
+                  {copy.desc[i]}
+                  <span class="cat">{copy.cats[i]}</span>
+                </td>
+                <td class="mono">{r.src}</td>
+                <td class="mono">{r.out}</td>
+                <td>
+                  <span class:list={['status', r.ok ? 'ok' : 'no']}>
+                    {r.ok ? '✓' : '✗'} {r.ok ? copy.ok : copy.bad}
+                  </span>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="note">{copy.note}</p>
+    <div class="actions">
+      <span class="btn btn-primary fake" aria-hidden="true">{copy.confirm}</span>
+    </div>
+  </div>
+  <figcaption class="muted">{copy.caption}</figcaption>
+</figure>
+
+<style>
+  .review {
+    margin-block: 40px;
+  }
+  .frame {
+    display: grid;
+    gap: 18px;
+    padding: clamp(18px, 3vw, 30px);
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background: var(--color-deep);
+  }
+  .top .label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    margin-inline: -4px;
+  }
+  table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-mist);
+    padding: 8px;
+    border-bottom: 1px solid var(--color-line);
+  }
+  td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--color-line);
+    vertical-align: top;
+  }
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .cat {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--color-mist);
+  }
+  tr.bad td {
+    background: color-mix(in srgb, var(--color-ember) 7%, transparent);
+  }
+  tr.bad td:nth-child(4) {
+    color: var(--color-ember);
+    text-decoration: line-through;
+  }
+  .status {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.25em 0.6em;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .status.ok {
+    color: var(--color-aurora);
+  }
+  .status.no {
+    color: var(--color-ember);
+  }
+  .note {
+    font-size: 0.9rem;
+    padding-left: 14px;
+    border-left: 2px solid var(--color-ember);
+    color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));
+  }
+  .fake {
+    pointer-events: none;
+    font-size: 0.85rem;
+    background: var(--color-violet);
+  }
+  figcaption {
+    margin-top: 12px;
+    font-size: 0.85rem;
+  }
+</style>

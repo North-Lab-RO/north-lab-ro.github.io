@@ -3,22 +3,29 @@ import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config';
+import { t, altPath, type Lang } from '../i18n/ui';
 import displayFont from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
 import bodyFont from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
 
 interface Props {
+  lang: Lang;
   title?: string;
   description?: string;
   image?: string;
+  /** Redirect Romanian-language browsers to /ro/ on first visit. Off for the shared 404 page. */
+  autodetect?: boolean;
 }
-const { title, description = site.description, image = '/og-image.png' } = Astro.props;
-const pageTitle = title ? `${title} — ${site.name}` : site.title;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const { lang, title, description = t(lang).meta.description, image = '/og-image.png', autodetect = true } = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : t(lang).meta.title;
+const path = Astro.url.pathname;
+const canonical = new URL(path, Astro.site);
+const hrefEn = new URL(altPath(path, 'en'), Astro.site);
+const hrefRo = new URL(altPath(path, 'ro'), Astro.site);
 const ogImage = new URL(image, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -26,6 +33,9 @@ const ogImage = new URL(image, Astro.site);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={hrefEn} />
+    <link rel="alternate" hreflang="ro" href={hrefRo} />
+    <link rel="alternate" hreflang="x-default" href={hrefEn} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -34,6 +44,7 @@ const ogImage = new URL(image, Astro.site);
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'ro' ? 'ro_RO' : 'en_US'} />
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
 
@@ -42,14 +53,34 @@ const ogImage = new URL(image, Astro.site);
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
+    {
+      autodetect && lang === 'en' && (
+        <script is:inline>
+          (function () {
+            var saved = null;
+            try {
+              saved = localStorage.getItem('nl-lang');
+            } catch (e) {}
+            if (saved) return;
+            var langs = navigator.languages || [navigator.language || ''];
+            for (var i = 0; i < langs.length; i++) {
+              if (/^ro(-|$)/i.test(langs[i])) {
+                location.replace('/ro' + location.pathname + location.search + location.hash);
+                return;
+              }
+            }
+          })();
+        </script>
+      )
+    }
   </head>
   <body>
-    <a href="#main" class="skip">Skip to content</a>
-    <Nav />
+    <a href="#main" class="skip">{t(lang).nav.skip}</a>
+    <Nav lang={lang} />
     <main id="main">
       <slot />
     </main>
-    <Footer />
+    <Footer lang={lang} />
 
     <script>
       import Lenis from 'lenis';

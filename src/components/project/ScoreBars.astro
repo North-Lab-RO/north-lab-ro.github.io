@@ -1,0 +1,140 @@
+---
+interface Props {
+  title: string;
+  caption?: string;
+  /** Each factor's maximum contribution, in points. */
+  items: { label: string; points: number; note?: string }[];
+  bands?: { label: string; value: string; color: string }[];
+}
+const { title, caption, items, bands = [] } = Astro.props;
+const max = Math.max(...items.map((i) => i.points));
+---
+
+<figure class="score" data-reveal>
+  <figcaption class="head">
+    <span class="label">{title}</span>
+    {caption && <span class="muted cap">{caption}</span>}
+  </figcaption>
+  <ul class="bars">
+    {
+      items.map((it, i) => (
+        <li class="bar" style={`--w:${(it.points / max) * 100}%;--i:${i}`}>
+          <span class="name">{it.label}</span>
+          <span class="track">
+            <span class="fill" />
+          </span>
+          <span class="pts">{it.points}</span>
+          {it.note && <span class="note muted">{it.note}</span>}
+        </li>
+      ))
+    }
+  </ul>
+  {
+    bands.length > 0 && (
+      <ul class="bands">
+        {bands.map((b) => (
+          <li>
+            <span class="swatch" style={`background:${b.color}`} />
+            <span class="bname">{b.label}</span>
+            <span class="muted">{b.value}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</figure>
+
+<style>
+  .score {
+    margin-block: 32px;
+    padding: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background: var(--color-deep);
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    align-items: baseline;
+    margin-bottom: 22px;
+  }
+  .cap {
+    font-size: 0.9rem;
+  }
+  .bars {
+    display: grid;
+    gap: 14px;
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36px;
+    gap: 6px 12px;
+    align-items: center;
+  }
+  .name {
+    grid-column: 1 / -1;
+    font-size: 0.95rem;
+  }
+  .track {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-line);
+    overflow: hidden;
+  }
+  .fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-ice), var(--color-aurora));
+    transition: width 1.2s var(--ease-out);
+    transition-delay: calc(var(--i) * 0.08s);
+  }
+  :global(.is-in) .fill,
+  :global(html:not(.js)) .fill {
+    width: var(--w);
+  }
+  .pts {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: right;
+  }
+  .note {
+    grid-column: 1 / -1;
+    font-size: 0.82rem;
+  }
+  .bands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--color-line);
+    font-size: 0.88rem;
+  }
+  .bands li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .bname {
+    font-weight: 600;
+  }
+  @media (min-width: 720px) {
+    .bar {
+      grid-template-columns: 220px minmax(0, 1fr) 36px;
+    }
+    .name {
+      grid-column: auto;
+    }
+    .note {
+      grid-column: 2 / -1;
+    }
+  }
+</style>

@@ -1,8 +1,12 @@
 ---
+import { t, type Lang } from '../../i18n/ui';
+
 interface Props {
+  lang: Lang;
   reports: { title: string; description?: string; file?: string }[];
 }
-const { reports } = Astro.props;
+const { lang, reports } = Astro.props;
+const tp = t(lang).project;
 ---
 
 {
@@ -20,10 +24,10 @@ const { reports } = Astro.props;
           </div>
           {r.file ? (
             <a class="btn btn-ghost" href={`/reports/${r.file}`} target="_blank" rel="noopener">
-              Open PDF <span aria-hidden="true">↗</span>
+              {tp.openPdf} <span aria-hidden="true">↗</span>
             </a>
           ) : (
-            <span class="chip pending">Sample in preparation</span>
+            <span class="chip pending">{tp.pending}</span>
           )}
         </li>
       ))}

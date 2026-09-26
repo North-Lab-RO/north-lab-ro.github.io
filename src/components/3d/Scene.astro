@@ -1,6 +1,6 @@
 ---
 interface Props {
-  name: 'northstar' | 'globe' | 'board' | 'radar';
+  name: 'northstar' | 'globe' | 'board' | 'radar' | 'ledger' | 'counselorstory';
   class?: string;
   label: string;
 }
@@ -19,6 +19,8 @@ const { name, class: className = '', label } = Astro.props;
     globe: () => import('./Globe'),
     board: () => import('./Board'),
     radar: () => import('./Radar'),
+    ledger: () => import('./Ledger'),
+    counselorstory: () => import('./CounselorStory'),
   };
 
   const hasWebGL = (() => {

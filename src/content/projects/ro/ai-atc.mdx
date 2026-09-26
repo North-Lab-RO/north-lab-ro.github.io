@@ -1,0 +1,115 @@
+---
+title: AI_ATC
+category: AI vocal · aviație
+tagline: Un controlor de trafic aerian găzduit local pentru X-Plane 12. Vorbești în stație, iar un model local răspunde în frazeologie ICAO.
+summary: >-
+  AI_ATC înlocuiește controlul de trafic prestabilit al simulatorului cu un controlor care chiar ascultă. Un plugin
+  trimite starea aeronavei în timp real către un server local. Pilotul vorbește, iar recunoașterea vocală, un agent
+  controlor specializat și sinteza vocală produc un răspuns radio realist. Fiecare instrucțiune este verificată față de
+  date reale de navigație și de reguli de siguranță înainte de a fi rostită. Fără cloud, fără abonament, fără cost pe
+  minut.
+order: 3
+accent: aurora
+scene: radar
+logo: ../../../assets/projects/ai-atc/logo.jpg
+metrics:
+  - value: '5'
+    label: controlori specializați, aleși după faza de zbor
+  - value: 2–4 s
+    label: ținta pentru un răspuns radio complet
+  - value: 0,61 s
+    label: recunoaștere vocală pe transmisie (față de 12,77 s cu medium.en)
+  - value: '0'
+    label: servicii cloud în circuit
+features:
+  - title: Voce la intrare, voce la ieșire
+    body: Apeși și vorbești, în simulator sau în portalul web. Vocea este transcrisă, primește răspuns și este redată pe COM1, totul pe GPU-ul local.
+  - title: Cinci controlori specializați
+    body: Agenți pentru autorizare, sol, turn, apropiere și control regional, aleși după frecvență, cerere și faza de zbor.
+  - title: Ancorat în date reale
+    body: Căutare în datele de navigație ale simulatorului, inclusiv SID-uri, STAR-uri și proceduri de apropiere, astfel încât instrucțiunile trimit la proceduri reale.
+  - title: Verificări de siguranță și colaționare
+    body: Răspunsurile sunt verificate înainte de a fi rostite, colaționările pilotului sunt comparate cu autorizarea, iar folosirea pistei este gestionată.
+  - title: Hartă și vreme în timp real
+    body: O hartă web cu straturi pentru aeroporturi și coduri de culoare METAR, plus import de planuri de zbor din SimBrief.
+  - title: Schimbarea modelului din mers
+    body: Treci de la un model local la altul în timpul rulării, pentru a alege între viteză și calitatea frazeologiei.
+stack:
+  - Python
+  - FastAPI
+  - Lua
+  - C++ (X-Plane SDK)
+  - Ollama
+  - Qwen 3.5
+  - Mistral 7B
+  - Whisper
+  - Kokoro TTS
+  - PostgreSQL
+  - Qdrant
+  - Docker
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import RadioExchange from '../../../components/samples/RadioExchange.astro';
+
+## Cum funcționează
+
+Un răspuns radio are la dispoziție două până la patru secunde, așa că fiecare etapă este măsurată. Whisper tiny.en a
+fost ales după testarea aceleiași transmisii cu mai multe dimensiuni de model: toate patru au înțeles intenția la fel
+de bine, iar tiny este de 20 de ori mai rapid decât medium.
+
+<Pipeline
+  title="Transmisia pilotului → răspunsul controlorului"
+  caption="Un circuit complet, în întregime pe mașina locală."
+  stages={[
+    { label: 'Starea aeronavei', detail: 'Pluginul X-Plane trimite în fiecare secundă poziția, faza de zbor și starea radio.', tag: 'plugin C++ · Lua' },
+    { label: 'Voce în text', detail: 'Transmisia vocală este transcrisă pe GPU.', tag: 'whisper tiny.en' },
+    {
+      label: 'Alegerea controlorului',
+      detail: 'Frecvența, cuvintele cheie și faza de zbor aleg agentul specializat.',
+      items: ['Autorizare', 'Sol', 'Turn', 'Apropiere', 'Control regional'],
+    },
+    { label: 'Context', detail: 'Date despre aeroport, proceduri și istoricul conversației.', tag: 'qdrant + postgres' },
+    { label: 'Generarea răspunsului', detail: 'Frazeologie în stil ICAO de la un model local.', tag: 'qwen 3.5' },
+    { label: 'Verificare', detail: 'Reguli de siguranță, detectarea conflictelor și verificarea colaționării înainte de a rosti ceva.' },
+    { label: 'Rostire', detail: 'Vocea sintetizată este redată pe stația COM1 din simulator.', tag: 'kokoro' },
+  ]}
+/>
+
+## Exemplu de rezultat
+
+<RadioExchange lang="ro" />
+
+## Alegerea după faza de zbor
+
+Când frecvența și cuvintele cheie nu sunt suficiente, routerul se bazează pe faza de zbor, apoi pe faptul că aeronava
+este la sol sau în aer și pe altitudinea ei.
+
+<CodeSnippet
+  file="fastapi/agents/router.py"
+  lang="python"
+  caption="Ultima variantă din lanțul de alegere. Verificările anterioare folosesc controlorul care are aeronava în grijă, frecvența selectată și cuvintele cheie explicite."
+  code={`
+phase = aircraft_state.get("phase", "cruise").lower()
+possible_agents = self.phase_agent_map.get(phase, ["center"])
+
+if len(possible_agents) > 1:
+    altitude = aircraft_state.get("altitude_msl", 0)
+    on_ground = aircraft_state.get("on_ground", False)
+
+    if on_ground:
+        if "clearance" in possible_agents:
+            return "clearance"
+        return "ground"
+    elif altitude < 18000:
+        if "approach" in possible_agents:
+            return "approach"
+        return "tower"
+    else:
+        if "center" in possible_agents:
+            return "center"
+
+return possible_agents[0]
+`}
+/>

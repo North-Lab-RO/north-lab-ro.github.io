@@ -203,7 +203,9 @@ const create: SceneFactory = (ctx) => {
       // Desktop: star owns the right half. Phone: star floats above the headline.
       baseX = wide ? halfW * 0.5 : 0;
       baseY = wide ? 0 : halfH * 0.46;
-      rig.scale.setScalar(wide ? Math.min(0.95, halfW / 6.2) : 0.62);
+      // camera looks at the rig, so shift the view window instead of the rig
+      camera.setViewOffset(w, h, wide ? -w * 0.3 : 0, wide ? 0 : h * 0.23, w, h);
+      rig.scale.setScalar(wide ? Math.min(0.85, halfW / 7) : 0.62);
       rig.position.x = baseX;
     },
     update(t) {
@@ -211,14 +213,16 @@ const create: SceneFactory = (ctx) => {
       tick(scene, t);
       star.rotation.y = t * 0.32;
       star.rotation.x = Math.sin(t * 0.4) * 0.07 + pointer.y * 0.15;
-      star.position.y = Math.sin(t * 0.8) * 0.08;
+      // The star breathes in place at the centre of its bezel; scrolling only turns the bezel.
+      star.position.y = Math.sin(t * 0.8) * 0.04;
       ring.rotation.z = -t * 0.025 - scroll.progress * 1.6;
-      ringTilt.rotation.y = pointer.x * 0.12;
-      rig.position.y = baseY + scroll.progress * 1.4;
+      ringTilt.rotation.y = pointer.x * 0.1;
+      rig.position.y = baseY;
       (aurora.material as ShaderMaterial).uniforms.uFade.value = 1 - scroll.progress * 0.8;
       stars.rotation.z = t * 0.004;
 
-      camera.position.set(pointer.x * 0.9, pointer.y * 0.55 + 0.2, baseZ);
+      look.set(rig.position.x, rig.position.y, 0);
+      camera.position.set(rig.position.x + pointer.x * 0.7, rig.position.y + pointer.y * 0.4 + 0.2, baseZ);
       camera.lookAt(look);
     },
     dispose() {

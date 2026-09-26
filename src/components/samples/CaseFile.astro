@@ -1,32 +1,82 @@
 ---
 // Excerpt of a generated case ("The Silent Alarm"). The hidden solution is deliberately left out.
-const header = [
-  ['Case no.', '23-0121'],
-  ['Offence', 'Homicide'],
-  ['Era', '2020 · modern'],
-  ['Time budget', '90 min · 10 days'],
-];
-const suspects = [
-  ['Samuel Carter', '42', 'Business partner'],
-  ['Emily Thompson', '38', 'Personal assistant'],
-  ['David Miller', '50', 'Investor'],
-  ['Lisa Johnson', '35', 'Neighbour'],
-];
-const evidence = [
-  ['E-02', 'Blood stain on kitchen floor', 'Biological'],
-  ['E-03', 'Fibre on office chair', 'Trace'],
-  ['E-08', 'Doorbell camera footage', 'Digital'],
-];
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const copy = {
+  en: {
+    tab: 'Case file',
+    title: 'The Silent Alarm',
+    header: [
+      ['Case no.', '23-0121'],
+      ['Offence', 'Homicide'],
+      ['Era', '2020 · modern'],
+      ['Time budget', '90 min · 10 days'],
+    ],
+    briefingLabel: 'Briefing',
+    briefing:
+      'On March 15, 2020, at approximately 08:30, a silent alarm was triggered at the residence of Richard Henderson. Officers arrived to find Henderson deceased in his home office. No signs of forced entry or struggle were noted. Neighbors report hearing a loud noise around 02:30.',
+    personsLabel: 'Persons of interest',
+    persons: [
+      ['Samuel Carter', '42', 'Business partner'],
+      ['Emily Thompson', '38', 'Personal assistant'],
+      ['David Miller', '50', 'Investor'],
+      ['Lisa Johnson', '35', 'Neighbour'],
+    ],
+    evidenceLabel: 'Evidence log (excerpt)',
+    evidence: [
+      ['E-02', 'Blood stain on kitchen floor', 'Biological'],
+      ['E-03', 'Fibre on office chair', 'Trace'],
+      ['E-08', 'Doorbell camera footage', 'Digital'],
+    ],
+    stamp: 'Solution sealed',
+    sealed: 'Method, motive and proving evidence stay hidden until the team files its report.',
+    caption: 'Excerpt from a real generated case, written entirely by the local model, then validated before publishing.',
+  },
+  ro: {
+    tab: 'Dosar',
+    title: 'Alarma silențioasă',
+    header: [
+      ['Nr. dosar', '23-0121'],
+      ['Infracțiune', 'Omucidere'],
+      ['Epocă', '2020 · modernă'],
+      ['Timp disponibil', '90 min · 10 zile'],
+    ],
+    briefingLabel: 'Informare',
+    briefing:
+      'Pe 15 martie 2020, în jurul orei 08:30, s-a declanșat o alarmă silențioasă la locuința lui Richard Henderson. Polițiștii l-au găsit pe Henderson decedat în biroul de acasă. Nu au fost observate semne de efracție sau de luptă. Vecinii spun că au auzit un zgomot puternic în jurul orei 02:30.',
+    personsLabel: 'Persoane de interes',
+    persons: [
+      ['Samuel Carter', '42', 'Asociat'],
+      ['Emily Thompson', '38', 'Asistentă personală'],
+      ['David Miller', '50', 'Investitor'],
+      ['Lisa Johnson', '35', 'Vecină'],
+    ],
+    evidenceLabel: 'Registru de probe (extras)',
+    evidence: [
+      ['E-02', 'Pată de sânge pe podeaua bucătăriei', 'Biologică'],
+      ['E-03', 'Fibră pe scaunul din birou', 'Urmă'],
+      ['E-08', 'Înregistrare de la camera soneriei', 'Digitală'],
+    ],
+    stamp: 'Soluție sigilată',
+    sealed: 'Metoda, mobilul și probele decisive rămân ascunse până când echipa își depune raportul.',
+    caption:
+      'Extras dintr-un caz generat real, scris integral de modelul local și validat înainte de publicare. Cazurile sunt generate în engleză; textul a fost tradus pentru această pagină.',
+  },
+}[lang];
 ---
 
 <figure class="casefile" data-reveal>
   <div class="folder">
-    <div class="tab label">Case file</div>
+    <div class="tab label">{copy.tab}</div>
     <header class="head">
-      <h3 class="title">The Silent Alarm</h3>
+      <h3 class="title">{copy.title}</h3>
       <dl class="meta">
         {
-          header.map(([k, v]) => (
+          copy.header.map(([k, v]) => (
             <div>
               <dt class="label">{k}</dt>
               <dd>{v}</dd>
@@ -37,20 +87,16 @@ const evidence = [
     </header>
 
     <section class="brief">
-      <p class="label">Briefing</p>
-      <p>
-        On March 15, 2020, at approximately 08:30, a silent alarm was triggered at the residence of Richard Henderson.
-        Officers arrived to find Henderson deceased in his home office. No signs of forced entry or struggle were noted.
-        Neighbors report hearing a loud noise around 02:30.
-      </p>
+      <p class="label">{copy.briefingLabel}</p>
+      <p>{copy.briefing}</p>
     </section>
 
     <div class="cols">
       <section>
-        <p class="label">Persons of interest</p>
+        <p class="label">{copy.personsLabel}</p>
         <ul class="rows">
           {
-            suspects.map(([name, age, role]) => (
+            copy.persons.map(([name, age, role]) => (
               <li>
                 <span>{name}</span>
                 <span class="muted">
@@ -62,10 +108,10 @@ const evidence = [
         </ul>
       </section>
       <section>
-        <p class="label">Evidence log (excerpt)</p>
+        <p class="label">{copy.evidenceLabel}</p>
         <ul class="rows">
           {
-            evidence.map(([no, name, cat]) => (
+            copy.evidence.map(([no, name, cat]) => (
               <li>
                 <span>
                   <b class="no">{no}</b> {name}
@@ -79,11 +125,11 @@ const evidence = [
     </div>
 
     <p class="sealed">
-      <span class="stamp">Solution sealed</span>
-      <span class="muted">Method, motive and proving evidence stay hidden until the team files its report.</span>
+      <span class="stamp">{copy.stamp}</span>
+      <span class="muted">{copy.sealed}</span>
     </p>
   </div>
-  <figcaption class="muted">Excerpt from a real generated case. Written entirely by the local model, then validated before publishing.</figcaption>
+  <figcaption class="muted">{copy.caption}</figcaption>
 </figure>
 
 <style>

@@ -1,0 +1,126 @@
+---
+title: BANKY
+category: Finanțe personale · privat
+tagline: Extrasele tale de cont, citite de un model pe propriul GPU. Fiecare cifră este verificată față de pagină înainte să ajungă în registru.
+summary: >-
+  BANKY este o aplicație de finanțe personale pentru cei care nu vor să-și dea extrasele de cont unui serviciu din
+  cloud. Importă extrase PDF, Excel și CSV, pagini scanate și fotografii de bonuri, apoi extrage și clasifică fiecare
+  tranzacție cu un model de limbaj care rulează pe hardware local. Soldurile, bugetele, analiza 50/30/20, obiectivele,
+  investițiile și rapoartele tipăribile sunt calculate dintr-un registru pe care îl confirmi rând cu rând. Modelul doar
+  propune: fiecare cifră pe care o scrie trebuie să existe pe pagina sursă, iar toate calculele cu bani sunt cod
+  obișnuit.
+order: 4
+accent: violet
+scene: ledger
+metrics:
+  - value: '95,1%'
+    label: din câmpuri citite corect (117 din 123, cu modelul încărcat)
+  - value: '0'
+    label: numere respinse de verificare în testul comparativ al modelului
+  - value: '1.615'
+    label: teste automate (1.186 backend, 429 frontend)
+  - value: '0'
+    label: numere în virgulă mobilă folosite pentru bani
+features:
+  - title: Importă orice îți dă banca
+    body: Extrase PDF, Excel și CSV, cu parsere dedicate fiecărei bănci, plus pagini scanate și fotografii de bonuri prin OCR local. Duplicatele sunt detectate la import.
+  - title: Revizuire înainte de registru
+    body: Rândurile extrase așteaptă într-un ecran de revizuire, alături de sursă. Nimic nu devine tranzacție până nu confirmi.
+  - title: Categorii care învață
+    body: Clasificarea locală îți învață comercianții, iar grupuri întregi de rânduri pot fi acceptate dintr-odată.
+  - title: Transferuri care nu pot ascunde cheltuieli
+    body: Transferurile interne sunt impuse de baza de date, astfel încât mutarea banilor între propriile conturi nu maschează niciodată o cheltuială reală.
+  - title: Căutare care știe românește
+    body: Căutare care ignoră diacriticele, cu interogări după sumă precum „>500”, și istoric de audit pentru fiecare modificare.
+  - title: Bugete, obiective și rapoarte
+    body: Analiză 50/30/20, bugete, obiective, investiții, teme, rapoarte tipăribile și copie de siguranță într-un singur fișier.
+stack:
+  - Python
+  - FastAPI
+  - SQLAlchemy
+  - PostgreSQL
+  - Ollama
+  - Qwen 3.6 27B
+  - PaddleOCR
+  - React
+  - TypeScript
+  - Vite
+  - Tailwind
+  - Recharts
+  - Docker
+reports:
+  - title: Raport lunar (PDF)
+    description: Cheltuieli pe categorii, bugete și împărțirea 50/30/20 pentru o lună.
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import ImportReview from '../../../components/samples/ImportReview.astro';
+import InfoGrid from '../../../components/project/InfoGrid.astro';
+
+## Cum funcționează
+
+Modelul de limbaj face singurul lucru pe care codul nu îl poate face: transformă o pagină dezordonată în rânduri
+structurate. Tot ce este înainte și după el este determinist. Modelul rulează într-o rețea izolată, fără acces la
+internet.
+
+<Pipeline
+  title="Extras → registru revizuit"
+  caption="Modelul propune; codul verifică; tu confirmi."
+  stages={[
+    { label: 'Încărcare', detail: 'Extrase PDF, XLSX sau CSV, pagini scanate și fotografii de bonuri.' },
+    { label: 'Citire', detail: 'Parsere dedicate pentru formatele cunoscute ale băncilor și numerele în format românesc; OCR local pentru scanări și bonuri.', tag: 'PaddleOCR' },
+    { label: 'Structurare', detail: 'Modelul de limbaj transformă textul în rânduri cu dată, descriere și semn.', tag: 'qwen3.6 27B' },
+    { label: 'Verificarea cifrelor', detail: 'Fiecare număr din rezultat trebuie să fie identic cu un număr întreg de pe pagină. Orice altceva este eliminat.' },
+    { label: 'Revizuire', detail: 'Rândurile te așteaptă într-un ecran de revizuire alături de sursă, cu duplicatele marcate.' },
+    { label: 'Registru', detail: 'Rândurile confirmate devin tranzacții stocate ca NUMERIC(18,2), cu istoric de audit.' },
+  ]}
+/>
+
+Observațiile scrise trec prin cinci etape (ciornă, verificare, critică, revizuire, verificare), iar ultimul cuvânt îl
+are o verificare fixă, bazată pe reguli. Pe o placă de 24 GB, mai multe treceri ale unui model care încape în memorie
+sunt mai bune decât o singură trecere a unuia mai mare.
+
+## De ce verificare, nu încredere
+
+<InfoGrid
+  items={[
+    { tag: 'problema', title: 'Plauzibil și greșit', body: 'Un model care citește 1.284,50 și scrie 128450.00 produce un număr care nu se verifică față de nimic. Nicio verificare ulterioară nu ar putea spune că a fost inventat.' },
+    { tag: 'regula', title: 'Doar numere întregi', body: 'Se compară doar cifrele, niciodată punctuația, iar fiecare număr trebuie să corespundă unui număr întreg de pe pagină. 84.32 este o bucată din 184,32, deci este respins.' },
+    { tag: 'rezultatul', title: 'Propuneri, nu înregistrări', body: 'O valoare respinsă rămâne goală, ca să o completezi tu. Registrul conține doar numere pe care le-ai confirmat.' },
+  ]}
+/>
+
+## Exemplu de rezultat
+
+<ImportReview lang="ro" />
+
+## Verificarea, în cod
+
+<CodeSnippet
+  file="backend/app/ai/extraction_guard.py"
+  lang="python"
+  caption="Fiecare număr din rezultatul modelului trebuie să fie identic cu un număr care a fost citit. Nu ajunge o potrivire parțială: exact așa ar trece neobservată o primă cifră omisă."
+  code={`
+_DIGITS = re.compile(r"\\D")
+_DIGIT_RUN = re.compile(r"\\d[\\d.,]*\\d|\\d")
+
+
+def digits(text: str) -> str:
+    return _DIGITS.sub("", text or "")
+
+
+def is_grounded(value: str, sources: list[str]) -> bool:
+    if not value:
+        return True
+
+    source_runs = [digits(run) for block in sources for run in _DIGIT_RUN.findall(block)]
+    for run in _DIGIT_RUN.findall(value):
+        needle = digits(run)
+        if not needle:
+            continue
+        if needle not in source_runs:
+            return False
+    return True
+`}
+/>
