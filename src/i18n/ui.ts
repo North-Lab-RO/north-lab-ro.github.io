@@ -117,6 +117,7 @@ const en = {
   },
   footer: {
     tagline: 'Private AI systems, built and run on our own hardware.',
+    contact: 'Contact',
   },
   project: {
     back: '← All projects',
@@ -247,6 +248,7 @@ const ro: Dict = {
   },
   footer: {
     tagline: 'Sisteme AI private, construite și rulate pe propriul hardware.',
+    contact: 'Contact',
   },
   project: {
     back: '← Toate proiectele',
