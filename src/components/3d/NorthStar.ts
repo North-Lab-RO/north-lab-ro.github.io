@@ -33,9 +33,10 @@ function starGeometry(): BufferGeometry {
   return geo;
 }
 
+// Opaque on purpose: drawn before the see-through rings and writing depth, the star hides the far side of the
+// compass ring while the near side passes in front of it, at every angle.
 const crystalMaterial = () =>
   new ShaderMaterial({
-    transparent: true,
     uniforms: { uTime: { value: 0 } },
     vertexShader: /* glsl */ `
       varying vec3 vN;
@@ -66,7 +67,7 @@ const crystalMaterial = () =>
         vec3 tint = mix(ice, mix(aurora, violet, band), 0.25 + 0.3 * n.y);
         vec3 col = mix(deep, tint, 0.12 + 0.62 * pow(facet, 1.6));
         col += fres * ice * 1.1;
-        gl_FragColor = vec4(col, 0.94);
+        gl_FragColor = vec4(col, 1.0);
       }`,
   });
 
