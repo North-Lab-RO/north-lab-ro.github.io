@@ -125,32 +125,6 @@ function bezel(radius: number): Group {
   return g;
 }
 
-/** Upright meridian ring of the armillary: a thin circle with ticks every 10°, standing around the star. */
-function meridian(radius: number): Group {
-  const g = new Group();
-  const p: number[] = [];
-  const n = 256;
-  for (let i = 0; i < n; i++) {
-    const a0 = (i / n) * Math.PI * 2;
-    const a1 = ((i + 1) / n) * Math.PI * 2;
-    p.push(Math.cos(a0) * radius, Math.sin(a0) * radius, 0, Math.cos(a1) * radius, Math.sin(a1) * radius, 0);
-  }
-  for (let i = 0; i < 36; i++) {
-    const a = (i / 36) * Math.PI * 2;
-    const len = i % 9 === 0 ? 0.3 : 0.12;
-    p.push(Math.cos(a) * radius, Math.sin(a) * radius, 0, Math.cos(a) * (radius - len), Math.sin(a) * (radius - len), 0);
-  }
-  const geo = new BufferGeometry();
-  geo.setAttribute('position', new Float32BufferAttribute(p, 3));
-  g.add(
-    new LineSegments(
-      geo,
-      new LineBasicMaterial({ color: 0x8be9ff, transparent: true, opacity: 0.32, blending: AdditiveBlending, depthWrite: false }),
-    ),
-  );
-  return g;
-}
-
 function auroraCurtain(): Mesh {
   const mat = new ShaderMaterial({
     transparent: true,
@@ -204,15 +178,11 @@ const create: SceneFactory = (ctx) => {
   rig.add(star);
 
   const ring = bezel(3.2);
-  // An armillary: the compass bezel lies tilted in 3D, and an upright meridian ring of the same radius
-  // stands around the star. The star's tips (±2.15) stay inside the meridian (3.2), so it never leaves the compass.
+  // The compass bezel lies tilted in 3D around the star.
   const ringTilt = new Group();
   ringTilt.rotation.x = -1.2;
   ringTilt.add(ring);
   rig.add(ringTilt);
-  const gyro = new Group();
-  gyro.add(meridian(3.2));
-  rig.add(gyro);
 
   const aurora = auroraCurtain();
   scene.add(aurora);
@@ -249,8 +219,6 @@ const create: SceneFactory = (ctx) => {
       star.position.y = Math.sin(t * 0.8) * 0.04;
       ring.rotation.z = -t * 0.025 - scroll.progress * 1.6;
       ringTilt.rotation.y = pointer.x * 0.1;
-      // the meridian turns slowly about the vertical axis, like a gyroscope
-      gyro.rotation.y = t * 0.18 + pointer.x * 0.1;
       rig.position.y = baseY;
       (aurora.material as ShaderMaterial).uniforms.uFade.value = 1 - scroll.progress * 0.8;
       stars.rotation.z = t * 0.004;
