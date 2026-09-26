@@ -108,6 +108,8 @@ export interface LabelStyle {
   bold?: boolean;
   /** Draw on top of everything (ignore depth). */
   overlay?: boolean;
+  /** Twice the canvas width, for long lines such as radio calls. */
+  wide?: boolean;
 }
 export interface Label {
   sprite: Sprite;
@@ -117,7 +119,7 @@ export interface Label {
 
 /** A text chip drawn once on a canvas and shown as a camera-facing sprite. */
 export function makeLabel(text: string, style: LabelStyle = {}): Label {
-  const W = 512;
+  const W = style.wide ? 1024 : 512;
   const H = 96;
   const c = document.createElement('canvas');
   c.width = W;

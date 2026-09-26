@@ -1,6 +1,6 @@
 ---
 /**
- * Card art for each product: a ~14 s looping miniature of what the product does, in SVG and CSS only.
+ * Card art for each product: a ~7 s looping miniature of what the product does, in SVG and CSS only.
  * Timing: every animated part runs on the same loop (--T) and starts at its own point in it (--at, a fraction).
  */
 import { Image } from 'astro:assets';
@@ -352,7 +352,7 @@ const blips: [number, number, string][] = [
         <rect class="beam" x="16" y="50" width="208" height="3" rx="1.5" fill="var(--color-violet)" />
         {/* the ledger: confirmed rows arrive with their category; the doubtful one waits for you */}
         <text x="262" y="40" class="head" fill="var(--color-mist)">{TXT.ledger}</text>
-        {ledgerPlan.map((r, i) =>
+        {ledgerPlan.map((r) =>
           r.ok ? (
             <g class="anim slide" style={`--at:${r.at + 0.05}`}>
               <rect x="262" y={50 + r.slot * 30} width="120" height="24" rx="5" fill="var(--color-panel)" stroke="var(--color-line)" />
@@ -390,7 +390,8 @@ const blips: [number, number, string][] = [
 
 <style>
   .visual {
-    --T: 14s;
+    /* short loops: visitors glance for 5–10 s, so every beat shows up within one look */
+    --T: 7s;
     position: relative;
     aspect-ratio: 4 / 3;
     border-radius: 18px;
@@ -403,7 +404,7 @@ const blips: [number, number, string][] = [
   /* reduced motion: the same story, told at half speed and without flashing */
   @media (prefers-reduced-motion: reduce) {
     .visual {
-      --T: 28s;
+      --T: 14s;
     }
     .bar,
     .beacon {

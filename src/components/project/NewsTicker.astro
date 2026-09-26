@@ -1,0 +1,160 @@
+---
+/**
+ * A live headline band, like COUNSELOR's own ticker: one invented headline at a time, a new one every 3 s.
+ * The colours match the categories on the globe.
+ */
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const headlines: { c: string; en: string; ro: string }[] = [
+  { c: '#fbbf24', en: 'Inflation eases to 4.1% in August, below forecasts', ro: 'Inflația scade la 4,1% în august, sub estimări' },
+  { c: '#5eead4', en: 'Heavy rain lifts rivers above alert levels in the west', ro: 'Ploile ridică râurile peste cota de atenție în vest' },
+  { c: '#fb923c', en: 'New 120 MW solar park joins the grid', ro: 'Un parc solar de 120 MW intră în rețea' },
+  { c: '#4dffb8', en: 'Hospitals extend vaccination hours before winter', ro: 'Spitalele prelungesc programul de vaccinare înainte de iarnă' },
+  { c: '#ff5a6a', en: 'Naval exercise begins with allied ships', ro: 'Începe un exercițiu naval cu nave aliate' },
+  { c: '#8be9ff', en: 'Chipmaker opens a research centre with 300 jobs', ro: 'Un producător de cipuri deschide un centru cu 300 de locuri de muncă' },
+  { c: '#9a8cff', en: 'Coalition agrees a new budget timetable', ro: 'Coaliția stabilește un nou calendar pentru buget' },
+];
+---
+
+<div class="ticker" style={`--n:${headlines.length}`}>
+  <span class="live"><span class="dot" aria-hidden="true"></span>LIVE</span>
+  <ul class="sr-only">
+    {headlines.map((h) => <li>{h[lang]}</li>)}
+  </ul>
+  <div class="items" aria-hidden="true">
+    {
+      headlines.map((h, i) => (
+        <p class="item" style={`--i:${i}`}>
+          <span class="cat" style={`background:${h.c}`} />
+          {h[lang]}
+        </p>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .ticker {
+    --step: 3s;
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: #ffe14d;
+    color: #0a1426;
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+    pointer-events: none;
+  }
+  /* the headlines, read once by screen readers; the animated copy is hidden from them */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    padding-right: 12px;
+    border-right: 1px solid rgb(10 20 38 / 0.25);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e11d48;
+    animation: live 1.4s ease-in-out infinite;
+  }
+  .items {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 2.6em;
+    overflow: hidden;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .item {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: swap calc(var(--step) * var(--n)) ease-out infinite both;
+    animation-delay: calc(var(--step) * var(--i));
+  }
+  .cat {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgb(10 20 38 / 0.35);
+  }
+  /* each headline holds its slot for one step (1/7 of the cycle), sliding in from below and out above */
+  @keyframes swap {
+    0% {
+      opacity: 0;
+      transform: translateY(70%);
+    }
+    1.8%,
+    12.6% {
+      opacity: 1;
+      transform: none;
+    }
+    14.2%,
+    100% {
+      opacity: 0;
+      transform: translateY(-70%);
+    }
+  }
+  @keyframes live {
+    50% {
+      opacity: 0.25;
+    }
+  }
+  /* reduced motion: a new headline every 6 s, with a plain fade */
+  @media (prefers-reduced-motion: reduce) {
+    .ticker {
+      --step: 6s;
+    }
+    .item {
+      animation-name: fade;
+    }
+    .dot {
+      animation: none;
+    }
+  }
+  @keyframes fade {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    2%,
+    12.6% {
+      opacity: 1;
+    }
+    14.2% {
+      opacity: 0;
+    }
+  }
+</style>

@@ -32,7 +32,6 @@ import { disposeTree, glowSprite, makeLabel, starField, tick, type Label } from 
  */
 
 const R = 2.1;
-const LOOP = 18;
 
 type Slug = 'politics' | 'health' | 'economy' | 'military' | 'energy' | 'climate' | 'technology';
 const CATEGORY: Record<Slug, { en: string; ro: string; color: string }> = {
@@ -78,17 +77,12 @@ const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
 };
-/** 0 → 1 between a and b, back to 0 between c and d. */
-const window4 = (a: number, b: number, c: number, d: number, x: number) => smooth(a, b, x) * (1 - smooth(c, d, x));
 
 function latLon(lat: number, lon: number, r = R): Vector3 {
   const phi = ((90 - lat) * Math.PI) / 180;
   const th = ((lon + 180) * Math.PI) / 180;
   return new Vector3(-r * Math.sin(phi) * Math.cos(th), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(th));
 }
-
-/** The turn about the vertical axis that brings a point on the globe to face the camera. */
-const facingAngle = (p: Vector3) => Math.atan2(-p.x, p.z);
 
 function fibonacciSphere(n: number, r: number): number[] {
   const out: number[] = [];
@@ -242,7 +236,7 @@ const create: SceneFactory = (ctx) => {
     );
     spike.quaternion.copy(new Quaternion().setFromUnitVectors(up, normal));
     globe.add(marker, glow, spike);
-    const chip = lite ? null : makeLabel(cat[lang], { color: cat.color, border: cat.color, height: 0.3, overlay: true });
+    const chip = makeLabel(cat[lang], { color: cat.color, border: cat.color, height: 0.3, overlay: true });
     if (chip) scene.add(chip.sprite);
     return { ...s, cat, pos, normal, marker, glow, spike, chip, height: 0, world: new Vector3(), facing: 0, index: i };
   });
@@ -315,6 +309,13 @@ const create: SceneFactory = (ctx) => {
 
   const stageChips: Label[] = tx.stages.map((s) => makeLabel(`✓ ${s}`, { color: '#e8f3ff', height: 0.27, overlay: true }));
   stageChips.forEach((c) => scene.add(c.sprite));
+  // the analysis column sits beside the globe; a thin line joins it to the story being analysed
+  const COLUMN = new Vector3(-R * 1.3, R * 0.62, 0.6);
+  const linkPos = new Float32Array(6);
+  const linkGeo = new BufferGeometry();
+  linkGeo.setAttribute('position', new Float32BufferAttribute(linkPos, 3));
+  const linkMat = new LineBasicMaterial({ color: 0xe8f3ff, transparent: true, opacity: 0, depthWrite: false });
+  scene.add(new LineSegments(linkGeo, linkMat));
   const importance = makeLabel(`${tx.importance} 34`, { color: '#fbbf24', border: '#fbbf24', height: 0.32, overlay: true, bold: true });
   const rising = makeLabel(tx.rising, { color: '#4dffb8', border: '#4dffb8', height: 0.3, overlay: true });
   const ticker = makeLabel(tx.source, { color: '#8be9ff', border: '#8be9ff', height: 0.26, overlay: true });
@@ -331,125 +332,145 @@ const create: SceneFactory = (ctx) => {
   const feeds = new LineSegments(feedGeo, feedMat);
   scene.add(feeds);
 
-  const hideLabel = (l: Label | null) => {
-    if (l) l.sprite.material.opacity = 0;
+  // Four roles play at once, each on its own 6 s cycle and its own offset, so any glance shows the whole product:
+  // a story being analysed, a story crossing the alert threshold, a story rising, and a story receiving coverage.
+  // When a role's cycle starts it takes the best-facing story no other role is using.
+  const CYCLE = 6;
+  const ROLES = ['analyse', 'alert', 'rise', 'cover'] as const;
+  const offsets = [0, 1.5, 3, 4.5];
+  const roleStory = [-1, -1, -1, -1];
+  const roleCycle = [-1, -1, -1, -1];
+  const pick = (k: number) => {
+    let best = -1;
+    let bestFacing = -2;
+    for (const s of stories) {
+      if (roleStory.some((r, j) => j !== k && r === s.index)) continue;
+      if (s.facing > bestFacing) {
+        bestFacing = s.facing;
+        best = s.index;
+      }
+    }
+    return best;
   };
 
   let baseZ = 8;
   let lastScore = -1;
   let lastLines = -1;
-  let lastLead = -1;
   const tmp = new Vector3();
   const cardAnchor = new Vector3();
+  (card.mesh.material as MeshBasicMaterial).opacity = 0.95;
   return {
     resize() {
       // room for the chips above the globe and the briefing card at its lower right
-      baseZ = fitDistance(camera, R * 1.55, R * 1.35);
+      baseZ = fitDistance(camera, R * 1.75, R * 1.35);
     },
     update(t) {
       tick(scene, t);
       const { pointer } = ctx;
-      const tc = t % LOOP;
-      const lead = Math.floor(t / LOOP) % stories.length;
 
-      // The lead story turns to face us; during the reset the globe eases round to the next one.
-      const nextLead = (lead + 1) % stories.length;
-      let turn = facingAngle(stories[nextLead].pos) - facingAngle(stories[lead].pos);
-      turn = Math.atan2(Math.sin(turn), Math.cos(turn));
-      globe.rotation.y = facingAngle(stories[lead].pos) + turn * smooth(16, 18, tc) + Math.sin(t * 0.15) * 0.25 + pointer.x * 0.3;
+      globe.rotation.y = t * 0.06 + pointer.x * 0.3;
       // every story is in the northern hemisphere: lean the north towards us so they spread over the face
       globe.rotation.x = 0.6 + pointer.y * 0.15;
       globe.updateMatrixWorld();
 
-      const news = window4(0, 0.8, 4.2, 6, tc);
-      const growth = smooth(1.5, 8, tc);
-      const settle = 1 - smooth(16, 18, tc);
-
-      // stories: where they are now, how much they face us, how tall their spike is
       for (const s of stories) {
         s.world.copy(s.pos).applyMatrix4(globe.matrixWorld);
         s.facing = smooth(-0.15, 0.45, s.world.z / R);
-        const isLead = s.index === lead;
-        s.height = (0.12 + (s.sources / 10) * 0.5 * growth * (isLead ? 1.6 : 1)) * (0.35 + 0.65 * settle);
+      }
+
+      // role timings: rt = seconds into this role's current cycle
+      const rt = [0, 0, 0, 0];
+      ROLES.forEach((_, k) => {
+        const c = Math.floor((t + offsets[k]) / CYCLE);
+        rt[k] = (t + offsets[k]) % CYCLE;
+        if (c !== roleCycle[k]) {
+          roleCycle[k] = c;
+          roleStory[k] = -1;
+          roleStory[k] = pick(k);
+        }
+      });
+      const S = (k: number) => stories[Math.max(0, roleStory[k])];
+      const fadeOut = (x: number) => 1 - smooth(5.3, 5.9, x);
+
+      // spikes: every story has one; the rising story's grows fastest
+      for (const s of stories) {
+        const rising = s.index === roleStory[2];
+        const grow = rising ? smooth(0.2, 3, rt[2]) * fadeOut(rt[2]) : 0;
+        s.height = 0.12 + (s.sources / 10) * 0.35 + grow * 0.7;
         s.spike.scale.set(1, s.height, 1);
         s.spike.position.copy(s.pos).addScaledVector(s.normal, s.height / 2);
         (s.spike.material as MeshBasicMaterial).opacity = 0.35 + 0.5 * s.facing;
-        s.glow.scale.setScalar(0.45 + (isLead ? 0.25 + Math.sin(t * 3) * 0.08 : 0.05));
+        const busy = roleStory.includes(s.index);
+        s.glow.scale.setScalar(0.45 + (busy ? 0.2 + Math.sin(t * 3 + s.index) * 0.06 : 0.05));
         if (s.chip) {
           tmp.copy(s.pos).addScaledVector(s.normal, s.height + 0.2).applyMatrix4(globe.matrixWorld);
           s.chip.sprite.position.copy(tmp);
-          s.chip.sprite.material.opacity = s.facing * (isLead ? 1 : 0.8);
-        }
-      }
-      const L = stories[lead];
-      // lite mode shows a chip only for the lead story
-      if (lite) {
-        if (lastLead !== lead) {
-          ticker.set(L.cat[lang], { color: L.cat.color, border: L.cat.color });
-          lastLead = lead;
+          s.chip.sprite.material.opacity = s.facing * (busy ? 1 : 0.75);
         }
       }
 
-      // news: coverage pulses along the arcs, strongest while articles arrive
+      // coverage: arcs into the covered story pulse strongest; "+1 source" pops up three times per cycle
+      const covered = roleStory[3];
       for (const a of arcs) {
-        const m = a.line.material as ShaderMaterial;
-        m.uniforms.uBoost.value = (0.25 + 0.75 * news) * (a.story === lead ? 1.2 : 0.8) * settle;
+        (a.line.material as ShaderMaterial).uniforms.uBoost.value = a.story === covered ? 1 : 0.4;
       }
-      if (lite) {
-        ticker.sprite.position.copy(L.world).addScaledVector(up, 0.42);
-        ticker.sprite.material.opacity = L.facing;
-      } else if (!calm) {
-        // "+1 source" hops between stories while articles arrive
-        const hop = Math.floor(tc / 0.9) % stories.length;
-        const h = stories[hop];
-        ticker.sprite.position.copy(h.world).addScaledVector(up, -0.3);
-        ticker.sprite.material.opacity = news * h.facing * (0.5 + 0.5 * Math.sin((tc % 0.9) * Math.PI / 0.9));
-      } else hideLabel(ticker);
+      const C = S(3);
+      if (!calm) {
+        const pop = rt[3] % 2;
+        ticker.sprite.position.copy(C.world).addScaledVector(up, -0.32);
+        ticker.sprite.material.opacity = smooth(0, 0.25, pop) * (1 - smooth(1.2, 1.7, pop)) * C.facing * fadeOut(rt[3]);
+      } else {
+        ticker.sprite.position.copy(C.world).addScaledVector(up, -0.32);
+        ticker.sprite.material.opacity = C.facing * 0.8 * fadeOut(rt[3]);
+      }
 
-      // rising: the lead story grows fastest
-      rising.sprite.position.copy(L.world).addScaledVector(up, L.height + 0.55);
-      rising.sprite.material.opacity = window4(4.5, 5.5, 8.5, 9.5, tc) * L.facing;
+      // rising
+      const Ri = S(2);
+      rising.sprite.position.copy(Ri.world).addScaledVector(up, Ri.height + 0.55);
+      rising.sprite.material.opacity = smooth(0.8, 1.4, rt[2]) * fadeOut(rt[2]) * Ri.facing;
 
-      // analysing: a scan ring turns on the lead story while its stages tick off
-      const analysing = window4(5, 5.6, 10, 10.8, tc);
-      scanGroup.position.copy(L.pos).addScaledVector(L.normal, 0.01);
-      // lookAt takes a world point: face the ring outwards from the globe's centre
-      scanGroup.lookAt(tmp.copy(L.pos).multiplyScalar(2).applyMatrix4(globe.matrixWorld));
+      // analysing: scan ring on the story, stages ticking off in ~2.5 s
+      const A = S(0);
+      const analysing = smooth(0.1, 0.5, rt[0]) * fadeOut(rt[0]);
+      scanGroup.position.copy(A.pos).addScaledVector(A.normal, 0.01);
+      scanGroup.lookAt(tmp.copy(A.pos).multiplyScalar(2).applyMatrix4(globe.matrixWorld));
       scanGroup.rotateZ(t * 2.4);
       (scan.material as LineBasicMaterial).opacity = analysing * 0.8;
       (scanTick.material as LineBasicMaterial).opacity = analysing;
-      const colX = L.world.x > 0 ? -1 : 1; // put the column on the globe's inner side
       stageChips.forEach((c, i) => {
-        const on = smooth(5.3 + i * 0.8, 5.7 + i * 0.8, tc) * (1 - smooth(10.2, 11, tc));
-        c.sprite.position.set(L.world.x + colX * 1.15, L.world.y + 0.66 - i * 0.33, L.world.z + 0.3);
-        c.sprite.material.opacity = on * Math.max(0.4, L.facing);
+        const on = smooth(0.4 + i * 0.5, 0.7 + i * 0.5, rt[0]) * fadeOut(rt[0]);
+        c.sprite.position.set(COLUMN.x, COLUMN.y - i * 0.33, COLUMN.z);
+        c.sprite.material.opacity = on;
       });
+      tmp.set(COLUMN.x + 0.55, COLUMN.y + 0.16, COLUMN.z).toArray(linkPos, 0);
+      A.world.toArray(linkPos, 3);
+      linkGeo.attributes.position.needsUpdate = true;
+      linkMat.opacity = analysing * 0.45 * A.facing;
 
       // alert: importance counts up; crossing 60 raises the alert
-      const score = Math.round(34 + 38 * smooth(9, 10.6, tc));
+      const Al = S(1);
+      const score = Math.round(38 + 34 * smooth(0.3, 1.8, rt[1]));
       const alerted = score >= 60;
       if (score !== lastScore) {
         if (alerted) importance.set(`⚠ ${tx.alert} · ${score}`, { color: '#ff5a6a', border: '#ff5a6a' });
         else importance.set(`${tx.importance} ${score}`, { color: '#fbbf24', border: '#fbbf24' });
         lastScore = score;
       }
-      importance.sprite.position.copy(L.world).addScaledVector(up, -0.45);
-      importance.sprite.material.opacity = window4(8.8, 9.3, 12.5, 13.5, tc) * Math.max(0.5, L.facing);
-      pulse.position.copy(L.pos).addScaledVector(L.normal, 0.02);
-      pulse.lookAt(tmp.copy(L.pos).multiplyScalar(2).applyMatrix4(globe.matrixWorld));
+      importance.sprite.position.copy(Al.world).addScaledVector(up, -0.45);
+      importance.sprite.material.opacity = smooth(0.1, 0.4, rt[1]) * fadeOut(rt[1]) * Math.max(0.5, Al.facing);
+      pulse.position.copy(Al.pos).addScaledVector(Al.normal, 0.02);
+      pulse.lookAt(tmp.copy(Al.pos).multiplyScalar(2).applyMatrix4(globe.matrixWorld));
       if (calm) {
         pulse.scale.setScalar(1.4);
-        (pulse.material as MeshBasicMaterial).opacity = alerted ? window4(10, 10.4, 12, 13, tc) * 0.6 : 0;
+        (pulse.material as MeshBasicMaterial).opacity = alerted ? 0.6 * fadeOut(rt[1]) : 0;
       } else {
-        const k = alerted ? ((tc - 10) % 1.1) / 1.1 : 0;
+        const k = alerted ? ((rt[1] - 1.6) % 1.1) / 1.1 : 0;
         pulse.scale.setScalar(1 + k * 3);
-        (pulse.material as MeshBasicMaterial).opacity = alerted && tc < 13 ? (1 - k) * 0.9 : 0;
+        (pulse.material as MeshBasicMaterial).opacity = alerted ? (1 - k) * 0.9 * fadeOut(rt[1]) : 0;
       }
 
-      // reporting: the stories facing us feed the briefing, which fills line by line
-      const report = window4(12, 12.8, 16.2, 17.4, tc);
-      (card.mesh.material as MeshBasicMaterial).opacity = report;
-      const lines = Math.min(6, Math.max(0, Math.floor((tc - 12.4) / 0.45)));
+      // reporting: the briefing is always on screen and refills every cycle from the stories facing us
+      const lines = Math.min(6, Math.floor(((t % CYCLE) / CYCLE) * 7.5));
       if (lines !== lastLines) {
         card.draw(lines, stories.map((s) => s.cat.color));
         lastLines = lines;
@@ -461,7 +482,7 @@ const create: SceneFactory = (ctx) => {
         cardAnchor.toArray(feedPos, i * 6 + 3);
       });
       feedGeo.attributes.position.needsUpdate = true;
-      feedMat.opacity = window4(12.2, 13, 15, 16.2, tc) * 0.5;
+      feedMat.opacity = 0.18 + 0.12 * Math.sin(t * 2.2);
 
       camera.position.set(0, 0, baseZ);
       camera.lookAt(0, 0, 0);

@@ -1,29 +1,35 @@
 ---
 import Scene from '../3d/Scene.astro';
 import ProjectVisual from '../project/ProjectVisual.astro';
+import NewsTicker from '../project/NewsTicker.astro';
 import { accentVar, type Project } from '../../lib';
 import { t, projectHref, type Lang } from '../../i18n/ui';
 
 interface Props {
   lang: Lang;
   project: Project;
+  /** Put the scene on the right on wide screens, so featured products alternate. */
+  flip?: boolean;
+  /** Only the flagship product carries the "Flagship product" badge. */
+  flagship?: boolean;
 }
-const { lang, project } = Astro.props;
+const { lang, project, flip = false, flagship = false } = Astro.props;
 const d = project.data;
 const p = t(lang).projects;
 const href = projectHref(lang, project.slug);
 ---
 
-<article class="featured" style={`--accent:${accentVar[d.accent]}`} data-reveal>
+<article class:list={['featured', flip && 'flip']} style={`--accent:${accentVar[d.accent]}`} data-reveal>
   <a href={href} class="cover-link" aria-label={`${d.title}: ${p.readMore}`}></a>
   <div class="stage">
     {d.scene !== 'none' && <Scene name={d.scene} class="scene-desk" label={d.title} />}
+    {project.slug === 'counselor' && <NewsTicker lang={lang} />}
     <div class="art-mob">
       <ProjectVisual scene={d.scene} cover={d.cover} coverAlt={d.coverAlt} logo={d.logo} gallery={d.gallery} lang={lang} />
     </div>
   </div>
   <div class="text">
-    <p class="label badge"><span class="swatch" aria-hidden="true"></span>{p.featured} · {d.category}</p>
+    <p class="label badge"><span class="swatch" aria-hidden="true"></span>{flagship ? `${p.featured} · ${d.category}` : d.category}</p>
     <h3 class="title">{d.title}</h3>
     <p class="promise">{d.promise ?? d.tagline}</p>
     {d.promise && <p class="tagline">{d.tagline}</p>}
@@ -73,10 +79,20 @@ const href = projectHref(lang, project.slug);
   .stage {
     position: relative;
   }
+  /* the live scene shows on every screen size; the SVG art is only the fallback without WebGL */
   .stage :global(.scene-desk) {
-    display: none;
+    display: block;
     height: 100%;
-    min-height: 460px;
+    min-height: 380px;
+  }
+  .art-mob {
+    display: none;
+  }
+  .stage:has(:global(.no-webgl)) :global(.scene-desk) {
+    display: none;
+  }
+  .stage:has(:global(.no-webgl)) .art-mob {
+    display: block;
   }
   .art-mob :global(.visual) {
     border: 0;
@@ -167,11 +183,14 @@ const href = projectHref(lang, project.slug);
     .featured {
       grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
     }
-    .stage :global(.scene-desk) {
-      display: block;
+    .featured.flip {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 7fr);
     }
-    .art-mob {
-      display: none;
+    .flip .stage {
+      order: 2;
+    }
+    .stage :global(.scene-desk) {
+      min-height: 460px;
     }
   }
 </style>

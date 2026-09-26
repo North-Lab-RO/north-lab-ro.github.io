@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Scene from '../components/3d/Scene.astro';
+import NewsTicker from '../components/project/NewsTicker.astro';
 import Gallery from '../components/project/Gallery.astro';
 import ProjectVisual from '../components/project/ProjectVisual.astro';
 import SalesBlock from '../components/sales/SalesBlock.astro';
@@ -28,16 +29,16 @@ const sceneLabels = {
   en: {
     globe: 'A globe of news stories coloured by category. Coverage arrives from many outlets, the leading story rises, is analysed stage by stage, crosses the importance threshold and raises an alert, and the top stories feed the morning briefing',
     board: 'An evidence board of pinned photographs joined by red string',
-    radar: 'A radar scope with a rotating sweep and aircraft blips on approach paths',
+    radar: 'A live airfield on a radar scope: aircraft tagged with callsign and type fly the arrival routes, land on runway 08 and take off on the departure route, while the tower works through each clearance: heard, understood, checked, answered',
     ledger: 'A bank statement being scanned, with checked numbers settling into ledger rows',
-    graph: 'A network of an investigation: a subject linked to identifiers, with findings confirmed or rejected',
+    graph: 'An OSINT investigation board in front of Athena’s shield: a subject with its identifiers, collectors searching them, findings confirmed or rejected by an analyst, a location pin, a relationship, and a report filling with the confirmed findings',
   },
   ro: {
     globe: 'Un glob cu povești de știri colorate după categorie. Relatările vin din multe publicații, povestea principală crește, e analizată etapă cu etapă, trece pragul de importanță și declanșează o alertă, iar cele mai importante povești intră în sinteza de dimineață',
     board: 'Un panou de probe cu fotografii prinse în ace și legate cu sfoară roșie',
-    radar: 'Un ecran radar cu baleiaj rotativ și aeronave pe traiectorii de apropiere',
+    radar: 'Un aeroport live pe un ecran radar: avioane etichetate cu indicativ și tip urmează rutele de sosire, aterizează pe pista 08 și decolează pe ruta de plecare, iar turnul trece prin fiecare autorizare: auzită, înțeleasă, verificată, transmisă',
     ledger: 'Un extras de cont scanat, cu cifrele verificate așezându-se în rândurile registrului',
-    graph: 'Rețeaua unei investigații: un subiect legat de identificatori, cu constatări confirmate sau respinse',
+    graph: 'Un panou de investigație OSINT în fața scutului Atenei: un subiect cu identificatorii săi, colectoare care îi caută, constatări confirmate sau respinse de un analist, un pin pe hartă, o relație și un raport care se umple cu constatările confirmate',
   },
 } as const;
 ---
@@ -86,6 +87,7 @@ const sceneLabels = {
             <ProjectVisual scene="none" cover={d.cover} coverAlt={d.coverAlt} />
           )
         }
+        {entry.slug === 'counselor' && <NewsTicker lang={lang} />}
       </div>
     </header>
 
@@ -160,6 +162,7 @@ const sceneLabels = {
     align-items: center;
   }
   .stage {
+    position: relative;
     order: -1;
     margin-inline: calc(var(--gutter) * -1);
   }
