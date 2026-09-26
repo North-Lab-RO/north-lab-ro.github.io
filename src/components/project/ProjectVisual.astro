@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
-  scene: 'none' | 'globe' | 'board' | 'radar' | 'ledger';
+  scene: 'none' | 'globe' | 'board' | 'radar' | 'ledger' | 'graph';
   cover?: ImageMetadata;
   coverAlt?: string;
   logo?: ImageMetadata;
@@ -27,6 +27,19 @@ const sources = [
 ];
 const polaroids = gallery.slice(0, 3);
 // Ledger rows for the Banky art: widths of the description and amount bars, and whether the guard passed them.
+// Network art for ATHENA: subject in the middle, identifiers around it, findings on the outside.
+const netNodes = Array.from({ length: 8 }, (_, i) => {
+  const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+  return { x: 200 + Math.cos(a) * 92, y: 150 + Math.sin(a) * 76, a };
+});
+const netFinds = netNodes.flatMap((n, i) =>
+  [-0.32, 0.32].map((d, k) => ({
+    x: 200 + Math.cos(n.a + d) * 138,
+    y: 150 + Math.sin(n.a + d) * 112,
+    from: n,
+    state: (i + k) % 4 === 1 ? 'rej' : (i + k) % 3 === 0 ? 'pend' : 'ok',
+  })),
+);
 const ledgerRows = [
   [0.46, 0.18, true],
   [0.3, 0.14, true],
@@ -84,6 +97,26 @@ const ledgerRows = [
           </figure>
         ))}
       </div>
+    )
+  }
+  {
+    scene === 'graph' && (
+      <svg viewBox="0 0 400 300" class="art graph" aria-hidden="true">
+        {netNodes.map((n) => (
+          <line x1="200" y1="150" x2={n.x.toFixed(1)} y2={n.y.toFixed(1)} stroke="#818cf8" stroke-opacity=".5" />
+        ))}
+        {netFinds.map((f) => (
+          <line x1={f.from.x.toFixed(1)} y1={f.from.y.toFixed(1)} x2={f.x.toFixed(1)} y2={f.y.toFixed(1)} stroke="#818cf8" stroke-opacity=".22" />
+        ))}
+        {netFinds.map((f, i) => (
+          <circle cx={f.x.toFixed(1)} cy={f.y.toFixed(1)} r="5" class:list={['find', f.state]} style={`--i:${i}`} />
+        ))}
+        {netNodes.map((n) => (
+          <circle cx={n.x.toFixed(1)} cy={n.y.toFixed(1)} r="7" fill="#c7d2fe" />
+        ))}
+        <circle cx="200" cy="150" r="30" fill="#818cf8" fill-opacity=".15" class="halo" />
+        <circle cx="200" cy="150" r="14" fill="#818cf8" />
+      </svg>
     )
   }
   {
@@ -191,6 +224,35 @@ const ledgerRows = [
     8% {
       opacity: 1;
     }
+  }
+  .graph .find {
+    fill: #eab308;
+    animation: review 6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.37s);
+  }
+  .graph .find.ok {
+    --end: #22c55e;
+  }
+  .graph .find.rej {
+    --end: #ef4444;
+  }
+  .graph .find.pend {
+    --end: #eab308;
+  }
+  @keyframes review {
+    0%,
+    40% {
+      fill: #eab308;
+      opacity: 1;
+    }
+    55%,
+    100% {
+      fill: var(--end);
+      opacity: 0.95;
+    }
+  }
+  .graph .halo {
+    animation: pulse 2.6s ease-in-out infinite;
   }
   .ledger .beam {
     filter: drop-shadow(0 0 8px var(--color-violet));

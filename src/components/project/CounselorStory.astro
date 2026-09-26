@@ -35,29 +35,29 @@ const copy = {
     ],
   },
   ro: {
-    label: 'Fluxul, pas cu pas',
-    aria: 'Animație a fluxului COUNSELOR: surse, grupare, analiză și livrare',
+    label: 'Cum lucrează, pas cu pas',
+    aria: 'Animație despre felul în care lucrează COUNSELOR: surse, grupare, analiză și livrare',
     steps: 'Pasul',
     chapters: [
       {
         k: 'Surse',
         title: '41 de publicații, la fiecare cinci minute.',
-        body: 'Fluxurile românești și internaționale sunt interogate non-stop. Fiecare articol este extras integral, i se detectează limba, iar duplicatele sunt eliminate înainte de orice altceva.',
+        body: 'Sursele din România și din străinătate sunt verificate non-stop. Fiecare articol e preluat integral, i se recunoaște limba, iar dublurile sunt eliminate înainte de orice altceva.',
       },
       {
         k: 'Grupare',
         title: 'Articolele își găsesc povestea.',
-        body: 'Fiecare articol devine un embedding BGE-M3. Articolele despre același eveniment (similaritate cosinus ≥ 0,78, publicate la cel mult 72 de ore unul de altul) intră în aceeași poveste, indiferent de publicație.',
+        body: 'Fiecare articol primește o „amprentă” de sens (BGE-M3). Articolele despre același eveniment, foarte apropiate ca sens (similaritate de cel puțin 0,78) și publicate la cel mult 72 de ore distanță, ajung în aceeași poveste, indiferent de publicație.',
       },
       {
         k: 'Analiză',
         title: 'O poveste, citită din toate unghiurile.',
-        body: 'Un model de 14B citește întregul grup și returnează o schemă fixă: rezumate, fapte cheie, ce se știe și ce nu, puncte de vedere după orientare și un scor de consens. Încrederea și spectrul surselor sunt calculate în cod.',
+        body: 'Un model de 14B citește toate articolele poveștii și completează mereu aceeași structură: rezumate, fapte-cheie, ce se știe și ce nu, puncte de vedere și gradul de acord. Încrederea și poziționarea surselor se calculează separat, prin reguli clare.',
       },
       {
         k: 'Livrare',
         title: 'Ajunge la tine doar ce contează.',
-        body: 'Un scor de importanță de la 0 la 100 (surse, credibilitate, țări, categorie, viteză) ordonează fiecare poveste. Peste pragul tău primești o alertă push cu o scurtă explicație „de ce contează”, iar în fiecare dimineață la 07:00, o sinteză.',
+        body: 'Fiecare poveste primește un scor de importanță de la 0 la 100, calculat din numărul și credibilitatea surselor, țări, categorie și viteza de răspândire. Peste pragul tău primești o notificare cu motivul într-o frază, iar în fiecare dimineață la 07:00, o sinteză.',
       },
     ],
   },

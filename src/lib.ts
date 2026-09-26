@@ -16,4 +16,5 @@ export const accentVar = {
   aurora: 'var(--color-aurora)',
   ember: 'var(--color-ember)',
   violet: 'var(--color-violet)',
+  indigo: 'var(--color-indigo)',
 } as const;

@@ -7,9 +7,9 @@ interface Props {
 const { lang } = Astro.props;
 // Radio transmissions are ICAO English in both languages; everything around them is translated.
 const radio = [
-  'Otopeni Tower, TAROM three zero one, holding point runway zero eight right, ready for departure.',
-  'TAROM three zero one, wind zero seven zero degrees eight knots, runway zero eight right, cleared for take-off.',
-  'Cleared for take-off runway zero eight right, TAROM three zero one.',
+  'Otopeni Tower, Northlab two zero four, holding point runway zero eight right, ready for departure.',
+  'Northlab two zero four, wind zero seven zero degrees eight knots, runway zero eight right, cleared for take-off.',
+  'Cleared for take-off runway zero eight right, Northlab two zero four.',
 ];
 const copy = {
   en: {
@@ -26,7 +26,7 @@ const copy = {
       'The exchange above is illustrative. The audio clip is real output from the system\'s speech stage. Note the ICAO “tree” for three.',
   },
   ro: {
-    head: 'LROP · Turn · pe dispozitiv',
+    head: 'LROP · Turn · local',
     pilot: 'Pilot',
     tower: 'Turn',
     traces: [
@@ -34,7 +34,7 @@ const copy = {
       ['verificare pistă liberă', 'răspuns verificat', 'text → voce'],
       ['colaționarea corespunde autorizării'],
     ],
-    clip: 'Înregistrare reală · sintetizată local',
+    clip: 'Înregistrare reală · voce sintetizată local',
     caption:
       'Schimbul de mai sus este ilustrativ; comunicările radio rămân în engleză, limba standard ICAO în aviație. Clipul audio este o ieșire reală a etapei de sinteză vocală. Observă pronunția ICAO „tree” pentru „three”.',
   },

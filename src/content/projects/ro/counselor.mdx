@@ -1,44 +1,28 @@
 ---
 title: COUNSELOR
-category: Analiză de știri
-tagline: "COUNSELOR citește non-stop 41 de surse de știri și le transformă într-o sinteză scurtă și echilibrată, cu alerte doar când se întâmplă ceva important."
+category: Monitorizarea presei
+tagline: "COUNSELOR urmărește non-stop 41 de surse de știri și le adună într-o sinteză scurtă și echilibrată. Te alertează doar când se întâmplă ceva important."
 summary: >-
-  COUNSELOR preia non-stop știri românești și internaționale, grupează articolele despre același eveniment într-o
-  singură poveste și scrie pentru fiecare o analiză echilibrată: un rezumat, unde se situează sursele pe spectrul
-  politic, în ce privințe sunt de acord și unde diferă, ce se știe și ce este încă neclar, ce afirmații sunt fapte și
-  care sunt opinii. Fiecare poveste primește un scor de importanță, cele relevante declanșează alerte, iar în fiecare
-  dimineață sosește o sinteză. Toate modelele rulează pe o singură mașină locală; traficul spre exterior merge doar
-  către publicațiile de știri și, când este activat, către Reddit.
+  COUNSELOR preia non-stop știri din România și din lume, grupează articolele despre același eveniment într-o
+  singură poveste și scrie pentru fiecare o analiză echilibrată: pe scurt ce s-a întâmplat, cum se poziționează
+  sursele, unde sunt de acord și unde nu, ce se știe sigur și ce e încă neclar, ce e fapt și ce e opinie. Fiecare
+  poveste primește un scor de importanță, cele relevante declanșează alerte, iar dimineața te așteaptă o sinteză.
+  Toate modelele funcționează pe un singur server local; în afară, sistemul contactează doar publicațiile de știri
+  și, dacă activezi opțiunea, Reddit.
 order: 1
 accent: ice
 scene: globe
 logo: ../../../assets/projects/counselor/logo.png
 metrics:
   - value: '41'
-    label: surse de știri, interogate la fiecare 5 minute
+    label: surse de știri, verificate la fiecare 5 minute
   - value: '2,2×'
-    label: mai multe articole grupate pe poveste decât prin cuvinte cheie
+    label: mai multe articole grupate pe poveste decât prin cuvinte-cheie
   - value: '~354'
-    label: analize de povești pe oră, pe un singur GPU
+    label: povești analizate pe oră, pe o singură placă video
   - value: '0'
-    label: apeluri AI în cloud
-features:
-  - title: O poveste, multe surse
-    body: Gruparea semantică adună articolele despre același eveniment din toate publicațiile, ca să citești evenimentul o singură dată și să vezi exact cine l-a relatat.
-  - title: Spectrul surselor și consensul
-    body: Fiecare poveste arată unde se situează sursele, cât de mult sunt de acord și ce puncte de vedere diferă, atribuite, nu preluate.
-  - title: Fapt versus opinie
-    body: Analiza separă faptele, afirmațiile și opiniile, precum și „ce știm” de „ce nu știm”.
-  - title: Verificări ancorate în surse
-    body: Verdictele sunt calculate din ce au relatat efectiv alte publicații. Modelul clasifică citatele; codul decide verdictul.
-  - title: Alerte și sinteze
-    body: Alerte push ordonate după importanță, cu o scurtă explicație „de ce contează”, o sinteză de dimineață la 07:00 și una actualizată pe parcursul zilei.
-  - title: Glob, căutare și rapoarte PDF
-    body: Un glob 3D al relatărilor, cu numele țărilor și ale capitalelor, căutare în tot textul, marcaje, o arhivă de rapoarte și rapoarte PDF descărcabile.
-  - title: Imagini principale, păstrate private
-    body: Cardurile poveștilor și ale articolelor arată imaginea principală a publicației, descărcată și stocată de server, astfel încât browserul tău nu contactează niciodată publicația.
-  - title: Povești în creștere și în declin
-    body: Fiecare poveste este marcată ca fiind în creștere sau încheiată, iar un panou dedicat, „În creștere”, arată ce câștigă surse chiar acum.
+    label: apeluri către servicii AI din cloud
+features: []
 stack:
   - Python
   - FastAPI
@@ -55,81 +39,82 @@ stack:
   - Docker
 reports:
   - title: Sinteza de dimineață (PDF)
-    description: O sinteză completă generată, așa cum este livrată la 07:00.
-  - title: Raport de analiză a unei povești (PDF)
-    description: O poveste cu consensul, spectrul surselor și verificările ei.
-credits: Părți din interfața web sunt adaptate după World Monitor (AGPL-3.0).
+    description: O sinteză completă, generată de aplicație pe date inventate.
+    file: counselor-sinteza-exemplu.pdf
+    preview: counselor-sinteza-exemplu.webp
+credits: Unele părți ale interfeței web sunt adaptate după World Monitor (AGPL-3.0).
+
 # ── Sales block ──
-promise: "Afli ce spune presa înainte să înceapă ziua."
+promise: "Știi ce scrie presa înainte să înceapă ziua."
 audienceShort:
   - "Comunicare și PR"
   - "Instituții publice"
   - "Analiști și investitori"
   - "Redacții"
 outcomes:
-  - title: "Minute, nu ore"
-    body: "O sinteză la 07:00 înlocuiește ore de citit: ce s-a întâmplat, de ce contează și unde diferă sursele."
-  - title: "Toate unghiurile fiecărei povești"
-    body: "Vezi ce publicații au relatat o poveste, unde se situează, cât de mult sunt de acord și ce este încă neclar."
-  - title: "Alertat doar când contează"
-    body: "Alertele push pleacă doar pentru poveștile importante, fiecare cu motivul într-un rând. Fără zgomot."
+  - title: "Câteva minute, nu ore"
+    body: "La 07:00 ai o sinteză care înlocuiește ore de citit: ce s-a întâmplat, de ce contează și unde nu se înțeleg sursele."
+  - title: "Fiecare poveste, din toate unghiurile"
+    body: "Vezi cine a relatat, cum se poziționează fiecare sursă, cât de mult sunt de acord și ce rămâne neclar."
+  - title: "Alerte doar când contează"
+    body: "Primești notificări doar pentru poveștile importante, fiecare cu motivul într-o frază. Fără zgomot."
 audiences:
   - title: "Echipe de comunicare și PR"
-    body: "Urmărești cum sunt prezentate organizația ta, sectorul și concurenții și informezi conducerea în fiecare dimineață."
+    body: "Urmărești cum apar în presă organizația ta, domeniul și concurenții, și informezi conducerea în fiecare dimineață."
   - title: "Instituții publice"
-    body: "Urmărești relatările naționale și internaționale din domeniile tale, cu rezumate echilibrate și atribuite."
+    body: "Ai sub ochi relatările din țară și din străinătate despre domeniile tale, în rezumate echilibrate, cu sursele citate."
   - title: "Analiști și investitori"
-    body: "Observi devreme poveștile în creștere, pe țări și categorii, și citești un rezumat verificat în câteva minute."
+    body: "Vezi din timp poveștile care prind avânt, pe țări și categorii, și citești un rezumat verificat în câteva minute."
   - title: "Redacții și ONG-uri"
-    body: "Monitorizezi zeci de surse deodată, compari cum prezintă publicațiile același eveniment și verifici afirmațiile."
+    body: "Urmărești zeci de surse deodată, compari cum prezintă fiecare același eveniment și verifici afirmațiile."
 tour: counselor
 capabilities:
   - group: "Sinteza zilnică"
     items:
-      - "Sinteză de dimineață la 07:00 și o actualizare la fiecare 4 ore"
-      - "Rezumat executiv, țara ta și internațional"
-      - "Analize: ce s-a întâmplat, de ce contează, unde diferă sursele, ce e neclar"
-      - "Verificări cu verdicte și surse numite"
-      - "Arhivă de rapoarte și descărcare PDF"
+      - "Sinteză de dimineață la 07:00 și actualizări la fiecare 4 ore"
+      - "Rezumat pentru conducere, România și internațional"
+      - "Analize aprofundate: ce s-a întâmplat, de ce contează, unde diferă sursele, ce e neclar"
+      - "Verificarea afirmațiilor, cu verdict și surse numite"
+      - "Arhivă de rapoarte și descărcare în PDF"
   - group: "Povești"
     items:
-      - "Articole din multe publicații grupate într-o singură poveste"
-      - "Rezumat scurt, mediu și detaliat"
-      - "Spectrul surselor, consens și încredere"
-      - "Ce știm și ce nu știm"
+      - "Articolele din mai multe publicații, adunate într-o singură poveste"
+      - "Rezumat scurt, mediu sau detaliat"
+      - "Poziționarea surselor, gradul de acord și nivelul de încredere"
+      - "Ce știm și ce nu știm, separat"
       - "Evoluția poveștii și povești înrudite"
-      - "Liste de salvate și de citit mai târziu"
+      - "Liste cu povești salvate și de citit mai târziu"
   - group: "Monitorizare"
     items:
-      - "Un panou cu 20 de secțiuni aranjate cum vrei și salvate ca spații de lucru"
-      - "Povești în creștere și în tendințe, subiecte emergente"
-      - "Glob 3D și hartă a lumii cu relatările"
+      - "Panou cu 20 de secțiuni, aranjate cum vrei și salvate ca spații de lucru"
+      - "Povești în creștere, subiecte la modă și teme noi"
+      - "Glob 3D și hartă a lumii cu toate relatările"
       - "Canale TV live și propriile camere"
       - "Căutare în titluri, rezumate, persoane, organizații și țări"
   - group: "Alerte"
     items:
-      - "Notificări push pentru poveștile importante"
-      - "Un rând „de ce contează” la fiecare alertă"
-      - "Alegi: oprite, doar știri sau tot"
+      - "Notificări pentru poveștile importante"
+      - "Fiecare alertă spune, într-o frază, de ce contează"
+      - "Alegi ce primești: nimic, doar știri sau tot"
       - "Se instalează pe telefon și pe calculator ca o aplicație"
   - group: "Surse"
     items:
-      - "41 de surse românești și internaționale incluse"
-      - "Adaugi orice publicație lipind adresa ei"
-      - "Pornești și oprești sursele și vezi starea fiecărui flux"
-      - "Titlurile în alte limbi sunt traduse"
+      - "41 de surse din România și din străinătate, incluse"
+      - "Adaugi orice publicație lipind adresa site-ului"
+      - "Pornești sau oprești sursele și vezi cum funcționează fiecare"
+      - "Titlurile din alte limbi sunt traduse"
   - group: "Confidențialitate"
     items:
-      - "Toată analiza rulează pe serverul tău"
-      - "Ce citești, cauți și urmărești nu iese din clădire"
-      - "Sunt contactate doar sursele de știri"
+      - "Toată analiza se face pe serverul tău"
+      - "Ce citești, cauți și urmărești nu iese din firmă"
+      - "Sistemul contactează doar sursele de știri"
 requirements:
-  - "Un server sau o stație de lucru cu o placă grafică NVIDIA modernă (24 GB)"
-  - "Se folosește din orice browser și se instalează pe telefon"
-  - "Conexiune la internet pentru preluarea știrilor; analiza rămâne pe mașina ta"
+  - "Un server sau o stație de lucru cu placă video NVIDIA modernă (24 GB)"
+  - "Se folosește din orice browser și se poate instala pe telefon"
+  - "Conexiune la internet pentru preluarea știrilor; analiza rămâne pe serverul tău"
 tailoring:
   - "Propriile surse, limbi și categorii"
-  - "Sinteze axate pe sectorul, clienții sau concurenții tăi"
+  - "Sinteze axate pe domeniul, clienții sau concurenții tăi"
   - "Praguri de alertă stabilite de tine și trimitere pe email"
   - "Identitatea vizuală și autentificarea companiei tale"
 ---
@@ -143,58 +128,60 @@ import ScoreBars from '../../../components/project/ScoreBars.astro';
 
 ## Cum funcționează
 
-Patru etape transformă un flux de titluri în câteva povești care merită citite. Derulează mai jos pentru a le vedea.
+Patru etape transformă un șuvoi de titluri în câteva povești care merită citite. Derulează în jos ca să le vezi pe
+rând.
 
 <CounselorStory lang="ro" />
 
-În spate, munca rulează ca sarcini în patru cozi separate, astfel încât procesarea în masă a articolelor nu blochează
-niciodată analiza poveștilor importante. Două modele își împart efortul: unul mic se ocupă de fiecare articol, iar
-unul mai mare rulează doar acolo unde se întâlnesc multe surse.
+În spate, munca e împărțită în patru cozi separate, așa că procesarea articolelor nu blochează niciodată analiza
+poveștilor importante. Două modele își împart efortul: unul mic se ocupă de fiecare articol, iar unul mai mare
+intervine doar acolo unde se întâlnesc mai multe surse.
 
 <Pipeline
   title="Articol → poveste → sinteză"
-  caption="Fiecare etapă rulează pe un singur server Linux, cu un singur GPU."
+  caption="Toate etapele rulează pe un singur server Linux, cu o singură placă video."
   stages={[
-    { label: 'Preluare', detail: '41 de fluxuri RSS interogate la fiecare cinci minute.', tag: 'feedparser' },
-    { label: 'Extragere și curățare', detail: 'Extragerea textului integral, detectarea limbii și eliminarea duplicatelor.', tag: 'trafilatura' },
-    { label: 'Imaginea principală', detail: 'Preluată din etichetele media RSS sau din metadatele paginii, descărcată cu limită de mărime, listă de tipuri permise și protecție SSRF, apoi stocată.', tag: 'proxy de imagini' },
-    { label: 'Embedding', detail: 'Vectori multilingvi pentru fiecare articol, stocați pentru căutare după similaritate.', tag: 'bge-m3 → qdrant' },
-    { label: 'Grupare în povești', detail: 'Similaritate cosinus ≥ 0,78 într-o fereastră de ±72 de ore; după 48 de ore, o poveste nu mai acceptă articole.' },
-    { label: 'Analiza fiecărui articol', detail: 'Rezumat, estimarea orientării și traducerea titlului pentru fiecare articol.', tag: 'qwen3 4B' },
-    { label: 'Analiza poveștii', detail: 'Consens, divergențe, ce se știe și ce nu, fapt versus opinie.', tag: 'qwen3 14B' },
-    { label: 'Scor și livrare', detail: 'Scor de importanță, alerte push, sinteze programate și rapoarte PDF.', items: ['alerte', 'sinteze', 'rapoarte PDF', 'căutare'] },
+    { label: 'Preluare', detail: '41 de fluxuri RSS, verificate la fiecare cinci minute.', tag: 'feedparser' },
+    { label: 'Extragere și curățare', detail: 'Textul complet al articolului, limba în care e scris și eliminarea dublurilor.', tag: 'trafilatura' },
+    { label: 'Imaginea principală', detail: 'Preluată din fluxul RSS sau din metadatele paginii, cu limită de mărime, doar tipuri permise și protecție SSRF, apoi păstrată local.', tag: 'proxy de imagini' },
+    { label: 'Vectorizare', detail: 'Fiecare articol primește o reprezentare semantică multilingvă, folosită pentru căutarea după sens.', tag: 'bge-m3 → qdrant' },
+    { label: 'Gruparea în povești', detail: 'Similaritate cosinus de cel puțin 0,78, într-o fereastră de ±72 de ore; după 48 de ore, povestea nu mai primește articole.' },
+    { label: 'Analiza fiecărui articol', detail: 'Rezumat, estimarea orientării și traducerea titlului.', tag: 'qwen3 4B' },
+    { label: 'Analiza poveștii', detail: 'Unde sunt de acord sursele și unde nu, ce se știe și ce nu, fapt sau opinie.', tag: 'qwen3 14B' },
+    { label: 'Scor și livrare', detail: 'Scor de importanță, alerte, sinteze programate și rapoarte PDF.', items: ['alerte', 'sinteze', 'rapoarte PDF', 'căutare'] },
   ]}
 />
 
 ## Ce vezi
 
-O aplicație web progresivă pentru telefon și desktop, construită în jurul a cinci ecrane.
+O aplicație web pentru telefon și calculator, construită în jurul a cinci ecrane.
 
 <InfoGrid
   items={[
-    { title: 'Panou principal', body: 'Douăzeci de panouri pe care le poți muta și redimensiona: alerte, titluri, subiecte în trend și în creștere, verificări, spectrul surselor, starea fluxurilor și o bandă de știri.' },
-    { title: 'Monitor global', body: 'Un glob 3D sau o hartă plană. Fiecare poveste este un marcaj dimensionat după numărul de surse și colorat după nivelul de importanță; poveștile noi pulsează.' },
-    { title: 'Pagina poveștii', body: 'Spectrul surselor, indicatori de consens și încredere, ce știm și ce nu, puncte de vedere, reacția publicului, entități și evoluția poveștii.' },
-    { title: 'Rapoarte', body: 'O arhivă de sinteze generate, fiecare cu o referință stabilă, plus rapoarte la cerere pentru orice zi, descărcabile în PDF.' },
-    { title: 'Ce face AI-ul', body: 'Activitatea sarcinilor în timp real, cu timpi estimați de finalizare, ca să vezi fluxul lucrând în loc să presupui că lucrează.' },
+    { title: 'Panoul principal', body: 'Douăzeci de secțiuni pe care le muți și le redimensionezi cum vrei: alerte, titluri, subiecte la modă și în creștere, verificări, poziționarea surselor, starea fluxurilor și o bandă cu știri.' },
+    { title: 'Monitorul global', body: 'Un glob 3D sau o hartă plană. Fiecare poveste apare ca un marcaj, mai mare când are mai multe surse și colorat după importanță; poveștile noi pulsează.' },
+    { title: 'Pagina unei povești', body: 'Poziționarea surselor, gradul de acord și de încredere, ce știm și ce nu, punctele de vedere, reacția publicului, entitățile implicate și felul în care a evoluat povestea.' },
+    { title: 'Rapoartele', body: 'Arhiva sintezelor generate, fiecare cu o referință proprie, și rapoarte la cerere pentru orice zi, descărcabile în PDF.' },
+    { title: 'Ce face AI-ul', body: 'Activitatea în timp real, cu timpul estimat până la final. Vezi sistemul lucrând, nu doar presupui că lucrează.' },
   ]}
 />
 
-## În interiorul analizei
+## Cum se face analiza
 
-Nimic din ce decide ce vezi nu este lăsat doar la latitudinea modelului. Importanța este aditivă și explicabilă:
+Nimic din ce decide ce vezi nu e lăsat doar la aprecierea modelului. Importanța se calculează din semnale clare și
+poate fi explicată oricând:
 
 <ScoreBars
-  title="Scor de importanță · 0–100"
+  title="Scorul de importanță · 0–100"
   caption="Fiecare punct poate fi urmărit până la semnalul care l-a produs."
   items={[
-    { label: 'Numărul de surse', points: 30, note: 'pondere maximă la 10 publicații' },
+    { label: 'Numărul de surse', points: 30, note: 'punctaj maxim de la 10 publicații' },
     { label: 'Credibilitatea surselor', points: 15 },
-    { label: 'Acoperire geografică', points: 15, note: 'pondere maximă la 5 țări' },
+    { label: 'Acoperirea geografică', points: 15, note: 'punctaj maxim de la 5 țări' },
     { label: 'Guvern și armată', points: 15 },
     { label: 'Economie și finanțe', points: 10 },
     { label: 'Categoriile alese de tine', points: 10 },
-    { label: 'Viteză', points: 5, note: 'surse noi pe oră' },
+    { label: 'Viteza de răspândire', points: 5, note: 'surse noi pe oră' },
   ]}
   bands={[
     { label: 'Ridicat', value: 'primele 25%', color: '#ffaa00' },
@@ -203,67 +190,67 @@ Nimic din ce decide ce vezi nu este lăsat doar la latitudinea modelului. Import
   ]}
 />
 
-Nivelurile sunt percentile ale întregii arhive, nu praguri fixe. Măsurat pe 1.844 de povești, cel mai mare scor atins
-vreodată a fost 65,6, așa că niște praguri fixe de 75/50/25 ar fi colorat totul în gri.
+Pragurile sunt calculate din întreaga arhivă, nu fixate dinainte. Pe 1.844 de povești, cel mai mare scor atins a fost
+65,6, așa că niște praguri fixe de 75/50/25 ar fi lăsat totul în gri.
 
 <InfoGrid
   columns={2}
   items={[
-    { tag: 'grupare', title: 'Același eveniment, aceeași poveste', body: 'Embedding-uri BGE-M3 în Qdrant, cei mai apropiați zece vecini, similaritate cosinus de cel puțin 0,78 și date de publicare la cel mult 72 de ore distanță. La 0,72, trei din patru grupări verificate erau de fapt povești diferite.' },
-    { tag: 'încredere', title: 'Încrederea este o formulă', body: '0,2 + 0,12 × surse (până la 5) + 0,06 × orientări distincte (până la 4). Mai multe surse independente, din mai multe direcții, înseamnă mai multă încredere.' },
-    { tag: 'schemă', title: 'O formă fixă pentru fiecare poveste', body: 'Rezumate scurte, medii și detaliate, fapte cheie cu susținere, ce știm și ce nu, puncte de vedere după orientare, citate, entități, semnale de dezinformare, consens, locație și categorii.' },
-    { tag: 'limbă', title: 'Multe limbi la intrare, română la ieșire', body: 'Articolele sunt detectate în opt limbi; fiecare analiză este scrisă în română, iar titlurile străine sunt traduse.' },
+    { tag: 'grupare', title: 'Același eveniment, aceeași poveste', body: 'Vectori BGE-M3 în Qdrant, primii zece vecini, similaritate cosinus de minimum 0,78 și publicare la cel mult 72 de ore distanță. La un prag de 0,72, trei din patru grupări verificate erau de fapt povești diferite.' },
+    { tag: 'încredere', title: 'Încrederea e o formulă', body: '0,2 + 0,12 × numărul de surse (maximum 5) + 0,06 × orientările distincte (maximum 4). Cu cât sunt mai multe surse independente, din mai multe direcții, cu atât încrederea e mai mare.' },
+    { tag: 'structură', title: 'Aceeași structură pentru fiecare poveste', body: 'Rezumat scurt, mediu și detaliat, fapte-cheie cu sursele lor, ce știm și ce nu, puncte de vedere după orientare, citate, entități, semnale de dezinformare, gradul de acord, locul și categoriile.' },
+    { tag: 'limbă', title: 'Știri în multe limbi, analiză în română', body: 'Limba articolelor e recunoscută automat, din opt limbi posibile; fiecare analiză e scrisă în română, iar titlurile străine sunt traduse.' },
   ]}
 />
 
-## Încredere prin construcție
+## Încredere construită din start
 
 <InfoGrid
   items={[
-    { title: 'Verdicte calculate în cod', body: 'La verificări, modelul doar etichetează fiecare citat din altă publicație ca susținere, contrazicere sau fără legătură. Verdictul rezultă din numărătoare.' },
-    { title: 'Citate verificate la sursă', body: 'Citatele din reacția publicului trebuie să apară cuvânt cu cuvânt într-un comentariu real. Autorul și linkul provin din acel comentariu, niciodată de la model.' },
-    { title: 'Fără dezacord inventat', body: 'Poveștile cu o singură sursă nu mai primesc puncte de vedere sau scor de consens: înainte de această regulă, 82% dintre ele veneau cu un dezacord care nu exista.' },
+    { title: 'Verdicte calculate, nu ghicite', body: 'La verificări, modelul doar clasifică fiecare citat din altă publicație: susține, contrazice sau n-are legătură. Verdictul rezultă din numărătoare.' },
+    { title: 'Citate verificate la sursă', body: 'Citatele din reacția publicului trebuie să apară, cuvânt cu cuvânt, într-un comentariu real. Autorul și linkul vin din acel comentariu, niciodată de la model.' },
+    { title: 'Fără dezacorduri inventate', body: 'Poveștile cu o singură sursă nu mai primesc puncte de vedere sau grad de acord: înainte de această regulă, 82% dintre ele veneau cu un dezacord care nu exista.' },
   ]}
 />
 
-## Măsurat pe un singur RTX 3090
+## Măsurat pe o singură placă RTX 3090
 
 <InfoGrid
   columns={2}
   items={[
-    { tag: '~354 / oră', title: 'Analize de povești', body: 'Ritm susținut cu GPU-ul la aproximativ 85%, măsurat după reglarea cozilor de sarcini.' },
-    { tag: '21,3 / 24,5 GB', title: 'Trei modele rezidente', body: 'Modelele de limbaj de 4B și 14B și modelul de embedding rămân încărcate împreună pe o singură placă de 24 GB.' },
-    { tag: '17.062', title: 'Articole grupate', body: 'Arhiva pe care sunt calculate statisticile de trend și de importanță.' },
-    { tag: '~90 s', title: 'O sinteză completă', body: 'Treisprezece povești din România și din lume, cu verificări, scrise într-o singură trecere.' },
+    { tag: '~354 / oră', title: 'Povești analizate', body: 'Ritm susținut, cu placa video folosită în proporție de aproximativ 85%, măsurat după reglarea cozilor de lucru.' },
+    { tag: '21,3 / 24,5 GB', title: 'Trei modele încărcate simultan', body: 'Modelele de limbaj de 4B și 14B și modelul de vectorizare stau împreună pe o singură placă de 24 GB.' },
+    { tag: '17.062', title: 'Articole grupate', body: 'Arhiva pe care se calculează tendințele și statisticile de importanță.' },
+    { tag: '~90 s', title: 'O sinteză completă', body: 'Treisprezece povești din România și din lume, cu verificări, scrise dintr-o singură trecere.' },
   ]}
 />
 
-## Lucrări recente
+## Ce am adăugat recent
 
-Livrate în septembrie 2026, în ordinea în care au intrat în cod.
+Livrate în septembrie 2026, în ordinea în care au intrat în aplicație.
 
 <InfoGrid
   items={[
-    { tag: 'livrat', title: 'Imagini principale printr-un proxy privat', body: 'Preluate din etichetele media RSS și din metadatele paginii, descărcate cu limită de mărime, listă de tipuri permise și o protecție SSRF care refuză adresele private și pe cele de tip NAT al operatorului, transferate în flux și oprite din citire dacă sunt prea mari, stocate pe disc cu eliminare LRU și cu memorarea ratărilor, apoi servite prin propriul endpoint al aplicației.' },
-    { tag: 'livrat', title: 'Tipografie pentru citit', body: 'Inter pentru interfață, Merriweather pentru textul articolelor și monospace păstrat pentru date: numărători, ore, scoruri și etichetele globului.' },
-    { tag: 'livrat', title: 'O română mai bună', body: 'Reguli de gramatică românească, extrase din greșelile reale ale modelului, fac parte din fiecare prompt, iar o etapă de reformulare rescrie titlurile stângace cu modelul mic.' },
-    { tag: 'livrat', title: 'Povești în creștere și în declin', body: 'Fiecare poveste este marcată ca fiind în creștere sau încheiată, iar panoul „În creștere” scoate în față poveștile care câștigă cel mai repede surse.' },
-    { tag: 'livrat', title: 'Locuri numite pe hartă', body: 'Numele țărilor și ale capitalelor, atât pe harta plană, cât și pe globul 3D.' },
-    { tag: 'livrat', title: 'Categorii care țin', body: 'O singură geografie pe poveste (România, apoi Europa, apoi restul lumii), impusă în cod, și un panou de categorii care filtrează întregul panou principal.' },
-    { tag: 'livrat', title: 'Rapoarte pe regiuni', body: 'Fiecare secțiune regională a unei sinteze este scrisă din poveștile acelei regiuni, astfel încât România și lumea primesc fiecare o analiză reală.' },
-    { tag: 'livrat', title: 'Un flux care ține pasul', body: 'Coada de analiză se golește singură, iar o blocare este detectată; o poveste nu mai este reanalizată la fiecare articol nou, ceea ce însemna 31% din toată munca modelelor.' },
+    { tag: 'livrat', title: 'Imagini prin proxy privat', body: 'Imaginea principală e preluată din fluxul RSS sau din metadatele paginii, cu limită de mărime, doar tipuri permise și protecție SSRF, care refuză adresele private și pe cele din rețele NAT ale operatorilor. Se descarcă în flux și se oprește dacă e prea mare, se păstrează pe disc cu ștergere automată a celor vechi și ajunge la browser prin serverul aplicației.' },
+    { tag: 'livrat', title: 'Tipografie pentru citit', body: 'Inter pentru interfață, Merriweather pentru textul articolelor și font monospațiat păstrat pentru date: cifre, ore, scoruri și etichetele de pe glob.' },
+    { tag: 'livrat', title: 'O română mai bună', body: 'Regulile de gramatică, extrase din greșelile reale ale modelului, fac parte din fiecare cerere, iar o etapă separată reformulează titlurile stângace.' },
+    { tag: 'livrat', title: 'Povești în creștere și în declin', body: 'Fiecare poveste e marcată ca fiind în creștere sau încheiată, iar secțiunea „În creștere” arată poveștile care strâng cel mai repede surse noi.' },
+    { tag: 'livrat', title: 'Nume de locuri pe hartă', body: 'Numele țărilor și ale capitalelor, atât pe harta plană, cât și pe globul 3D.' },
+    { tag: 'livrat', title: 'Categorii care țin', body: 'O singură zonă geografică pe poveste (România, apoi Europa, apoi restul lumii), impusă prin cod, și o secțiune de categorii care filtrează tot panoul.' },
+    { tag: 'livrat', title: 'Rapoarte pe regiuni', body: 'Fiecare regiune din sinteză e scrisă din propriile povești, așa că atât România, cât și restul lumii primesc o analiză consistentă.' },
+    { tag: 'livrat', title: 'Un flux care ține pasul', body: 'Coada de analiză se golește singură, iar blocajele sunt detectate; o poveste nu mai e reanalizată la fiecare articol nou, ceea ce însemna 31% din toată munca modelelor.' },
   ]}
 />
 
 ### În dezvoltare
 
-Proiectate și aprobate; implementarea este în curs.
+Proiectate și aprobate; implementarea e în curs.
 
 <InfoGrid
   columns={2}
   items={[
-    { tag: 'în dezvoltare', title: 'Setări și un VPN vizibil', body: 'O pagină de setări pentru datele de acces ale integrărilor, criptate și imposibil de citit înapoi după salvare. Descărcările publice trec printr-un tunel ProtonVPN WireGuard folosit ca proxy, iar traficul intern rămâne direct. Dacă tunelul cade, descărcările așteaptă în loc să expună adresa reală. Fiecare integrare arată dacă funcționează, dacă are erori sau dacă nu este configurată, cu un test la cerere.' },
-    { tag: 'în dezvoltare', title: 'Un cititor lângă camera de control', body: 'O vizualizare de citit în trei panouri (secțiuni, lista de povești, povestea), alături de panoul existent, cu derulare continuă prin povești, un aspect gândit pentru telefon și navigare din tastatură.' },
+    { tag: 'în dezvoltare', title: 'Setări și un VPN pe care îl vezi', body: 'O pagină de setări pentru datele de acces ale integrărilor, criptate și imposibil de citit după salvare. Descărcările publice trec printr-un tunel ProtonVPN WireGuard, iar traficul intern rămâne direct. Dacă tunelul cade, descărcările așteaptă, în loc să expună adresa reală. Fiecare integrare arată dacă merge, dacă are erori sau dacă nu e configurată, cu un test la cerere.' },
+    { tag: 'în dezvoltare', title: 'Un ecran de citit, lângă panoul de control', body: 'Un mod de citire pe trei coloane (secțiuni, lista de povești, povestea), alături de panoul existent, cu derulare continuă, o variantă gândită pentru telefon și navigare din tastatură.' },
   ]}
 />
 
@@ -271,15 +258,15 @@ Proiectate și aprobate; implementarea este în curs.
 
 <StoryAnalysis lang="ro" />
 
-## Verdictele sunt calculate, nu generate
+## Verdictele se calculează, nu se generează
 
-Un model lăsat liber să răspundă „confirmat” poate face asta fără să citeze nimic. COUNSELOR caută citate din *alte*
+Un model lăsat liber să spună „confirmat” poate face asta fără să citeze nimic. COUNSELOR caută citate din *alte*
 publicații și îi cere modelului doar să le clasifice. Verdictul rezultă apoi din numărătoare.
 
 <CodeSnippet
   file="backend/app/services/fact_check.py"
   lang="python"
-  caption="Articolul care face afirmația și publicația lui nu o pot confirma niciodată, iar un citat dintr-o sursă necunoscută este eliminat, nu atribuit unui nume ghicit."
+  caption="Articolul care face afirmația și publicația lui nu o pot confirma niciodată, iar un citat dintr-o sursă necunoscută e eliminat, nu atribuit unui nume ghicit."
   code={`
 def gather_evidence(
     hits: list[SearchHit],

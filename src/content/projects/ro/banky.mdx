@@ -1,39 +1,27 @@
 ---
 title: BANKY
 category: Finanțe personale · privat
-tagline: "BANKY citește extrasele de cont și bonurile pe propriul calculator, clasifică fiecare plată și îți oferă bugete, obiective și rapoarte lunare, iar tu confirmi fiecare rând."
+tagline: "BANKY citește extrasele de cont și bonurile direct pe calculatorul tău, încadrează fiecare plată și îți arată bugete, obiective și rapoarte lunare. Tu confirmi fiecare rând."
 summary: >-
-  BANKY este o aplicație de finanțe personale pentru cei care nu vor să-și dea extrasele de cont unui serviciu din
-  cloud. Importă extrase PDF, Excel și CSV, pagini scanate și fotografii de bonuri, apoi extrage și clasifică fiecare
-  tranzacție cu un model de limbaj care rulează pe hardware local. Soldurile, bugetele, analiza 50/30/20, obiectivele,
-  investițiile și rapoartele tipăribile sunt calculate dintr-un registru pe care îl confirmi rând cu rând. Modelul doar
-  propune: fiecare cifră pe care o scrie trebuie să existe pe pagina sursă, iar toate calculele cu bani sunt cod
-  obișnuit.
-order: 4
+  BANKY este o aplicație de finanțe personale pentru cei care nu vor să-și trimită extrasele de cont unui serviciu
+  din cloud. Importă extrase PDF, Excel și CSV, pagini scanate și fotografii de bonuri, apoi extrage și încadrează
+  fiecare tranzacție cu ajutorul unui model de limbaj care rulează local. Soldurile, bugetele, împărțirea 50/30/20,
+  obiectivele, investițiile și rapoartele tipăribile se calculează dintr-un registru pe care îl confirmi rând cu rând.
+  Modelul doar propune: orice cifră scrisă de el trebuie să existe în documentul original, iar toate calculele cu bani
+  le face codul, nu modelul.
+order: 3
 accent: violet
 scene: ledger
 metrics:
   - value: '95,1%'
-    label: din câmpuri citite corect (117 din 123, cu modelul încărcat)
+    label: din câmpuri citite corect (117 din 123, cu modelul deja încărcat)
   - value: '0'
-    label: numere respinse de verificare în testul comparativ al modelului
+    label: cifre respinse de verificare în testul comparativ al modelului
   - value: '1.615'
-    label: teste automate (1.186 backend, 429 frontend)
+    label: teste automate (1.186 pentru server, 429 pentru interfață)
   - value: '0'
-    label: numere în virgulă mobilă folosite pentru bani
-features:
-  - title: Importă orice îți dă banca
-    body: Extrase PDF, Excel și CSV, cu parsere dedicate fiecărei bănci, plus pagini scanate și fotografii de bonuri prin OCR local. Duplicatele sunt detectate la import.
-  - title: Revizuire înainte de registru
-    body: Rândurile extrase așteaptă într-un ecran de revizuire, alături de sursă. Nimic nu devine tranzacție până nu confirmi.
-  - title: Categorii care învață
-    body: Clasificarea locală îți învață comercianții, iar grupuri întregi de rânduri pot fi acceptate dintr-odată.
-  - title: Transferuri care nu pot ascunde cheltuieli
-    body: Transferurile interne sunt impuse de baza de date, astfel încât mutarea banilor între propriile conturi nu maschează niciodată o cheltuială reală.
-  - title: Căutare care știe românește
-    body: Căutare care ignoră diacriticele, cu interogări după sumă precum „>500”, și istoric de audit pentru fiecare modificare.
-  - title: Bugete, obiective și rapoarte
-    body: Analiză 50/30/20, bugete, obiective, investiții, teme, rapoarte tipăribile și copie de siguranță într-un singur fișier.
+    label: sume de bani stocate ca numere rotunjite
+features: []
 stack:
   - Python
   - FastAPI
@@ -50,63 +38,66 @@ stack:
   - Docker
 reports:
   - title: Raport lunar (PDF)
-    description: Cheltuieli pe categorii, bugete și împărțirea 50/30/20 pentru o lună.
+    description: Cheltuieli pe categorii, bugete și împărțirea 50/30/20 pentru o lună, pe date inventate. Raportul este în limba engleză, ca aplicația.
+    file: banky-raport-lunar-exemplu.pdf
+    preview: banky-raport-lunar-exemplu.webp
+
 # ── Sales block ──
-promise: "Finanțele tale, organizate de AI, fără să trimiți nimănui vreun extras."
+promise: "Finanțele tale, puse în ordine de AI, fără să trimiți nimănui vreun extras."
 audienceShort:
   - "Persoane și familii"
   - "Liber-profesioniști"
-  - "Gospodării atente la confidențialitate"
+  - "Oricine ține la confidențialitate"
 outcomes:
   - title: "Toate conturile într-un loc"
-    body: "Bancă, economii, numerar, carduri și investiții împreună, în fiecare monedă pe care o folosești."
-  - title: "Clasificat pentru tine, verificat de tine"
-    body: "Imporți un extras și rândurile vin clasificate. Nimic nu ajunge în registru până nu confirmi."
-  - title: "Nimic nu iese din calculator"
-    body: "Extrasele, bonurile și cheltuielile rămân pe mașina ta. Fără date de logare la bancă, fără urcare în cloud."
+    body: "Cont curent, economii, numerar, carduri și investiții la un loc, în fiecare monedă pe care o folosești."
+  - title: "Încadrat automat, verificat de tine"
+    body: "Imporți un extras și tranzacțiile vin deja încadrate. Nimic nu intră în registru până nu confirmi."
+  - title: "Nimic nu pleacă de pe calculator"
+    body: "Extrasele, bonurile și cheltuielile rămân la tine. Fără date de logare la bancă, fără încărcare în cloud."
 audiences:
   - title: "Persoane și familii"
-    body: "Vezi unde se duc banii, îți setezi bugete și economisești pentru obiective, fără o aplicație care profită de datele tale."
+    body: "Vezi unde se duc banii, îți faci bugete și strângi bani pentru obiective, fără o aplicație care câștigă din datele tale."
   - title: "Liber-profesioniști"
-    body: "Îți ții finanțele personale clare, chiar și cu venituri neregulate, cu rapoarte lunare tipăribile."
-  - title: "Gospodării atente la confidențialitate"
-    body: "Clasificare automată, fără să urci vreun extras nicăieri."
+    body: "Îți ții finanțele personale în ordine, chiar și cu venituri neregulate, cu rapoarte lunare pe care le poți tipări."
+  - title: "Oricine ține la confidențialitate"
+    body: "Încadrare automată a cheltuielilor, fără să încarci vreun extras pe internet."
 tour: banky
 capabilities:
   - group: "Import"
     items:
       - "Extrase PDF, Excel și CSV"
-      - "Pagini scanate și fotografii de bonuri, citite pe calculatorul tău"
-      - "Duplicate detectate la import"
-      - "Revizuire alături de sursă, înainte să se salveze ceva"
+      - "Pagini scanate și poze cu bonuri, citite pe calculatorul tău"
+      - "Dublurile sunt depistate la import"
+      - "Verifici rândurile alături de documentul original, înainte să se salveze ceva"
   - group: "Zi de zi"
     items:
       - "Panou cu sold, venituri, cheltuieli și economii"
       - "Căutare de tipul „Lidl >100”, cu filtre"
-      - "Categorii care îți învață magazinele"
-      - "Clasifici multe tranzacții deodată"
+      - "Categorii care învață magazinele unde cumperi"
+      - "Încadrezi mai multe tranzacții deodată"
   - group: "Planificare"
     items:
       - "Bugete lunare pe categorii"
-      - "50/30/20: nevoi, dorințe și economii"
-      - "Obiective cu progres"
-      - "Investiții: valoare, investit, câștig"
+      - "Împărțirea 50/30/20: nevoi, dorințe și economii"
+      - "Obiective, cu progresul lor"
+      - "Investiții: cât valorează, cât ai pus, cât ai câștigat"
   - group: "Rapoarte"
     items:
-      - "Analize: avere netă, tendințe, comercianți principali"
-      - "Raport lunar tipăribil"
+      - "Analize: avere netă, tendințe, comercianții la care cheltui cel mai mult"
+      - "Raport lunar gata de tipărit"
       - "Copie de siguranță într-un singur fișier și export CSV"
   - group: "Încredere"
     items:
-      - "Fiecare cifră verificată față de extrasul original"
-      - "Banii nu sunt stocați niciodată ca zecimale rotunjite"
-      - "Istoric de audit pentru fiecare modificare"
+      - "Fiecare cifră e verificată față de extrasul original"
+      - "Sumele nu sunt niciodată rotunjite la stocare"
+      - "Istoricul fiecărei modificări"
 requirements:
-  - "Un calculator cu o placă grafică NVIDIA modernă (24 GB)"
-  - "Se folosește din browser; se instalează cu Docker"
+  - "Un calculator cu placă video NVIDIA modernă (24 GB)"
+  - "Se folosește din browser și se instalează cu Docker"
   - "Reglat pentru extrasele băncilor din România; alte bănci pot fi adăugate"
 tailoring:
-  - "Mai mulți utilizatori și registre comune pentru familie"
+  - "Mai mulți utilizatori și un registru comun pentru familie"
   - "Registre pentru firme și exporturi pentru contabil"
   - "Suport pentru formatul extraselor băncii tale"
   - "Interfață în limba română"
@@ -119,34 +110,34 @@ import InfoGrid from '../../../components/project/InfoGrid.astro';
 
 ## Cum funcționează
 
-Modelul de limbaj face singurul lucru pe care codul nu îl poate face: transformă o pagină dezordonată în rânduri
-structurate. Tot ce este înainte și după el este determinist. Modelul rulează într-o rețea izolată, fără acces la
+Modelul de limbaj face singurul lucru pe care codul nu-l poate face: transformă o pagină dezordonată în rânduri
+structurate. Tot ce e înainte și după el e determinist. Modelul rulează într-o rețea izolată, fără acces la
 internet.
 
 <Pipeline
-  title="Extras → registru revizuit"
-  caption="Modelul propune; codul verifică; tu confirmi."
+  title="Extras → registru verificat"
+  caption="Modelul propune, codul verifică, tu confirmi."
   stages={[
-    { label: 'Încărcare', detail: 'Extrase PDF, XLSX sau CSV, pagini scanate și fotografii de bonuri.' },
-    { label: 'Citire', detail: 'Parsere dedicate pentru formatele cunoscute ale băncilor și numerele în format românesc; OCR local pentru scanări și bonuri.', tag: 'PaddleOCR' },
-    { label: 'Structurare', detail: 'Modelul de limbaj transformă textul în rânduri cu dată, descriere și semn.', tag: 'qwen3.6 27B' },
-    { label: 'Verificarea cifrelor', detail: 'Fiecare număr din rezultat trebuie să fie identic cu un număr întreg de pe pagină. Orice altceva este eliminat.' },
-    { label: 'Revizuire', detail: 'Rândurile te așteaptă într-un ecran de revizuire alături de sursă, cu duplicatele marcate.' },
-    { label: 'Registru', detail: 'Rândurile confirmate devin tranzacții stocate ca NUMERIC(18,2), cu istoric de audit.' },
+    { label: 'Încărcare', detail: 'Extrase PDF, XLSX sau CSV, pagini scanate și poze cu bonuri.' },
+    { label: 'Citire', detail: 'Cititoare dedicate pentru formatele cunoscute ale băncilor și pentru numerele scrise în format românesc; recunoaștere de text locală pentru scanări și bonuri.', tag: 'PaddleOCR' },
+    { label: 'Structurare', detail: 'Modelul de limbaj transformă textul în rânduri cu dată, descriere și sumă.', tag: 'qwen3.6 27B' },
+    { label: 'Verificarea cifrelor', detail: 'Fiecare număr din rezultat trebuie să apară întocmai în document. Orice altceva e eliminat.' },
+    { label: 'Revizuire', detail: 'Rândurile te așteaptă alături de documentul original, cu dublurile marcate.' },
+    { label: 'Registru', detail: 'Rândurile confirmate devin tranzacții păstrate ca NUMERIC(18,2), cu istoricul modificărilor.' },
   ]}
 />
 
-Observațiile scrise trec prin cinci etape (ciornă, verificare, critică, revizuire, verificare), iar ultimul cuvânt îl
-are o verificare fixă, bazată pe reguli. Pe o placă de 24 GB, mai multe treceri ale unui model care încape în memorie
-sunt mai bune decât o singură trecere a unuia mai mare.
+Observațiile scrise de aplicație trec prin cinci etape (ciornă, verificare, critică, revizuire, verificare), iar
+ultimul cuvânt îl are o verificare fixă, bazată pe reguli. Pe o placă de 24 GB, mai multe treceri cu un model care
+încape în memorie dau rezultate mai bune decât o singură trecere cu unul mai mare.
 
-## De ce verificare, nu încredere
+## De ce verificare, nu încredere oarbă
 
 <InfoGrid
   items={[
-    { tag: 'problema', title: 'Plauzibil și greșit', body: 'Un model care citește 1.284,50 și scrie 128450.00 produce un număr care nu se verifică față de nimic. Nicio verificare ulterioară nu ar putea spune că a fost inventat.' },
-    { tag: 'regula', title: 'Doar numere întregi', body: 'Se compară doar cifrele, niciodată punctuația, iar fiecare număr trebuie să corespundă unui număr întreg de pe pagină. 84.32 este o bucată din 184,32, deci este respins.' },
-    { tag: 'rezultatul', title: 'Propuneri, nu înregistrări', body: 'O valoare respinsă rămâne goală, ca să o completezi tu. Registrul conține doar numere pe care le-ai confirmat.' },
+    { tag: 'problema', title: 'Plauzibil, dar greșit', body: 'Un model care citește 1.284,50 și scrie 128450.00 produce o cifră care nu se leagă de nimic. Nicio verificare ulterioară n-ar mai putea spune că e inventată.' },
+    { tag: 'regula', title: 'Doar numere întregi', body: 'Se compară doar cifrele, nu și punctuația, iar fiecare număr trebuie să apară întreg în document. 84.32 e doar o bucată din 184,32, deci e respins.' },
+    { tag: 'rezultatul', title: 'Propuneri, nu înregistrări', body: 'O valoare respinsă rămâne necompletată, ca s-o scrii tu. În registru ajung doar cifre pe care le-ai confirmat.' },
   ]}
 />
 
@@ -159,7 +150,7 @@ sunt mai bune decât o singură trecere a unuia mai mare.
 <CodeSnippet
   file="backend/app/ai/extraction_guard.py"
   lang="python"
-  caption="Fiecare număr din rezultatul modelului trebuie să fie identic cu un număr care a fost citit. Nu ajunge o potrivire parțială: exact așa ar trece neobservată o primă cifră omisă."
+  caption="Fiecare număr scris de model trebuie să fie identic cu un număr citit din document. O potrivire parțială nu ajunge: exact așa ar trece neobservată o primă cifră pierdută."
   code={`
 _DIGITS = re.compile(r"\\D")
 _DIGIT_RUN = re.compile(r"\\d[\\d.,]*\\d|\\d")

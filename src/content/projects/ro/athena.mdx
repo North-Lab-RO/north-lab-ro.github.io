@@ -1,0 +1,226 @@
+---
+title: ATHENA
+category: Investigații · OSINT
+tagline: "ATHENA adună o investigație întreagă într-un singur spațiu de lucru: colectare automată din surse deschise, constatări verificate de un analist, un asistent AI privat și un raport gata de predat."
+summary: >-
+  ATHENA este o platformă găzduită la tine pentru investigații pe surse deschise (OSINT), făcute în echipă. Munca e
+  organizată pe cazuri: analiștii adaugă subiecții și datele lor de identificare, pornesc colectoarele automate și
+  confirmă sau resping fiecare constatare. Un model de limbaj local răspunde la întrebări despre caz și cântărește
+  fiecare sursă după cât de des au fost confirmate constatările ei. Entitățile, relațiile dintre ele, cronologia și
+  jurnalul de audit păstrează investigația transparentă, iar rapoartele se exportă în PDF.
+order: 2
+accent: indigo
+scene: graph
+metrics:
+  - value: '7'
+    label: colectoare automate, într-un singur loc
+  - value: '52'
+    label: platforme verificate pentru profiluri
+  - value: '11'
+    label: secțiuni în spațiul de lucru al fiecărui caz
+  - value: '0'
+    label: apeluri către servicii AI din cloud
+features: []
+stack:
+  - Python
+  - Django
+  - Django REST Framework
+  - Channels
+  - Celery
+  - PostgreSQL
+  - Redis
+  - Qdrant
+  - Ollama
+  - Qwen3 4B
+  - nomic-embed-text
+  - SearXNG
+  - Headless Chromium
+  - React
+  - TypeScript
+  - Cytoscape
+  - WeasyPrint
+  - Docker
+reports:
+  - title: Raport de investigație (PDF)
+    description: Un exemplu de raport, pe un caz inventat. Raportul este în limba engleză, ca aplicația.
+    file: athena-raport-exemplu.pdf
+    preview: athena-raport-exemplu.webp
+
+# ── Sales block ──
+promise: "Toată investigația într-un singur loc, de la prima pistă la raportul final."
+audienceShort:
+  - "Due diligence și conformitate"
+  - "Echipe de fraudă și risc"
+  - "Securitate cibernetică"
+outcomes:
+  - title: "Colectare în minute, nu în zile"
+    body: "Pornești colectoarele pe un subiect și primești laolaltă rezultatele de pe web, despre domenii, rețele sociale și imagini, în loc să cauți site cu site."
+  - title: "Fiecare constatare, verificată"
+    body: "Un analist confirmă sau respinge fiecare rezultat și îi dă un grad de încredere. Ce e respins nu ajunge niciodată în raport."
+  - title: "Privat și trasabil"
+    body: "Inteligența artificială rulează pe serverul tău, colectarea poate trece printr-un VPN, iar fiecare acțiune rămâne în jurnalul de audit."
+audiences:
+  - title: "Due diligence și conformitate"
+    body: "Verificări despre firme, parteneri și domenii, cu un raport care arată de unde vine fiecare informație."
+  - title: "Echipe de fraudă și risc"
+    body: "Vezi persoanele, firmele, domeniile și conturile din spatele unui caz suspect și legăturile dintre ele."
+  - title: "Securitate cibernetică"
+    body: "Investighezi domenii, adrese IP și infrastructură online și împarți rezultatele în formatul STIX."
+  - title: "Echipe de investigații"
+    body: "Mai mulți analiști pe același caz, cu roluri, sarcini, notificări și o cronologie comună."
+tour: athena
+capabilities:
+  - group: "Cazuri"
+    items:
+      - "Cazuri cu membri și roluri"
+      - "Liste de sarcini pornite din șabloane"
+      - "Cronologie și jurnal de audit pentru fiecare acțiune"
+      - "Notificări în aplicație"
+  - group: "Subiecți"
+    items:
+      - "Persoane, organizații, domenii și dispozitive, ca entități"
+      - "Date de identificare: nume de utilizator, emailuri, telefoane, domenii, adrese IP, imagini, portofele cripto, profiluri sociale"
+      - "Relații între entități"
+      - "Un grafic interactiv al rețelei"
+  - group: "Colectare"
+    items:
+      - "Căutare pe web, DNS și WHOIS"
+      - "Verificarea scurgerilor de date, printr-un serviciu extern"
+      - "Căutarea profilurilor pe 52 de platforme"
+      - "Analiza postărilor și căutare inversă după imagine"
+      - "Pornești un singur colector sau pe toate, cu istoricul rulărilor"
+  - group: "Constatări"
+    items:
+      - "Confirmi sau respingi fiecare rezultat"
+      - "Grad de încredere pentru fiecare constatare"
+      - "Cauți mai departe pornind de la orice rezultat"
+      - "Căutare globală, cu căutări salvate"
+  - group: "Asistent AI"
+    items:
+      - "Întrebi despre caz și primești răspunsuri de la un model local"
+      - "Căutare după sens în toate dovezile"
+      - "Sursele sunt cântărite după cât de des au fost confirmate"
+      - "Modelul AI se alege din setări"
+  - group: "Rapoarte și export"
+    items:
+      - "Rapoarte scrise în caz și exportate în PDF"
+      - "Exportul cazului în ZIP și STIX"
+      - "Import din CSV, JSON și STIX"
+requirements:
+  - "Un server cu placă video NVIDIA; modelul implicit are nevoie de 6 GB de memorie video"
+  - "Se instalează cu Docker și se folosește din orice browser din rețeaua ta"
+  - "Conexiune la internet pentru colectare, opțional printr-un VPN"
+tailoring:
+  - "Variantă pentru telefon și tabletă"
+  - "Interfață în limba română"
+  - "Căutare în baze de date cu scurgeri de informații"
+  - "Raport structurat automat, cu secțiunile standard ale unei investigații"
+  - "Graficul rețelei inclus în raportul PDF"
+note: "Pentru investigații legale, făcute de echipe autorizate. Fiecare acțiune rămâne în jurnalul de audit."
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import InfoGrid from '../../../components/project/InfoGrid.astro';
+
+## Cum funcționează
+
+Un caz trece de la piste la dovezi și apoi la raport. Colectarea e automată, decizia rămâne la analist, iar
+inteligența artificială ajută, dar nu hotărăște ce e adevărat.
+
+<Pipeline
+  title="Pistă → dovadă → raport"
+  caption="Totul rulează pe serverul tău; colectarea poate trece printr-un VPN."
+  stages={[
+    { label: 'Caz și subiecți', detail: 'Un caz cuprinde persoanele, organizațiile, domeniile și dispozitivele investigate, cu datele lor de identificare.' },
+    {
+      label: 'Colectoare',
+      detail: 'Pornești un colector sau pe toate, pe datele de identificare.',
+      items: ['căutare web', 'DNS și WHOIS', 'scurgeri de date', 'căutare de profiluri', 'analiză socială', 'analiza postărilor', 'căutare după imagine'],
+    },
+    { label: 'Verificare', detail: 'Un analist confirmă sau respinge fiecare constatare și îi dă un grad de încredere.' },
+    { label: 'Cunoaștere', detail: 'Constatările și conversațiile anterioare sunt vectorizate pentru căutarea după sens.', tag: 'nomic-embed-text → qdrant' },
+    { label: 'Asistent AI', detail: 'Răspunde la întrebări despre caz pe baza dovezilor, cântărind sursele după cât de sigure s-au dovedit.', tag: 'qwen3 4B' },
+    { label: 'Raport', detail: 'Un raport construit din caz și exportat în PDF.', tag: 'WeasyPrint' },
+  ]}
+/>
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: 'backend', title: 'Django, API și notificări live', body: 'Django 5 cu API REST și autentificare JWT, Channels pentru notificări în timp real, workeri Celery și un planificator pentru colectare.' },
+    { tag: 'interfață', title: 'Un spațiu de lucru pentru analiști', body: 'React și TypeScript, cu graficul rețelei în Cytoscape, grafice și un spațiu de lucru cu unsprezece secțiuni pentru fiecare caz.' },
+    { tag: 'ai', title: 'Doar modele locale', body: 'Ollama rulează modelul de conversație și modelul de vectorizare pe același server; modelul se poate schimba din setări.' },
+    { tag: 'colectare', title: 'Privat din start', body: 'Căutarea pe web trece printr-un SearXNG găzduit la tine, un browser automat deschide paginile care au nevoie de el, iar cererile spre exterior pot trece printr-un VPN.' },
+  ]}
+/>
+
+## Sursele își câștigă încrederea
+
+Asistentul vede cât de sigură s-a dovedit fiecare sursă în cazul respectiv: ce parte din constatările ei au fost
+confirmate de analiști. O sursă respinsă des contează mai puțin în răspuns.
+
+<CodeSnippet
+  file="backend/apps/ai/services.py"
+  lang="python"
+  caption="Deciziile de confirmare și respingere devin, pentru fiecare sursă, un indice de acuratețe de care AI-ul ține cont."
+  code={`
+def _compute_source_accuracy(case) -> dict[str, dict]:
+    rows = (
+        Evidence.objects
+        .filter(case=case)
+        .exclude(status="pending")
+        .values("source_name", "source_type")
+        .annotate(
+            total=Count("id"),
+            confirmed=Count("id", filter=Q(status="confirmed")),
+            rejected=Count("id", filter=Q(status="rejected")),
+        )
+    )
+    out: dict[str, dict] = {}
+    for r in rows:
+        key = (r["source_name"] or r["source_type"]).strip()
+        if not key or r["total"] == 0:
+            continue
+        ratio = r["confirmed"] / r["total"] if r["total"] else 0.0
+        out[key] = {
+            "confirmed": r["confirmed"],
+            "rejected": r["rejected"],
+            "total": r["total"],
+            "ratio": round(ratio, 2),
+        }
+    return out
+`}
+/>
+
+## Rapoarte potrivite subiectului
+
+Raportul structurat se adaptează la tipul cazului: pentru o persoană dispare secțiunea de infrastructură, iar
+secțiunile fără date sunt lăsate deoparte, nu umplute cu text de umplutură.
+
+<CodeSnippet
+  file="backend/apps/reports/structured.py"
+  lang="python"
+  caption="Secțiunile sunt construite din datele cazului, iar în ordinea standard rămân doar cele care au conținut."
+  code={`
+evidence = list(
+    Evidence.objects.filter(case=case).exclude(status="rejected").order_by("-created_at")
+)
+profile = detect_profile(entities, selectors)
+
+subject = _build_subject_identification(entities)
+infrastructure = _build_infrastructure(selectors, evidence)
+digital = _build_digital_footprint(selectors, evidence)
+network = _build_relationships(relationships)
+timeline = _build_timeline(case, evidence)
+
+if profile == "person":
+    infrastructure = ""
+
+sections = [
+    {"title": title, "markdown": md}
+    for title, md in candidates
+    if md and md.strip()
+]
+`}
+/>

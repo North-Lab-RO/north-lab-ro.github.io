@@ -1,14 +1,14 @@
 ---
 title: AI_ATC
 category: AI vocal · aviație
-tagline: "AI_ATC aduce în X-Plane 12 un control de trafic aerian vorbit și realist: vorbești în stație, iar un controlor răspunde în frazeologie ICAO corectă, de la autorizare la aterizare."
+tagline: "AI_ATC aduce în X-Plane 12 un controlor de trafic aerian cu care vorbești pe bune: îi spui ce vrei în stație, iar el îți răspunde în frazeologia ICAO, de la autorizare până la aterizare."
 summary: >-
-  AI_ATC înlocuiește controlul de trafic prestabilit al simulatorului cu un controlor care chiar ascultă. Un plugin
-  trimite starea aeronavei în timp real către un server local. Pilotul vorbește, iar recunoașterea vocală, un agent
-  controlor specializat și sinteza vocală produc un răspuns radio realist. Fiecare instrucțiune este verificată față de
-  date reale de navigație și de reguli de siguranță înainte de a fi rostită. Fără cloud, fără abonament, fără cost pe
-  minut.
-order: 3
+  AI_ATC înlocuiește controlul de trafic prestabilit din simulator cu un controlor care chiar ascultă. Un plugin
+  trimite în timp real starea aeronavei către un server local. Pilotul vorbește, iar recunoașterea vocală, un agent
+  specializat pe faza de zbor și sinteza vocală produc un răspuns radio realist. Fiecare instrucțiune e verificată
+  față de datele reale de navigație și față de reguli de siguranță înainte să fie rostită. Fără cloud, fără
+  abonament, fără cost pe minut.
+order: 4
 accent: aurora
 scene: radar
 logo: ../../../assets/projects/ai-atc/logo.jpg
@@ -18,22 +18,10 @@ metrics:
   - value: 2–4 s
     label: ținta pentru un răspuns radio complet
   - value: 0,61 s
-    label: recunoaștere vocală pe transmisie (față de 12,77 s cu medium.en)
+    label: pentru recunoașterea vocală a unei transmisii (față de 12,77 s cu medium.en)
   - value: '0'
-    label: servicii cloud în circuit
-features:
-  - title: Voce la intrare, voce la ieșire
-    body: Apeși și vorbești, în simulator sau în portalul web. Vocea este transcrisă, primește răspuns și este redată pe COM1, totul pe GPU-ul local.
-  - title: Cinci controlori specializați
-    body: Agenți pentru autorizare, sol, turn, apropiere și control regional, aleși după frecvență, cerere și faza de zbor.
-  - title: Ancorat în date reale
-    body: Căutare în datele de navigație ale simulatorului, inclusiv SID-uri, STAR-uri și proceduri de apropiere, astfel încât instrucțiunile trimit la proceduri reale.
-  - title: Verificări de siguranță și colaționare
-    body: Răspunsurile sunt verificate înainte de a fi rostite, colaționările pilotului sunt comparate cu autorizarea, iar folosirea pistei este gestionată.
-  - title: Hartă și vreme în timp real
-    body: O hartă web cu straturi pentru aeroporturi și coduri de culoare METAR, plus import de planuri de zbor din SimBrief.
-  - title: Schimbarea modelului din mers
-    body: Treci de la un model local la altul în timpul rulării, pentru a alege între viteză și calitatea frazeologiei.
+    label: servicii din cloud implicate
+features: []
 stack:
   - Python
   - FastAPI
@@ -47,34 +35,35 @@ stack:
   - PostgreSQL
   - Qdrant
   - Docker
+
 # ── Sales block ──
-promise: "Un controlor de trafic aerian care ascultă și răspunde în câteva secunde."
+promise: "Un controlor de trafic aerian care te ascultă și îți răspunde în câteva secunde."
 audienceShort:
   - "Piloți de simulator"
   - "Companii aeriene virtuale"
-  - "Centre de simulare și cabine acasă"
+  - "Centre de simulare și cockpituri acasă"
 outcomes:
-  - title: "Exercițiu radio real"
-    body: "Vorbești, asculți și colaționezi ca un pilot adevărat, cu un controlor care înțelege vorbirea naturală."
+  - title: "Exersezi radioul ca în realitate"
+    body: "Vorbești, asculți și repeți instrucțiunile ca un pilot adevărat, cu un controlor care înțelege vorbirea naturală."
   - title: "Toate fazele zborului"
-    body: "Autorizarea, solul, turnul, apropierea și controlul regional te preiau pe rând în timp ce zbori."
+    body: "Autorizarea, solul, turnul, apropierea și controlul regional te preiau pe rând, pe măsură ce zbori."
   - title: "Fără abonament"
-    body: "Rulează pe propriul PC, fără taxă lunară sau pe minut."
+    body: "Rulează pe calculatorul tău, fără taxă lunară sau pe minut."
 audiences:
   - title: "Pasionați de simulare"
-    body: "Simulatorul prinde viață cu un controlor care chiar ascultă."
+    body: "Simulatorul prinde viață cu un controlor care chiar te ascultă."
   - title: "Companii aeriene virtuale"
-    body: "Control de trafic consecvent și realist pentru zboruri de grup și seri de antrenament."
-  - title: "Centre de simulare și cabine acasă"
-    body: "Imersiune radio pentru vizitatori și un loc unde exersezi frazeologia."
+    body: "Control de trafic consecvent și realist pentru zboruri în grup și seri de antrenament."
+  - title: "Centre de simulare și cockpituri acasă"
+    body: "Atmosferă radio autentică pentru vizitatori și un loc bun pentru exersarea frazeologiei."
 tour: atc
 capabilities:
   - group: "Radio"
     items:
-      - "Transmisie de pe manșă sau din portalul web"
-      - "Vocea controlorului prin stația COM1 a aeronavei"
-      - "Două stații cu frecvențe active și de rezervă"
-      - "Un jurnal scris al fiecărui schimb de replici"
+      - "Transmiți din butonul de pe manșă sau din portalul web"
+      - "Vocea controlorului se aude prin stația COM1 a avionului"
+      - "Două stații, cu frecvență activă și de rezervă"
+      - "Jurnal scris al fiecărei comunicări"
   - group: "Planul de zbor"
     items:
       - "Încarci planul din SimBrief sau dintr-un fișier"
@@ -82,19 +71,19 @@ capabilities:
       - "Depui planul și vezi ruta pe hartă"
   - group: "Ghidare"
     items:
-      - "O listă cu fiecare fază a zborului"
+      - "Listă de verificare pentru fiecare fază a zborului"
       - "Indicii pentru următorul apel"
       - "Cinci controlori, aleși după faza de zbor"
-      - "Mod demo pentru un zbor complet"
+      - "Mod demonstrativ pentru un zbor complet"
   - group: "Lumea din jur"
     items:
       - "Hartă live cu aeroporturi, piste și trafic"
       - "Vremea și METAR pentru zona ta"
-      - "Niveluri de trafic, de la singur la aglomerat"
+      - "Trafic reglabil, de la zbor solitar la cer aglomerat"
 requirements:
   - "X-Plane 12"
-  - "Un PC cu placă grafică NVIDIA pentru serviciile AI (poate fi un al doilea PC din aceeași rețea)"
-  - "Un microfon și căști"
+  - "Un calculator cu placă video NVIDIA pentru serviciile AI (poate fi un al doilea calculator din aceeași rețea)"
+  - "Microfon și căști"
 tailoring:
   - "Instalare și configurare făcute de noi"
   - "Scenarii pentru seri de antrenament sau evenimente"
@@ -108,25 +97,25 @@ import RadioExchange from '../../../components/samples/RadioExchange.astro';
 
 ## Cum funcționează
 
-Un răspuns radio are la dispoziție două până la patru secunde, așa că fiecare etapă este măsurată. Whisper tiny.en a
-fost ales după testarea aceleiași transmisii cu mai multe dimensiuni de model: toate patru au înțeles intenția la fel
-de bine, iar tiny este de 20 de ori mai rapid decât medium.
+Un răspuns radio are la dispoziție două până la patru secunde, așa că fiecare etapă e măsurată. Whisper tiny.en a
+fost ales după ce aceeași transmisie a fost testată cu mai multe dimensiuni de model: toate au înțeles la fel de bine
+intenția pilotului, iar tiny e de 20 de ori mai rapid decât medium.
 
 <Pipeline
   title="Transmisia pilotului → răspunsul controlorului"
-  caption="Un circuit complet, în întregime pe mașina locală."
+  caption="Un schimb complet de replici, în întregime pe calculatorul tău."
   stages={[
-    { label: 'Starea aeronavei', detail: 'Pluginul X-Plane trimite în fiecare secundă poziția, faza de zbor și starea radio.', tag: 'plugin C++ · Lua' },
-    { label: 'Voce în text', detail: 'Transmisia vocală este transcrisă pe GPU.', tag: 'whisper tiny.en' },
+    { label: 'Starea avionului', detail: 'Pluginul X-Plane trimite în fiecare secundă poziția, faza de zbor și starea stațiilor radio.', tag: 'plugin C++ · Lua' },
+    { label: 'Din voce în text', detail: 'Transmisia vocală e transcrisă pe placa video.', tag: 'whisper tiny.en' },
     {
       label: 'Alegerea controlorului',
-      detail: 'Frecvența, cuvintele cheie și faza de zbor aleg agentul specializat.',
+      detail: 'Frecvența, cuvintele-cheie și faza de zbor decid ce controlor răspunde.',
       items: ['Autorizare', 'Sol', 'Turn', 'Apropiere', 'Control regional'],
     },
-    { label: 'Context', detail: 'Date despre aeroport, proceduri și istoricul conversației.', tag: 'qdrant + postgres' },
-    { label: 'Generarea răspunsului', detail: 'Frazeologie în stil ICAO de la un model local.', tag: 'qwen 3.5' },
-    { label: 'Verificare', detail: 'Reguli de siguranță, detectarea conflictelor și verificarea colaționării înainte de a rosti ceva.' },
-    { label: 'Rostire', detail: 'Vocea sintetizată este redată pe stația COM1 din simulator.', tag: 'kokoro' },
+    { label: 'Context', detail: 'Datele aeroportului, procedurile și istoricul conversației.', tag: 'qdrant + postgres' },
+    { label: 'Răspunsul', detail: 'Frazeologie în stil ICAO, generată de un model local.', tag: 'qwen 3.5' },
+    { label: 'Verificare', detail: 'Reguli de siguranță, detectarea conflictelor și verificarea colaționării, înainte ca ceva să fie rostit.' },
+    { label: 'Rostire', detail: 'Vocea sintetizată se aude pe stația COM1 din simulator.', tag: 'kokoro' },
   ]}
 />
 
@@ -134,15 +123,15 @@ de bine, iar tiny este de 20 de ori mai rapid decât medium.
 
 <RadioExchange lang="ro" />
 
-## Alegerea după faza de zbor
+## Alegerea controlorului după faza de zbor
 
-Când frecvența și cuvintele cheie nu sunt suficiente, routerul se bazează pe faza de zbor, apoi pe faptul că aeronava
-este la sol sau în aer și pe altitudinea ei.
+Când frecvența și cuvintele-cheie nu sunt de ajuns, sistemul se uită la faza de zbor, apoi la faptul că avionul e la
+sol sau în aer și la altitudine.
 
 <CodeSnippet
   file="fastapi/agents/router.py"
   lang="python"
-  caption="Ultima variantă din lanțul de alegere. Verificările anterioare folosesc controlorul care are aeronava în grijă, frecvența selectată și cuvintele cheie explicite."
+  caption="Ultima variantă din lanțul de decizie. Înainte de ea contează controlorul care are avionul în grijă, frecvența pe care e acordată stația și cuvintele-cheie explicite."
   code={`
 phase = aircraft_state.get("phase", "cruise").lower()
 possible_agents = self.phase_agent_map.get(phase, ["center"])

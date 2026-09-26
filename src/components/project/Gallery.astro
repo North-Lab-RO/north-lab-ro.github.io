@@ -26,6 +26,10 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
       ))
     }
   </div>
+  <div class="arrows" aria-hidden="false">
+    <button class="arr" data-dir="-1" aria-label={tp.prevItem}>‹</button>
+    <button class="arr" data-dir="1" aria-label={tp.nextItem}>›</button>
+  </div>
   {note && <p class="note muted">{note}</p>}
 
   <dialog class="lightbox" data-lightbox>
@@ -51,6 +55,16 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
       }),
     );
     dialog.addEventListener('click', (e) => e.target === dialog && dialog.close());
+
+    // Phone/tablet arrows: move the snap track by one shot.
+    const track = g.querySelector<HTMLElement>('.track')!;
+    g.querySelectorAll<HTMLButtonElement>('.arr').forEach((b) =>
+      b.addEventListener('click', () => {
+        const shot = track.querySelector<HTMLElement>('.shot');
+        const step = shot ? shot.offsetWidth + 14 : track.clientWidth * 0.8;
+        track.scrollBy({ left: step * Number(b.dataset.dir), behavior: 'smooth' });
+      }),
+    );
   });
 </script>
 
@@ -96,6 +110,29 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
     margin-top: 10px;
     font-size: 0.85rem;
   }
+  .arrows {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .arr {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--color-line);
+    background: var(--color-deep);
+    color: var(--color-frost);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .arr:hover {
+    border-color: var(--color-ice);
+    color: var(--color-ice);
+  }
   .note {
     margin-top: 12px;
     font-size: 0.85rem;
@@ -135,6 +172,9 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
     cursor: pointer;
   }
   @media (min-width: 960px) {
+    .arrows {
+      display: none;
+    }
     .track {
       grid-auto-flow: row;
       grid-template-columns: repeat(3, 1fr);

@@ -1,41 +1,29 @@
 ---
 title: CASES
 category: Joc generativ
-tagline: "CASES scrie cazuri polițiste complete, corecte și rezolvabile, pe care echipele le rezolvă împreună în fața unui ecran și a unui kit de probe tipărit, în sesiuni de la 60 de minute la 3 ore."
+tagline: "CASES scrie cazuri polițiste complete, corecte și rezolvabile, pe care echipele le dezleagă împreună în fața unui ecran și a unui dosar de probe tipărit, în sesiuni de la 60 de minute la 3 ore."
 summary: >-
-  CASES generează infracțiuni fictive complete și lasă o echipă să le rezolve în jurul unui singur ecran comun. Scrie
-  mai întâi adevărul ascuns, apoi derivă din el suspecții, probele, interogatoriile, rezultatele de laborator și
-  documentele, astfel încât povestea să nu se poată contrazice. Validatori automați demonstrează că fiecare caz este
-  corect și rezolvabil, apoi un model de imagine creează portretele, scenele și probele. Jucătorii percheziționează
-  locuri, interoghează suspecți, trimit probe la laborator, tipăresc exponate pentru un panou fizic, depun un raport
-  și urmăresc un proces animat care dă verdictul.
-order: 2
+  CASES generează infracțiuni fictive complete și lasă o echipă să le rezolve în fața unui singur ecran. Mai întâi
+  scrie adevărul ascuns, apoi construiește din el suspecții, probele, interogatoriile, rezultatele de laborator și
+  documentele, așa că povestea nu se poate contrazice. Verificări automate confirmă că fiecare caz e corect și poate fi
+  rezolvat, apoi un model de imagine creează portretele, scenele și fotografiile probelor. Jucătorii percheziționează
+  locuri, interoghează suspecți, trimit probe la laborator, tipăresc exponate pentru un panou real, depun raportul și
+  urmăresc un proces animat care dă verdictul.
+order: 5
 accent: ember
 scene: board
 cover: ../../../assets/projects/cases/cover.jpg
-coverAlt: O pădure de pini tăiată, în lumina joasă a soarelui, imaginea de copertă a unui caz generat
+coverAlt: O pădure de pini cu copaci tăiați, în lumina joasă a soarelui, coperta unui caz generat
 metrics:
   - value: '10'
-    label: etape de generare, întâi adevărul ascuns
+    label: etape de generare, pornind de la adevărul ascuns
   - value: 8–15 min
-    label: pentru generarea unui caz pe un RTX 3090
+    label: pentru un caz nou, pe o singură placă RTX 3090
   - value: '≥ 3'
-    label: descoperiri independente necesare pentru dovadă
+    label: descoperiri independente necesare pentru a-l dovedi
   - value: '0'
-    label: apeluri GPU în timpul jocului
-features:
-  - title: Întâi adevărul
-    body: Soluția este scrisă înaintea oricărui alt lucru, iar fiecare etapă ulterioară este derivată din ea, cu JSON constrâns de schemă.
-  - title: Rezolvabil, demonstrat
-    body: O verificare de accesibilitate peste condițiile fiecărei acțiuni confirmă că probele decisive pot fi obținute în timpul disponibil.
-  - title: Fidel epocii
-    body: Fără probe ADN înainte de 1986, documente potrivite perioadei și un stil fotografic care se potrivește anului.
-  - title: Imagini consecvente
-    body: Portretele, scenele crimei, probele și locurile păstrează aceeași înfățișare a personajelor pe tot parcursul unui caz.
-  - title: O anchetă adevărată
-    body: Un depozit de probe, interogatorii care pot demasca minciuni, un laborator criminalistic cu trei locuri la coadă, o hartă, o cronologie și un ceas de joc.
-  - title: Proces și verdict
-    body: Un punctaj determinist alimentează o sală de judecată animată cu cinci verdicte posibile. Sunt incluse fișe de probe tipăribile pentru un panou fizic.
+    label: apeluri către placa video în timpul jocului
+features: []
 stack:
   - TypeScript
   - React
@@ -52,17 +40,17 @@ stack:
   - Docker
 gallery:
   - src: ../../../assets/projects/cases/scene-wide.jpg
-    alt: Imagine largă a unei poieni cu copaci doborâți, locul crimei
-    caption: Locul crimei · general
+    alt: Imagine largă a unei poieni cu copaci doborâți, locul faptei
+    caption: Locul faptei · plan general
   - src: ../../../assets/projects/cases/portrait-1.jpg
-    alt: Portretul unui bărbat de cincizeci și ceva de ani, cu ochelari și cămașă de lucru
+    alt: Portretul unui bărbat trecut de cincizeci de ani, cu ochelari și cămașă de lucru
     caption: Portret de suspect
   - src: ../../../assets/projects/cases/evidence-knives.jpg
     alt: Două cuțite pe o masă gri de probe
     caption: Fotografie de probă
   - src: ../../../assets/projects/cases/scene-detail.jpg
     alt: Prim-plan cu bușteni tăiați și ferigi pe solul pădurii
-    caption: Locul crimei · detaliu
+    caption: Locul faptei · detaliu
   - src: ../../../assets/projects/cases/portrait-2.jpg
     alt: Portretul unei femei cu ochelari, într-o cămașă verde
     caption: Portret de martor
@@ -70,7 +58,7 @@ gallery:
     alt: O cămașă albastră cu o pată roșie, întinsă pe beton
     caption: Fotografie de probă
   - src: ../../../assets/projects/cases/location-diner.jpg
-    alt: Un restaurant roșu de lângă șosea, cu o mașină clasică turcoaz parcată în față
+    alt: Un restaurant roșu de la marginea drumului, cu o mașină clasică turcoaz parcată în față
     caption: Loc · restaurant
   - src: ../../../assets/projects/cases/evidence-camera.jpg
     alt: Un aparat foto negru pe o masă gri de probe
@@ -80,75 +68,76 @@ gallery:
     caption: Loc · potecă
 reports:
   - title: Fișe de probe tipăribile (PDF)
-    description: Setul de exponate pe care jucătorii îl tipăresc pentru panoul fizic de anchetă.
-  - title: Export al dosarului (PDF)
-    description: Informarea, persoanele de interes și registrul de probe pentru un caz.
+    description: Setul de exponate pe care jucătorii îl tipăresc pentru panoul real.
+  - title: Dosarul cazului (PDF)
+    description: Informarea, persoanele de interes și registrul probelor pentru un caz.
+
 # ── Sales block ──
-promise: "Un mister polițist nou, de fiecare dată când vin oaspeții."
+promise: "Un mister polițist nou de fiecare dată când vin invitații."
 audienceShort:
   - "Escape room-uri și cafenele de jocuri"
-  - "Team-building și evenimente"
+  - "Team building și evenimente"
   - "Școli și cluburi"
   - "Seri de joc"
 outcomes:
-  - title: "Conținut nou, la cerere"
-    body: "Generezi un caz nou în câteva minute, în loc să-l proiectezi luni întregi. Jucătorii care revin primesc mereu un mister nerezolvat."
+  - title: "Conținut nou, oricând"
+    body: "Generezi un caz nou în câteva minute, în loc să-l scrii luni de zile. Jucătorii care revin primesc mereu un mister pe care nu l-au rezolvat."
   - title: "Se potrivește cu rezervarea"
-    body: "Alegi 60, 90, 120 sau 180 de minute; ceasul, dificultatea și mărimea cazului se adaptează."
+    body: "Alegi 60, 90, 120 sau 180 de minute, iar ceasul, dificultatea și mărimea cazului se ajustează."
   - title: "Ecran și masă, împreună"
-    body: "Echipele anchetează pe un ecran comun și lucrează cu probe tipărite pe o masă adevărată."
+    body: "Echipele anchetează pe un ecran comun și lucrează cu probe tipărite, pe o masă adevărată."
 audiences:
   - title: "Escape room-uri și cafenele de jocuri"
     body: "Un mister nou pentru fiecare grup și fiecare sezon, fără să scrii sau să cumperi scenarii."
-  - title: "Team-building și evenimente"
-    body: "O activitate structurată pentru grupuri de colegi, cu un final clar, un verdict și un punctaj."
+  - title: "Team building și evenimente"
+    body: "O activitate structurată pentru colegi, cu un final clar, un verdict și un punctaj."
   - title: "Școli și cluburi"
-    body: "Raționament logic, citit atent și lucru în echipă, într-un caz cu verdict."
+    body: "Gândire logică, citit atent și lucru în echipă, într-un caz care se încheie cu un verdict."
   - title: "Seri de joc acasă"
-    body: "O seară de detectivi cu un kit tipărit, pentru prieteni și familie."
+    body: "O seară de detectivi cu dosarul tipărit, pentru prieteni și familie."
 tour: cases
 capabilities:
   - group: "Ancheta"
     items:
       - "Informare, probe, persoane, hartă, documente, laborator și notițele echipei"
       - "Întrebări care costă timp și minciuni demontate cu dovezi"
-      - "Documente de cerut: cazier, proprietăți, telefon, finanțe și altele"
-      - "Un laborator criminalistic cu 3 posturi și 9 tipuri de teste"
+      - "Documente care pot fi cerute: cazier, proprietăți, telefon, situație financiară și altele"
+      - "Un laborator criminalistic cu 3 mese de lucru și 9 tipuri de analize"
   - group: "Ceasul"
     items:
       - "Numărătoare inversă și zile de anchetă"
-      - "Fiecare acțiune își arată mai întâi costul în timp"
-      - "Pauză și reluare între sesiuni; progresul rezistă la reîncărcare"
+      - "Fiecare acțiune îți arată întâi cât timp costă"
+      - "Pui pauză și reiei jocul oricând; progresul rămâne chiar dacă reîncarci pagina"
   - group: "Finalul"
     items:
       - "Un raport cu vinovatul, mobilul, metoda, probele și ordinea evenimentelor"
       - "Un proces animat, probă cu probă"
       - "5 verdicte posibile și un punctaj din 100"
-      - "Stenograma procesului, tipăribilă"
-  - group: "Kitul tipărit"
+      - "Stenograma procesului, gata de tipărit"
+  - group: "Dosarul tipărit"
     items:
       - "Fiecare fișă pe A4: informare, hartă, probe, rapoarte de laborator, documente"
       - "Tipărește doar fișele pe care nu le ai încă"
-      - "Reguli tipăribile"
+      - "Regulile jocului, tot tipăribile"
   - group: "Organizatorul"
     items:
-      - "Generezi un caz după dificultate și o temă opțională"
-      - "Urmărești cum este scris și verificat cazul"
-      - "Revizuiești cazul complet și soluția înainte de publicare"
-      - "O bibliotecă de cazuri cu starea fiecăruia"
+      - "Generezi un caz după dificultate și, opțional, o temă"
+      - "Urmărești cum e scris și verificat cazul"
+      - "Revizuiești cazul complet, cu soluția, înainte să-l publici"
+      - "O bibliotecă de cazuri, cu stadiul fiecăruia"
   - group: "Cazurile"
     items:
-      - "6 epoci, din 1900 până azi, cu documente și criminalistică de epocă"
+      - "6 epoci, de la 1900 până azi, cu documente și metode criminalistice de epocă"
       - "4 niveluri: Rutină, Standard, Complex, Caz vechi"
       - "Portrete, scene și fotografii de probe pentru fiecare caz"
 requirements:
-  - "Un PC cu o placă grafică NVIDIA modernă (24 GB) pentru generarea cazurilor"
-  - "Orice ecran pentru joc și o imprimantă pentru kitul de probe"
-  - "Fără internet și fără abonament per jucător"
+  - "Un calculator cu placă video NVIDIA modernă (24 GB), pentru generarea cazurilor"
+  - "Orice ecran pentru joc și o imprimantă pentru dosarul de probe"
+  - "Fără internet și fără abonament pe jucător"
 tailoring:
   - "Mai multe echipe pe același caz, cu clasament"
   - "Indicii și controale pentru organizator în timpul jocului"
-  - "Cazuri tematice sau cu identitatea locației ori companiei tale"
+  - "Cazuri pe teme alese sau cu identitatea locației ori a firmei tale"
   - "Editarea cazurilor generate înainte de publicare"
 ---
 
@@ -158,29 +147,30 @@ import CaseFile from '../../../components/samples/CaseFile.astro';
 
 ## Cum funcționează
 
-Modelul de limbaj și cel de imagine nu încap simultan pe o placă de 24 GB, așa că un mecanism de rezervare a GPU-ului
-le rulează pe rând. Totul este generat dinainte, deci jocul propriu-zis nu are nevoie deloc de GPU.
+Modelul de limbaj și cel de imagine nu încap în același timp pe o placă de 24 GB, așa că un mecanism de rezervare a
+plăcii video le pornește pe rând. Totul se generează dinainte, deci jocul propriu-zis nu are nevoie deloc de placa
+video.
 
 <Pipeline
-  title="Premisă → caz demonstrat → caz ilustrat"
-  caption="Generarea rulează ca sarcini în fundal; erorile sunt reparate în etapa care le-a produs."
+  title="Premisă → caz verificat → caz ilustrat"
+  caption="Generarea rulează în fundal; o eroare e reparată în etapa care a produs-o."
   stages={[
     {
       label: 'Generare în etape',
-      detail: 'Zece etape constrânse de schemă, fiecare derivată din adevărul ascuns.',
+      detail: 'Zece etape cu structură fixă, fiecare construită pornind de la adevărul ascuns.',
       tag: 'mistral-small 24B',
-      items: ['premisă', 'adevăr ascuns', 'personaje', 'locuri', 'probe', 'rezultate de laborator', 'interogatorii', 'documente', 'starea inițială', 'lista de imagini'],
+      items: ['premisa', 'adevărul ascuns', 'personajele', 'locurile', 'probele', 'laboratorul', 'interogatoriile', 'documentele', 'situația de start', 'imaginile'],
       numberedItems: true,
     },
     {
-      label: 'Validatori',
-      detail: 'Referințe, cronologie, fidelitate față de epocă, corectitudine și rezolvabilitate.',
+      label: 'Verificări',
+      detail: 'Trimiteri corecte, cronologie, fidelitate față de epocă, corectitudine și faptul că poate fi rezolvat.',
       items: ['structură', 'cronologie', 'epocă', 'corectitudine', 'rezolvabilitate'],
       loop: 'până la 3 reparații țintite',
     },
-    { label: 'Ilustrare', detail: 'Portrete, scene ale crimei, probe și locuri, cu personaje care își păstrează înfățișarea.', tag: 'SDXL · ComfyUI' },
-    { label: 'Revizuire', detail: 'Un editor verifică întregul caz, inclusiv soluția ascunsă, și îl publică.' },
-    { label: 'Joc', detail: 'Ancheta, interogatoriile, testele de laborator, raportul și procesul. Fără GPU.' },
+    { label: 'Ilustrare', detail: 'Portrete, scene, probe și locuri, cu personaje care își păstrează înfățișarea.', tag: 'SDXL · ComfyUI' },
+    { label: 'Revizuire', detail: 'Un editor verifică întregul caz, inclusiv soluția, și îl publică.' },
+    { label: 'Joc', detail: 'Ancheta, interogatoriile, analizele, raportul și procesul. Fără placă video.' },
   ]}
 />
 
@@ -188,11 +178,12 @@ le rulează pe rând. Totul este generat dinainte, deci jocul propriu-zis nu are
 
 <CaseFile lang="ro" />
 
-## Rezolvabilitatea este o demonstrație, nu o speranță
+## Un caz rezolvabil se demonstrează, nu se speră
 
-Fiecare acțiune pe care o poate face echipa (o percheziție, un interogatoriu, un test de laborator, o cerere de
-documente) are condiții, dezvăluiri și un cost în timp. Validatorul calculează tot ce poate fi aflat pornind de la
-informațiile inițiale, apoi verifică dacă cel mai scurt drum spre probele decisive încape în timpul disponibil.
+Fiecare acțiune pe care o poate face echipa (o percheziție, un interogatoriu, o analiză de laborator, o cerere de
+documente) are condiții, dezvăluiri și un cost în timp. Verificarea calculează tot ce se poate afla pornind de la
+informațiile de început și apoi se asigură că drumul cel mai scurt până la probele decisive încape în timpul
+disponibil.
 
 <CodeSnippet
   file="packages/shared/src/knowledge.ts"
@@ -238,4 +229,5 @@ if (fraction > draft.profile.maxCriticalPathFraction) {
 
 ## Imagini generate
 
-Toate imaginile de mai jos au fost create de modelul local de imagine pentru un singur caz generat, diferit de dosarul de mai sus.
+Toate imaginile de mai jos au fost create de modelul local de imagine pentru un singur caz generat, altul decât
+dosarul de mai sus.

@@ -3,7 +3,7 @@ import { t, type Lang } from '../../i18n/ui';
 
 interface Props {
   lang: Lang;
-  reports: { title: string; description?: string; file?: string }[];
+  reports: { title: string; description?: string; file?: string; preview?: string }[];
 }
 const { lang, reports } = Astro.props;
 const tp = t(lang).project;
@@ -13,7 +13,12 @@ const tp = t(lang).project;
   reports.length > 0 && (
     <ul class="reports">
       {reports.map((r) => (
-        <li class:list={['report', !r.file && 'empty']} data-reveal>
+        <li class:list={['report', !r.file && 'empty', r.preview && 'has-preview']} data-reveal>
+          {r.preview && r.file && (
+            <a href={`/reports/${r.file}`} target="_blank" rel="noopener" class="preview" tabindex="-1" aria-hidden="true">
+              <img src={`/reports/${r.preview}`} alt="" loading="lazy" width="300" height="424" />
+            </a>
+          )}
           <svg viewBox="0 0 40 48" width="34" height="41" aria-hidden="true" class="doc">
             <path d="M4 2h22l10 10v32a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.5" />
             <path d="M26 2v10h10M9 22h20M9 28h20M9 34h13" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -54,6 +59,29 @@ const tp = t(lang).project;
   .report > :last-child {
     grid-column: 1 / -1;
     justify-self: start;
+  }
+  .has-preview {
+    grid-template-columns: auto 1fr;
+  }
+  .has-preview .doc {
+    display: none;
+  }
+  .preview {
+    grid-row: span 2;
+    display: block;
+    width: 120px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    box-shadow: 0 12px 30px rgb(0 0 0 / 0.45);
+    transition: transform 0.4s var(--ease-out);
+  }
+  .preview:hover {
+    transform: translateY(-3px) rotate(-1deg);
+  }
+  .preview img {
+    width: 100%;
+    height: auto;
   }
   .empty {
     border-style: dashed;

@@ -1,0 +1,226 @@
+---
+title: ATHENA
+category: Investigations · OSINT
+tagline: "ATHENA brings a whole investigation into one workspace: automated collection from open sources, findings an analyst reviews, a private AI assistant and a report you can hand over."
+summary: >-
+  ATHENA is a self-hosted platform for open-source intelligence investigations run by teams. Work is organised in
+  cases: analysts add subjects and their identifiers, run automated collectors, and confirm or reject every finding.
+  A local language model answers questions about the case and weighs each source by how often its findings were
+  confirmed. Entities, relationships, a timeline and an audit trail keep the investigation accountable, and reports
+  are exported as PDF.
+order: 2
+accent: indigo
+scene: graph
+metrics:
+  - value: '7'
+    label: automated collectors in one place
+  - value: '52'
+    label: platforms checked for matching profiles
+  - value: '11'
+    label: views in every case workspace
+  - value: '0'
+    label: cloud AI calls
+features: []
+stack:
+  - Python
+  - Django
+  - Django REST Framework
+  - Channels
+  - Celery
+  - PostgreSQL
+  - Redis
+  - Qdrant
+  - Ollama
+  - Qwen3 4B
+  - nomic-embed-text
+  - SearXNG
+  - Headless Chromium
+  - React
+  - TypeScript
+  - Cytoscape
+  - WeasyPrint
+  - Docker
+reports:
+  - title: Intelligence report (PDF)
+    description: A sample report on an invented case.
+    file: athena-raport-exemplu.pdf
+    preview: athena-raport-exemplu.webp
+
+# ── Sales block ──
+promise: "Every investigation in one place, from the first lead to the final report."
+audienceShort:
+  - "Due diligence & compliance"
+  - "Fraud & risk teams"
+  - "Security & threat intelligence"
+outcomes:
+  - title: "Collection in minutes, not days"
+    body: "Run the collectors on a subject and get web, domain, social and image findings together, instead of searching one site at a time."
+  - title: "Every finding reviewed"
+    body: "An analyst confirms or rejects each finding, with a confidence score. Rejected findings never reach the report."
+  - title: "Private and accountable"
+    body: "The AI runs on your server, collection can go through a VPN, and every action is recorded in the audit log."
+audiences:
+  - title: "Due diligence & compliance"
+    body: "Background checks on companies, partners and domains, with a report that shows where every fact came from."
+  - title: "Fraud & risk teams"
+    body: "Map the people, companies, domains and accounts behind a suspicious case, and how they are connected."
+  - title: "Security & threat intelligence"
+    body: "Investigate domains, IP addresses and online infrastructure, and share findings in the STIX format."
+  - title: "Investigation teams"
+    body: "Several analysts on one case, with roles, tasks, notifications and a shared timeline."
+tour: athena
+capabilities:
+  - group: "Cases"
+    items:
+      - "Cases with members and roles"
+      - "Task checklists from templates"
+      - "A timeline and audit trail of every action"
+      - "In-app notifications"
+  - group: "Subjects"
+    items:
+      - "People, organisations, domains and devices as entities"
+      - "Identifiers: usernames, emails, phones, domains, IPs, images, wallets, social links"
+      - "Relationships between entities"
+      - "An interactive network graph"
+  - group: "Collection"
+    items:
+      - "Web search, DNS and WHOIS"
+      - "Breach checks through an external breach-data service"
+      - "Profile discovery across 52 platforms"
+      - "Social post analysis and reverse image search"
+      - "Run one collector or all of them, with a run history"
+  - group: "Findings"
+    items:
+      - "Confirm or reject every finding"
+      - "A confidence score for each finding"
+      - "Search deeper from any finding"
+      - "Global search, with saved searches"
+  - group: "AI assistant"
+    items:
+      - "Ask questions about the case, answered by a local model"
+      - "Semantic search across the evidence"
+      - "Sources weighted by how often their findings were confirmed"
+      - "The AI model is chosen in the settings"
+  - group: "Reports & export"
+    items:
+      - "Reports written in the case and exported as PDF"
+      - "Case export as ZIP and STIX"
+      - "Import from CSV, JSON and STIX"
+requirements:
+  - "A server with an NVIDIA graphics card; the default model is sized for 6 GB of video memory"
+  - "Installed with Docker and used from any browser on your network"
+  - "An internet connection for collection, optionally routed through a VPN"
+tailoring:
+  - "A layout for phones and tablets"
+  - "A Romanian-language interface"
+  - "Searches in leak databases"
+  - "An automatic structured report with the standard intelligence sections"
+  - "The network graph included in the PDF report"
+note: "For lawful investigations carried out by authorised teams. Every action is recorded in the audit log."
+---
+
+import Pipeline from '../../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../../components/project/CodeSnippet.astro';
+import InfoGrid from '../../../components/project/InfoGrid.astro';
+
+## How it works
+
+A case moves from leads to evidence to a report. Collection is automated; judgement stays with the analyst; the AI
+helps but never decides what is true.
+
+<Pipeline
+  title="Lead → evidence → report"
+  caption="Everything runs on your own server; collection can be routed through a VPN."
+  stages={[
+    { label: 'Case & subjects', detail: 'A case holds the people, organisations, domains and devices under investigation, with their identifiers.' },
+    {
+      label: 'Collectors',
+      detail: 'Run one collector or all of them against the identifiers.',
+      items: ['web search', 'DNS & WHOIS', 'breach check', 'profile discovery', 'deep social', 'post analysis', 'reverse image'],
+    },
+    { label: 'Review', detail: 'Each finding is confirmed or rejected by an analyst, with a confidence score.' },
+    { label: 'Knowledge', detail: 'Findings and past conversations are embedded for semantic search.', tag: 'nomic-embed-text → qdrant' },
+    { label: 'AI assistant', detail: 'Answers questions about the case from the evidence, weighing sources by their track record.', tag: 'qwen3 4B' },
+    { label: 'Report', detail: 'A report assembled from the case and exported as PDF.', tag: 'WeasyPrint' },
+  ]}
+/>
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: 'backend', title: 'Django, REST and websockets', body: 'Django 5 with a REST API and JWT sign-in, Channels for live notifications, Celery workers and a scheduler for collection jobs.' },
+    { tag: 'frontend', title: 'A workspace for analysts', body: 'React and TypeScript, with a Cytoscape network graph, charts and an eleven-tab case workspace.' },
+    { tag: 'ai', title: 'Local models only', body: 'Ollama runs the chat model and the embedding model on the same server; the model can be switched in the settings.' },
+    { tag: 'collection', title: 'Private by default', body: 'Web search through a self-hosted SearXNG, a headless browser for pages that need one, and optional VPN routing for outbound requests.' },
+  ]}
+/>
+
+## Sources earn their weight
+
+The assistant sees how reliable each source has been in this case: the share of its findings that analysts
+confirmed. A source that keeps being rejected carries less weight in the answer.
+
+<CodeSnippet
+  file="backend/apps/ai/services.py"
+  lang="python"
+  caption="Confirm and reject decisions become a per-source accuracy ratio that the AI takes into account."
+  code={`
+def _compute_source_accuracy(case) -> dict[str, dict]:
+    rows = (
+        Evidence.objects
+        .filter(case=case)
+        .exclude(status="pending")
+        .values("source_name", "source_type")
+        .annotate(
+            total=Count("id"),
+            confirmed=Count("id", filter=Q(status="confirmed")),
+            rejected=Count("id", filter=Q(status="rejected")),
+        )
+    )
+    out: dict[str, dict] = {}
+    for r in rows:
+        key = (r["source_name"] or r["source_type"]).strip()
+        if not key or r["total"] == 0:
+            continue
+        ratio = r["confirmed"] / r["total"] if r["total"] else 0.0
+        out[key] = {
+            "confirmed": r["confirmed"],
+            "rejected": r["rejected"],
+            "total": r["total"],
+            "ratio": round(ratio, 2),
+        }
+    return out
+`}
+/>
+
+## Reports that fit the subject
+
+The structured report adapts to what the case is about: a report on a person drops the infrastructure section, and
+any section without data is left out rather than filled with padding.
+
+<CodeSnippet
+  file="backend/apps/reports/structured.py"
+  lang="python"
+  caption="Sections are built from the case data, then only the non-empty ones are kept, in the standard order."
+  code={`
+evidence = list(
+    Evidence.objects.filter(case=case).exclude(status="rejected").order_by("-created_at")
+)
+profile = detect_profile(entities, selectors)
+
+subject = _build_subject_identification(entities)
+infrastructure = _build_infrastructure(selectors, evidence)
+digital = _build_digital_footprint(selectors, evidence)
+network = _build_relationships(relationships)
+timeline = _build_timeline(case, evidence)
+
+if profile == "person":
+    infrastructure = ""
+
+sections = [
+    {"title": title, "markdown": md}
+    for title, md in candidates
+    if md and md.strip()
+]
+`}
+/>

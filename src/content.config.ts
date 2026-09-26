@@ -13,8 +13,8 @@ const projects = defineCollection({
       summary: z.string(),
       order: z.number(),
       draft: z.boolean().default(false),
-      accent: z.enum(['ice', 'aurora', 'ember', 'violet']).default('ice'),
-      scene: z.enum(['none', 'globe', 'board', 'radar', 'ledger']).default('none'),
+      accent: z.enum(['ice', 'aurora', 'ember', 'violet', 'indigo']).default('ice'),
+      scene: z.enum(['none', 'globe', 'board', 'radar', 'ledger', 'graph']).default('none'),
       cover: image().optional(),
       coverAlt: z.string().optional(),
       logo: image().optional(),
@@ -41,6 +41,8 @@ const projects = defineCollection({
             description: z.string().optional(),
             // File name inside public/reports/. Leave empty for a placeholder slot.
             file: z.string().optional(),
+            // Optional first-page preview image, also inside public/reports/.
+            preview: z.string().optional(),
           }),
         )
         .default([]),
@@ -56,7 +58,7 @@ const projects = defineCollection({
       audienceShort: z.array(z.string()).default([]),
       outcomes: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
       audiences: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
-      tour: z.enum(['none', 'counselor', 'cases', 'atc', 'banky']).default('none'),
+      tour: z.enum(['none', 'counselor', 'athena', 'cases', 'atc', 'banky']).default('none'),
       capabilities: z.array(z.object({ group: z.string(), items: z.array(z.string()) })).default([]),
       requirements: z.array(z.string()).default([]),
       tailoring: z.array(z.string()).default([]),
