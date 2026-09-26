@@ -1,6 +1,7 @@
 ---
 import type { ImageMetadata } from 'astro';
 import Gallery from '../project/Gallery.astro';
+import ReportSlot from '../project/ReportSlot.astro';
 import TourFrame from '../tours/TourFrame.astro';
 import { getTour } from '../tours';
 import type { Project } from '../../lib';
@@ -37,6 +38,8 @@ const realNote = (uiLang[entry.slug] ?? lang) !== lang ? s.realNoteOther : s.rea
 
 const tour = d.tour !== 'none' ? getTour(d.tour, lang) : null;
 const tourNote = tour && tour.uiLang !== lang ? s.realNoteLang : undefined;
+// Only reports with a real sample PDF are shown to clients; placeholders stay in the content until a file exists.
+const reports = d.reports.filter((r) => r.file);
 const checkIcon = 'M5 12l4 4L19 6';
 ---
 
@@ -78,6 +81,15 @@ const checkIcon = 'M5 12l4 4L19 6';
     <section class="wrap block" id="tour">
       <h2 class="h-section sm" data-reveal>{s.tour}</h2>
       <TourFrame lang={lang} label={tour.label} steps={tour.steps} url={tour.url} note={tourNote} />
+    </section>
+  )
+}
+
+{
+  reports.length > 0 && (
+    <section class="wrap block" id="reports">
+      <h2 class="h-section sm" data-reveal>{t(lang).project.reports}</h2>
+      <ReportSlot lang={lang} reports={reports} />
     </section>
   )
 }

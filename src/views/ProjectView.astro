@@ -3,7 +3,6 @@ import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Scene from '../components/3d/Scene.astro';
 import Gallery from '../components/project/Gallery.astro';
-import ReportSlot from '../components/project/ReportSlot.astro';
 import ProjectVisual from '../components/project/ProjectVisual.astro';
 import SalesBlock from '../components/sales/SalesBlock.astro';
 import DemoButton from '../components/sales/DemoButton.astro';
@@ -117,15 +116,6 @@ const sceneLabels = {
       <Content />
       {d.gallery.length > 0 && <Gallery lang={lang} items={d.gallery} />}
     </section>
-
-    {
-      d.reports.length > 0 && (
-        <section class="wrap block">
-          <h2 class="h-section sm" data-reveal>{tp.reports}</h2>
-          <ReportSlot lang={lang} reports={d.reports} />
-        </section>
-      )
-    }
 
     <section class="wrap block built">
       <p class="label">{tp.builtWith}</p>

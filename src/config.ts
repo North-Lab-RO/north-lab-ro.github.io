@@ -6,9 +6,9 @@ export const site = {
   // Fill these in and push. Each one appears in the site footer (both
   // languages) as soon as it is not empty; leave '' to keep it hidden.
   // Example: linkedin: 'https://www.linkedin.com/company/north-lab-ro/',
-  linkedin: '',
-  // Example: email: 'contact@yourdomain.ro',
-  email: '',
+  linkedin: 'https://www.linkedin.com/in/petru-r-a9543743a/',
+  // Example: email: 'northlabs.office@gmail.com',
+  email: 'northlabs.office@gmail.com',
   year: new Date().getFullYear(),
 };
 
