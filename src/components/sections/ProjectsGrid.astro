@@ -1,0 +1,186 @@
+---
+import { getProjects, accentVar } from '../../lib';
+import ProjectVisual from '../project/ProjectVisual.astro';
+import { showComingSoon } from '../../config';
+
+const projects = await getProjects();
+---
+
+<section id="work" class="section work" aria-labelledby="work-title">
+  <div class="wrap">
+    <header class="head">
+      <p class="label" data-reveal>Work</p>
+      <h2 id="work-title" class="h-section" data-reveal style="--delay:.06s">Three systems, three domains, one rule: it runs here.</h2>
+    </header>
+
+    <ul class="list">
+      {
+        projects.map((p, i) => (
+          <li class:list={['card', i % 2 === 1 && 'flip']} style={`--accent:${accentVar[p.data.accent]}`} data-reveal>
+            <a href={`/projects/${p.id}/`} class="link" aria-label={`${p.data.title} case study`} />
+            <div class="visual-wrap" data-tilt>
+              <ProjectVisual
+                scene={p.data.scene}
+                cover={p.data.cover}
+                coverAlt={p.data.coverAlt}
+                logo={p.data.logo}
+                gallery={p.data.gallery}
+              />
+            </div>
+            <div class="text">
+              <p class="label cat">
+                <span class="swatch" aria-hidden="true" />
+                {p.data.category}
+              </p>
+              <h3 class="title">{p.data.title}</h3>
+              <p class="tagline">{p.data.tagline}</p>
+              <dl class="metrics">
+                {p.data.metrics.slice(0, 3).map((m) => (
+                  <div>
+                    <dt class="value">{m.value}</dt>
+                    <dd class="muted">{m.label}</dd>
+                  </div>
+                ))}
+              </dl>
+              <span class="more">
+                Read the case study <span aria-hidden="true">→</span>
+              </span>
+            </div>
+          </li>
+        ))
+      }
+      {
+        showComingSoon && (
+          <li class="card soon panel">
+            <p class="label">Next</p>
+            <p class="h-sub">A new system is in the lab.</p>
+          </li>
+        )
+      }
+    </ul>
+  </div>
+</section>
+
+<script>
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (fine && !reduce) {
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
+      const card = el.closest<HTMLElement>('.card')!;
+      card.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transform = `perspective(1000px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
+      });
+      card.addEventListener('pointerleave', () => (el.style.transform = ''));
+    });
+  }
+</script>
+
+<style>
+  .head {
+    max-width: 820px;
+    margin-bottom: clamp(48px, 7vw, 88px);
+  }
+  .head .label {
+    margin-bottom: 20px;
+  }
+  .list {
+    display: grid;
+    gap: clamp(64px, 9vw, 120px);
+  }
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+  }
+  .link {
+    position: absolute;
+    inset: -12px;
+    z-index: 3;
+    border-radius: 24px;
+  }
+  .visual-wrap {
+    transition: transform 0.6s var(--ease-out);
+    transform-style: preserve-3d;
+  }
+  .cat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .swatch {
+    width: 18px;
+    height: 2px;
+    background: var(--accent);
+  }
+  .title {
+    margin-top: 14px;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+  .tagline {
+    margin-top: 16px;
+    font-size: 1.1rem;
+    max-width: 44ch;
+    color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--color-line);
+  }
+  .value {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+    letter-spacing: -0.02em;
+    color: var(--color-frost);
+  }
+  .metrics dd {
+    font-size: 0.82rem;
+    line-height: 1.35;
+    margin-top: 6px;
+  }
+  .more {
+    display: inline-flex;
+    gap: 8px;
+    margin-top: 28px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .more span {
+    transition: transform 0.35s var(--ease-out);
+  }
+  .card:hover .more span {
+    transform: translateX(5px);
+  }
+  .link:focus-visible {
+    outline-offset: 0;
+  }
+  .soon {
+    padding: 40px;
+    text-align: center;
+  }
+  @media (min-width: 960px) {
+    .card {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: 64px;
+    }
+    .card.flip {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+    .card.flip .visual-wrap {
+      order: 2;
+    }
+  }
+</style>

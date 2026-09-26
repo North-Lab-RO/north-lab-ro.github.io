@@ -1,0 +1,154 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  items: { src: ImageMetadata; alt: string; caption?: string }[];
+  note?: string;
+}
+const { items, note } = Astro.props;
+const large = await Promise.all(items.map((it) => getImage({ src: it.src, width: 1600, format: 'webp' })));
+---
+
+<section class="gallery" aria-label="Gallery">
+  <div class="track" data-reveal>
+    {
+      items.map((it, i) => (
+        <figure class="shot">
+          <button class="open" data-full={large[i].src} data-alt={it.alt} data-caption={it.caption ?? ''} aria-label={`Enlarge: ${it.alt}`}>
+            <Image src={it.src} alt={it.alt} widths={[420, 720]} sizes="(min-width: 960px) 30vw, 78vw" loading="lazy" />
+          </button>
+          {it.caption && <figcaption class="muted">{it.caption}</figcaption>}
+        </figure>
+      ))
+    }
+  </div>
+  {note && <p class="note muted">{note}</p>}
+
+  <dialog class="lightbox" data-lightbox>
+    <form method="dialog">
+      <button class="close" aria-label="Close">✕</button>
+    </form>
+    <img alt="" data-lightbox-img />
+    <p class="muted" data-lightbox-cap></p>
+  </dialog>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.gallery').forEach((g) => {
+    const dialog = g.querySelector<HTMLDialogElement>('[data-lightbox]')!;
+    const img = g.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+    const cap = g.querySelector<HTMLElement>('[data-lightbox-cap]')!;
+    g.querySelectorAll<HTMLButtonElement>('.open').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        img.src = btn.dataset.full!;
+        img.alt = btn.dataset.alt!;
+        cap.textContent = btn.dataset.caption ?? '';
+        dialog.showModal();
+      }),
+    );
+    dialog.addEventListener('click', (e) => e.target === dialog && dialog.close());
+  });
+</script>
+
+<style>
+  .gallery {
+    margin-block: 40px;
+  }
+  .track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 12px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
+  .shot {
+    scroll-snap-align: start;
+  }
+  .open {
+    display: block;
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    cursor: zoom-in;
+  }
+  .open img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease-out);
+  }
+  .open:hover img {
+    transform: scale(1.04);
+  }
+  figcaption {
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+  .note {
+    margin-top: 12px;
+    font-size: 0.85rem;
+  }
+  .lightbox {
+    max-width: min(1100px, 94vw);
+    max-height: 92dvh;
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: var(--color-night);
+    color: var(--color-frost);
+  }
+  .lightbox::backdrop {
+    background: rgb(3 6 14 / 0.85);
+    backdrop-filter: blur(6px);
+  }
+  .lightbox img {
+    max-height: 80dvh;
+    width: auto;
+    margin-inline: auto;
+  }
+  .lightbox p {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+  }
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgb(5 10 22 / 0.7);
+    color: var(--color-frost);
+    cursor: pointer;
+  }
+  @media (min-width: 960px) {
+    .track {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+    .shot:first-child {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .shot:first-child img {
+      aspect-ratio: auto;
+      height: 100%;
+    }
+    .shot:first-child .open {
+      height: calc(100% - 0px);
+    }
+  }
+</style>

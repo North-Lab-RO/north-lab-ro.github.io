@@ -1,0 +1,173 @@
+---
+title: CASES
+category: Generative game
+tagline: A local model writes a complete detective case, and code proves it can be solved before anyone plays it.
+summary: >-
+  CASES generates full fictional crimes and lets a team solve them around one shared screen. It writes the hidden
+  truth first, then derives the suspects, evidence, interviews, lab results and documents from it, so the story can't
+  contradict itself. Automated validators prove every case is fair and solvable, then an image model renders the
+  portraits, scenes and evidence. Players search locations, question suspects, send evidence to the lab, print
+  exhibits for a physical board, file a report and watch an animated trial deliver the verdict.
+order: 2
+accent: ember
+scene: board
+cover: ../../assets/projects/cases/cover.jpg
+coverAlt: A logged pine forest in low sun, the cover image of a generated case
+metrics:
+  - value: '10'
+    label: generation stages, hidden truth first
+  - value: 8–15 min
+    label: to generate a case on one RTX 3090
+  - value: '≥ 3'
+    label: independent discoveries required to prove it
+  - value: '0'
+    label: GPU calls during play
+features:
+  - title: Truth-first generation
+    body: The solution is written before anything else, and every later stage is derived from it using schema-constrained JSON.
+  - title: Proven solvable
+    body: A reachability check over every action's prerequisites confirms the proving evidence can be reached within the time budget.
+  - title: Era-aware
+    body: No DNA evidence before 1986, period-correct documents, and a photographic style that matches the year.
+  - title: Consistent imagery
+    body: Portraits, crime scenes, evidence and locations are rendered with stable character looks across a case.
+  - title: A real investigation loop
+    body: An evidence locker, interviews that can expose lies, a forensic lab with three queue slots, a map, a timeline and an in-game clock.
+  - title: Trial and verdict
+    body: Deterministic scoring feeds an animated courtroom with five possible verdicts. Printable evidence sheets are included for a physical board.
+stack:
+  - TypeScript
+  - React
+  - Vite
+  - Fastify
+  - Prisma
+  - PostgreSQL
+  - Redis
+  - BullMQ
+  - Ollama
+  - Mistral Small 3.2 24B
+  - ComfyUI
+  - SDXL
+  - Docker
+gallery:
+  - src: ../../assets/projects/cases/scene-wide.jpg
+    alt: Wide shot of a felled forest clearing, the crime scene
+    caption: Crime scene · wide
+  - src: ../../assets/projects/cases/portrait-1.jpg
+    alt: Portrait of a man in his fifties with glasses and a work shirt
+    caption: Suspect portrait
+  - src: ../../assets/projects/cases/evidence-knives.jpg
+    alt: Two knives on a grey evidence table
+    caption: Evidence · E-01
+  - src: ../../assets/projects/cases/scene-detail.jpg
+    alt: Close-up of cut logs and ferns on the forest floor
+    caption: Crime scene · detail
+  - src: ../../assets/projects/cases/portrait-2.jpg
+    alt: Portrait of a woman with glasses in a green shirt
+    caption: Witness portrait
+  - src: ../../assets/projects/cases/evidence-shirt.jpg
+    alt: A blue shirt with a red stain laid flat on concrete
+    caption: Evidence · E-02
+  - src: ../../assets/projects/cases/location-diner.jpg
+    alt: A red roadside diner with a teal classic car parked outside
+    caption: Location · diner
+  - src: ../../assets/projects/cases/evidence-camera.jpg
+    alt: A black camera on a grey evidence table
+    caption: Evidence · E-03
+  - src: ../../assets/projects/cases/location-trail.jpg
+    alt: A forest trail with a wooden picnic table
+    caption: Location · trail
+reports:
+  - title: Printable evidence sheets (PDF)
+    description: The exhibit pack players print for their physical detective board.
+  - title: Case file export (PDF)
+    description: Briefing, persons of interest and evidence log for one case.
+---
+
+import Pipeline from '../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../components/project/CodeSnippet.astro';
+import CaseFile from '../../components/samples/CaseFile.astro';
+
+## How it works
+
+The LLM and the image model can't fit on a 24 GB card at the same time, so a GPU lease runs them in turn. Everything
+is generated up front, which means playing a case needs no GPU at all.
+
+<Pipeline
+  title="Premise → proven case → rendered case"
+  caption="Generation runs as background jobs; failures are repaired at the stage that caused them."
+  stages={[
+    {
+      label: 'Staged generation',
+      detail: 'Ten schema-constrained stages, each derived from the hidden truth.',
+      tag: 'mistral-small 24B',
+      items: ['premise', 'hidden truth', 'cast', 'locations', 'evidence', 'lab results', 'interviews', 'documents', 'opening state', 'image list'],
+      numberedItems: true,
+    },
+    {
+      label: 'Validators',
+      detail: 'References, timeline, era accuracy, fairness and solvability.',
+      items: ['structural', 'timeline', 'era', 'fairness', 'solvability'],
+      loop: 'up to 3 targeted repairs',
+    },
+    { label: 'Render', detail: 'Portraits, crime scenes, evidence and locations with consistent character looks.', tag: 'SDXL · ComfyUI' },
+    { label: 'Admin review', detail: 'An editor reviews the case, including the hidden solution, and publishes it.' },
+    { label: 'Play', detail: 'Investigate, interview, run lab tests, file the report, face the trial. No GPU needed.' },
+  ]}
+/>
+
+## Sample output
+
+<CaseFile />
+
+## Solvability is a proof, not a hope
+
+Every action a team can take (a search, an interview, a lab test, a records request) has prerequisites, reveals and
+a clock cost. The validator computes everything reachable from the opening knowledge, then checks the cheapest path
+to the proving evidence fits the time budget.
+
+<CodeSnippet
+  file="packages/shared/src/knowledge.ts"
+  lang="ts"
+  caption="A fixed-point closure over the case's actions. Any proving key outside it sends the case back to the stage that can actually produce it."
+  code={`
+export function computeClosure(
+  initial: readonly KnowledgeKey[],
+  actions: readonly DiscoveryAction[],
+): Set<KnowledgeKey> {
+  const held = new Set<KnowledgeKey>(initial);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const act of actions) {
+      if (!isSatisfied(held, act.requires)) continue;
+      for (const key of act.reveals) {
+        if (!held.has(key)) {
+          held.add(key);
+          grew = true;
+        }
+      }
+    }
+  }
+  return held;
+}
+
+// validation/solvability.ts
+const closure = computeClosure(initial, actions);
+const unreachable = draft.truth.provingEvidence.filter((key) => !closure.has(key));
+
+const path = computeCriticalPath(initial, actions, draft.truth.provingEvidence);
+const budgetSeconds = draft.profile.timeBudgetMinutes * 60;
+const fraction = path.costSeconds / budgetSeconds;
+if (fraction > draft.profile.maxCriticalPathFraction) {
+  const used = Math.round(fraction * 100);
+  const allowed = Math.round(draft.profile.maxCriticalPathFraction * 100);
+  issues.push(issue(7,
+    \`Critical path costs \${used}% of the time budget, above the \${allowed}% ceiling.\`));
+}
+`}
+/>
+
+## Generated imagery
+
+Every image below was produced by the local image model for a single generated case.

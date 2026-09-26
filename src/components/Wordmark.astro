@@ -1,0 +1,42 @@
+---
+interface Props {
+  size?: number;
+}
+const { size = 26 } = Astro.props;
+---
+
+<span class="wordmark">
+  <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M16 1 L19 13 L31 16 L19 19 L16 31 L13 19 L1 16 L13 13 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path>
+    <path d="M16 1 L19 13 L16 16 L13 13 Z" fill="var(--color-ice)"></path>
+  </svg>
+  <span class="name">North<span class="dash">—</span>Lab</span>
+  <span class="ro">RO</span>
+</span>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1;
+  }
+  .name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.02rem;
+    letter-spacing: -0.02em;
+  }
+  .dash {
+    color: var(--color-ice);
+  }
+  .ro {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    padding: 3px 5px;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    color: var(--color-mist);
+  }
+</style>

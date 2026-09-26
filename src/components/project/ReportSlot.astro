@@ -1,0 +1,79 @@
+---
+interface Props {
+  reports: { title: string; description?: string; file?: string }[];
+}
+const { reports } = Astro.props;
+---
+
+{
+  reports.length > 0 && (
+    <ul class="reports">
+      {reports.map((r) => (
+        <li class:list={['report', !r.file && 'empty']} data-reveal>
+          <svg viewBox="0 0 40 48" width="34" height="41" aria-hidden="true" class="doc">
+            <path d="M4 2h22l10 10v32a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="M26 2v10h10M9 22h20M9 28h20M9 34h13" fill="none" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+          <div class="info">
+            <p class="name">{r.title}</p>
+            {r.description && <p class="muted desc">{r.description}</p>}
+          </div>
+          {r.file ? (
+            <a class="btn btn-ghost" href={`/reports/${r.file}`} target="_blank" rel="noopener">
+              Open PDF <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <span class="chip pending">Sample in preparation</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .reports {
+    display: grid;
+    gap: 12px;
+    margin-block: 32px;
+  }
+  .report {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px 18px;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: var(--color-deep);
+  }
+  .report > :last-child {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .empty {
+    border-style: dashed;
+    background: transparent;
+  }
+  .doc {
+    color: var(--accent);
+  }
+  .name {
+    font-weight: 600;
+  }
+  .desc {
+    font-size: 0.9rem;
+    margin-top: 2px;
+  }
+  .pending {
+    color: var(--color-mist);
+  }
+  @media (min-width: 640px) {
+    .report {
+      grid-template-columns: auto 1fr auto;
+    }
+    .report > :last-child {
+      grid-column: auto;
+    }
+  }
+</style>

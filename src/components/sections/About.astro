@@ -1,0 +1,93 @@
+---
+const principles = [
+  {
+    title: 'Private by construction',
+    body: 'Inference, embeddings and speech run on-premise. The only outbound traffic is data you asked for, like a news feed or a weather report.',
+    icon: 'M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z',
+  },
+  {
+    title: 'Built to run offline',
+    body: 'The core loops (speech, reasoning, generation) keep working without an internet connection, because nothing in them depends on one.',
+    icon: 'M4 12h16M12 4v16M6.3 6.3l11.4 11.4M17.7 6.3L6.3 17.7',
+  },
+  {
+    title: 'Models propose, code decides',
+    body: 'Fact-check verdicts, case solvability and radio instructions are checked by deterministic code before they reach a person.',
+    icon: 'M5 12l4 4L19 6',
+  },
+];
+---
+
+<section id="lab" class="section about" aria-labelledby="lab-title">
+  <div class="wrap grid">
+    <div class="intro">
+      <p class="label" data-reveal>The lab</p>
+      <h2 id="lab-title" class="h-section" data-reveal style="--delay:.06s">
+        Local-first isn't a setting. It's the architecture.
+      </h2>
+    </div>
+    <div class="body">
+      <p class="lede" data-reveal style="--delay:.1s">
+        Every system we build runs its models on hardware the owner controls: one GPU workstation, or a rack in their own
+        building. That constraint shapes everything. Models are chosen to fit the memory budget. Queues keep the GPU busy
+        without starving interactive requests. Validation layers check model output before anyone relies on it.
+      </p>
+      <ul class="principles">
+        {
+          principles.map((p, i) => (
+            <li class="principle" data-reveal style={`--delay:${0.12 + i * 0.08}s`}>
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path d={p.icon} fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <div>
+                <h3 class="h-sub">{p.title}</h3>
+                <p class="muted">{p.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 40px;
+  }
+  .intro .label {
+    margin-bottom: 20px;
+  }
+  .principles {
+    margin-top: 48px;
+    display: grid;
+    border-top: 1px solid var(--color-line);
+  }
+  .principle {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 20px;
+    padding-block: 26px;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .principle svg {
+    color: var(--color-ice);
+    margin-top: 3px;
+  }
+  .principle p {
+    margin-top: 8px;
+    max-width: 52ch;
+  }
+  @media (min-width: 960px) {
+    .grid {
+      grid-template-columns: 5fr 7fr;
+      gap: 80px;
+    }
+    .intro {
+      position: sticky;
+      top: 120px;
+      align-self: start;
+    }
+  }
+</style>

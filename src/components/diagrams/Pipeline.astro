@@ -1,0 +1,202 @@
+---
+export interface Stage {
+  label: string;
+  detail?: string;
+  tag?: string;
+  items?: string[];
+  numberedItems?: boolean;
+  loop?: string;
+}
+interface Props {
+  title: string;
+  caption?: string;
+  stages: Stage[];
+}
+const { title, caption, stages } = Astro.props;
+---
+
+<figure class="pipeline" data-reveal>
+  <figcaption class="head">
+    <span class="label">{title}</span>
+    {caption && <span class="muted cap">{caption}</span>}
+  </figcaption>
+  <ol class="rail">
+    {
+      stages.map((s, i) => (
+        <li class="stage" style={`--i:${i}`}>
+          <span class="node" aria-hidden="true" />
+          <div class="box">
+            <div class="top">
+              <h3 class="name">{s.label}</h3>
+              {s.tag && <span class="chip tag">{s.tag}</span>}
+            </div>
+            {s.detail && <p class="muted detail">{s.detail}</p>}
+            {s.items && (
+              <ol class:list={['items', s.numberedItems && 'numbered']}>
+                {s.items.map((it) => (
+                  <li class="item">{it}</li>
+                ))}
+              </ol>
+            )}
+            {s.loop && (
+              <p class="loop">
+                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                  <path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                {s.loop}
+              </p>
+            )}
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .pipeline {
+    margin-block: 40px;
+    padding: clamp(20px, 3vw, 36px);
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background:
+      radial-gradient(80% 60% at 0% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%),
+      var(--color-deep);
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    align-items: baseline;
+    margin-bottom: 28px;
+  }
+  .cap {
+    font-size: 0.9rem;
+  }
+  .rail {
+    position: relative;
+    display: grid;
+    gap: 14px;
+  }
+  /* the rail itself, with a data packet travelling down it */
+  .rail::before,
+  .rail::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    width: 2px;
+  }
+  .rail::before {
+    top: 8px;
+    bottom: 8px;
+    background: linear-gradient(180deg, var(--color-line), color-mix(in srgb, var(--accent) 50%, var(--color-line)), var(--color-line));
+  }
+  .rail::after {
+    top: 0;
+    height: 64px;
+    left: 6px;
+    width: 4px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, transparent, var(--accent), transparent);
+    filter: drop-shadow(0 0 6px var(--accent));
+    animation: packet 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  @keyframes packet {
+    from {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    8% {
+      opacity: 1;
+    }
+    92% {
+      opacity: 1;
+    }
+    to {
+      transform: translateY(calc(var(--rail-h, 600px)));
+      opacity: 0;
+    }
+  }
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    gap: 18px;
+  }
+  .node {
+    position: relative;
+    z-index: 1;
+    width: 16px;
+    height: 16px;
+    margin-top: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--color-night);
+    box-shadow: 0 0 0 4px var(--color-deep);
+  }
+  .box {
+    padding: 14px 18px;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-panel) 60%, transparent);
+  }
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+  }
+  .name {
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.005em;
+  }
+  .tag {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--color-line));
+    font-size: 0.7rem;
+  }
+  .detail {
+    margin-top: 4px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+    counter-reset: step;
+  }
+  .item {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.3em 0.7em;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-night) 70%, transparent);
+    border: 1px solid var(--color-line);
+  }
+  .numbered .item::before {
+    counter-increment: step;
+    content: counter(step) ' ';
+    color: var(--accent);
+  }
+  .loop {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-ember);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.pipeline .rail').forEach((rail) => {
+    const set = () => rail.style.setProperty('--rail-h', `${rail.clientHeight - 64}px`);
+    set();
+    new ResizeObserver(set).observe(rail);
+  });
+</script>

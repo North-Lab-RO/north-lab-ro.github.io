@@ -1,0 +1,77 @@
+---
+import { Code } from 'astro:components';
+
+interface Props {
+  code: string;
+  lang: 'python' | 'ts' | 'typescript' | 'lua' | 'json';
+  file: string;
+  caption?: string;
+}
+const { code, lang, file, caption } = Astro.props;
+---
+
+<figure class="snippet" data-reveal>
+  <div class="bar">
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="file">{file}</span>
+    <span class="lang label">{lang === 'ts' ? 'typescript' : lang}</span>
+  </div>
+  <Code code={code.trim()} lang={lang} theme="poimandres" />
+  {caption && <figcaption class="muted">{caption}</figcaption>}
+</figure>
+
+<style>
+  .snippet {
+    margin-block: 40px;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #0b1222;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-deep);
+  }
+  .dots {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-line);
+  }
+  .file {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-frost);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lang {
+    margin-left: auto;
+    font-size: 0.65rem;
+  }
+  .snippet :global(pre) {
+    margin: 0;
+    padding: 20px;
+    background: transparent !important;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    overflow-x: auto;
+  }
+  .snippet :global(code) {
+    font-family: var(--font-mono);
+  }
+  figcaption {
+    padding: 14px 18px;
+    border-top: 1px solid var(--color-line);
+    font-size: 0.9rem;
+  }
+</style>

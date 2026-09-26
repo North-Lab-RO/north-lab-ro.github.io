@@ -1,0 +1,138 @@
+---
+const lines = [
+  {
+    who: 'Pilot',
+    text: 'Otopeni Tower, TAROM three zero one, holding point runway zero eight right, ready for departure.',
+    trace: ['speech → text', 'intent: ready for departure', 'phase: holding → Tower'],
+  },
+  {
+    who: 'Tower',
+    text: 'TAROM three zero one, wind zero seven zero degrees eight knots, runway zero eight right, cleared for take-off.',
+    trace: ['runway clear check', 'reply verified', 'text → speech'],
+  },
+  {
+    who: 'Pilot',
+    text: 'Cleared for take-off runway zero eight right, TAROM three zero one.',
+    trace: ['readback matches clearance'],
+  },
+];
+---
+
+<figure class="radio" data-reveal>
+  <div class="frame">
+    <header class="top">
+      <span class="label"><span class="local-dot" aria-hidden="true"></span> LROP · Tower · on-device</span>
+      <span class="chip">COM1</span>
+    </header>
+    <ol class="log">
+      {
+        lines.map((l) => (
+          <li class:list={['line', l.who === 'Tower' && 'atc']}>
+            <span class="who label">{l.who}</span>
+            <div>
+              <p class="text">{l.text}</p>
+              <p class="trace">
+                {l.trace.map((t) => (
+                  <span>{t}</span>
+                ))}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="clip">
+      <p class="label">Recorded output · synthesised locally</p>
+      <audio controls preload="none" src="/audio/atc-roger.mp3"></audio>
+      <p class="quote">“Romeo Oscar Tango, tree zero one, roger.”</p>
+    </div>
+  </div>
+  <figcaption class="muted">
+    The exchange above is illustrative. The audio clip is real output from the system's speech stage. Note the ICAO
+    “tree” for three.
+  </figcaption>
+</figure>
+
+<style>
+  .radio {
+    margin-block: 40px;
+  }
+  .frame {
+    display: grid;
+    gap: 20px;
+    padding: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background: var(--color-deep);
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .top .label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .log {
+    display: grid;
+    gap: 14px;
+  }
+  .line {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 14px;
+  }
+  .who {
+    padding-top: 4px;
+  }
+  .atc .who {
+    color: var(--color-aurora);
+  }
+  .text {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  .atc .text {
+    color: var(--color-ice);
+  }
+  .trace {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .trace span {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-mist);
+    padding: 0.2em 0.6em;
+    border: 1px dashed var(--color-line);
+    border-radius: 5px;
+  }
+  .clip {
+    display: grid;
+    gap: 10px;
+    padding-top: 18px;
+    border-top: 1px solid var(--color-line);
+  }
+  audio {
+    width: 100%;
+    max-width: 420px;
+    height: 40px;
+    color-scheme: dark;
+  }
+  .quote {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--color-ice);
+  }
+  figcaption {
+    margin-top: 12px;
+    font-size: 0.85rem;
+  }
+</style>

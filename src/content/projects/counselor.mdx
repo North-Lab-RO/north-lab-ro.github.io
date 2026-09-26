@@ -1,0 +1,130 @@
+---
+title: COUNSELOR
+category: News intelligence
+tagline: An analyst, not a headline reader. It reads 41 outlets, groups their coverage into stories and explains where they agree.
+summary: >-
+  COUNSELOR ingests Romanian and international news around the clock, clusters articles about the same event into a
+  single story and writes a balanced analysis in Romanian: a summary, where the sources sit on the bias spectrum,
+  what they agree and disagree on, what is known versus still unclear, and which statements are fact and which are
+  opinion. Every model runs on the host. The only outbound traffic is the news feeds themselves.
+order: 1
+accent: ice
+scene: globe
+logo: ../../assets/projects/counselor/logo.png
+metrics:
+  - value: '41'
+    label: news sources, Romanian and international
+  - value: '2.26×'
+    label: articles per story after semantic clustering (was 1.01)
+  - value: 5 min
+    label: feed cycle, around the clock
+  - value: '0'
+    label: cloud AI calls
+features:
+  - title: One story, many sources
+    body: Semantic clustering groups coverage of the same event across outlets, so you read the event once and see who covered it.
+  - title: Bias spectrum and consensus
+    body: Each story shows where its sources sit and how strongly they agree, with divergent claims attributed rather than adopted.
+  - title: Fact versus opinion
+    body: The analysis separates facts, claims and opinions, and "what we know" from "what we don't".
+  - title: Grounded fact-checks
+    body: Verdicts are computed from what other outlets actually reported. The model classifies quotes; code decides the verdict.
+  - title: Briefings and alerts
+    body: A morning briefing at 07:00, a rolling one every four hours, and importance-scored push alerts with a short "why it matters".
+  - title: Globe, search and PDF reports
+    body: A 3D globe and world map of coverage, full-text search, bookmarks, and downloadable PDF reports.
+stack:
+  - Python
+  - FastAPI
+  - Celery
+  - PostgreSQL
+  - Redis
+  - Qdrant
+  - Ollama
+  - Qwen3 4B / 14B
+  - BGE-M3
+  - Next.js
+  - three.js
+  - Docker
+reports:
+  - title: Daily briefing (PDF)
+    description: A full generated briefing, as delivered at 07:00.
+  - title: Story analysis report (PDF)
+    description: One story with its consensus, bias spectrum and fact-checks.
+credits: Parts of the web UI are adapted from World Monitor (AGPL-3.0).
+---
+
+import Pipeline from '../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../components/project/CodeSnippet.astro';
+import StoryAnalysis from '../../components/samples/StoryAnalysis.astro';
+
+## How it works
+
+The pipeline runs as queued jobs on four separate queues, so bulk article work never blocks the high-value story
+analysis. Two models split the load: a small one handles every article, and a larger one runs only where many sources
+meet.
+
+<Pipeline
+  title="Article → story → briefing"
+  caption="Every stage runs on one Linux host with a single GPU."
+  stages={[
+    { label: 'Fetch', detail: '41 RSS feeds polled every five minutes.', tag: 'feedparser' },
+    { label: 'Extract & clean', detail: 'Full-text extraction, language detection and de-duplication.', tag: 'trafilatura' },
+    { label: 'Embed', detail: 'Multilingual embeddings for every article, stored for similarity search.', tag: 'bge-m3 → qdrant' },
+    { label: 'Cluster into stories', detail: 'Semantic clustering groups coverage of the same event across outlets.' },
+    { label: 'Per-article analysis', detail: 'Summary and bias markers for each article.', tag: 'qwen3 4B' },
+    { label: 'Per-story analysis', detail: 'Consensus, divergence, known vs. unknown, fact vs. opinion.', tag: 'qwen3 14B' },
+    { label: 'Score & deliver', detail: 'Importance scoring, push alerts, scheduled briefings and PDF reports.', items: ['alerts', 'briefings', 'PDF reports', 'search'] },
+  ]}
+/>
+
+## Sample output
+
+<StoryAnalysis />
+
+## Verdicts are computed, not generated
+
+A model that is free to answer "confirmed" can do so while citing nothing. COUNSELOR retrieves quotes from *other*
+outlets and asks the model only to classify each one. The verdict then follows from the tallies.
+
+<CodeSnippet
+  file="backend/app/services/fact_check.py"
+  lang="python"
+  caption="A claim's own article and its own outlet can never corroborate it, and a quote from an unknown source is dropped rather than cited under a guessed name."
+  code={`
+def gather_evidence(
+    hits: list[SearchHit],
+    *,
+    claim_article_id: int | None,
+    claim_source_id: int | None,
+    source_names: dict[int, str],
+) -> list[Evidence]:
+    best: dict[int, Evidence] = {}
+    for h in hits:
+        payload = h.payload or {}
+        source_id = payload.get("source_id")
+        article_id = payload.get("article_id")
+        text = (payload.get("text") or "").strip()
+        if not text or source_id is None:
+            continue
+        if article_id is not None and article_id == claim_article_id:
+            continue
+        if source_id == claim_source_id:
+            continue
+        name = source_names.get(source_id)
+        if not name:
+            continue
+        ...
+    return sorted(best.values(), key=lambda e: e.score, reverse=True)
+
+
+def decide_verdict(*, supporting: int, contradicting: int) -> str:
+    if contradicting > 0:
+        return CONTESTED
+    if supporting >= 2:
+        return CONFIRMED
+    if supporting == 1:
+        return SINGLE_SOURCE
+    return UNVERIFIABLE
+`}
+/>

@@ -1,0 +1,179 @@
+---
+const stack = [
+  'Python', 'FastAPI', 'TypeScript', 'React', 'Next.js', 'Fastify', 'Prisma', 'PostgreSQL',
+  'Redis', 'Qdrant', 'Ollama', 'Qwen', 'Mistral', 'BGE-M3', 'Whisper', 'Kokoro', 'SDXL',
+  'ComfyUI', 'Celery', 'BullMQ', 'Docker', 'three.js', 'Lua', 'Vitest',
+];
+const half = Math.ceil(stack.length / 2);
+const rows = [stack.slice(0, half), stack.slice(half)];
+---
+
+<section id="stack" class="section tech" aria-labelledby="stack-title">
+  <div class="wrap layout">
+    <header class="head">
+      <p class="label" data-reveal>Stack</p>
+      <h2 id="stack-title" class="h-section" data-reveal style="--delay:.06s">Open models. Open tools. Our hardware.</h2>
+      <p class="lede" data-reveal style="--delay:.1s">
+        Everything here is open source or open-weight, so every system can be inspected, rebuilt and run without a
+        vendor account.
+      </p>
+    </header>
+
+    <div class="sphere" data-sphere aria-hidden="true">
+      {stack.map((t) => <span class="tag">{t}</span>)}
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    {
+      rows.map((row, r) => (
+        <div class:list={['track', r === 1 && 'reverse']}>
+          {[...row, ...row].map((t) => (
+            <span class="chip">{t}</span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+  <ul class="sr-only">
+    {stack.map((t) => <li>{t}</li>)}
+  </ul>
+</section>
+
+<script>
+  const host = document.querySelector<HTMLElement>('[data-sphere]');
+  const desktop = window.matchMedia('(min-width: 900px)');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (host) {
+    const tags = [...host.querySelectorAll<HTMLElement>('.tag')];
+    const n = tags.length;
+    // Fibonacci points: an even spread of tags over the sphere.
+    const pts = tags.map((_, i) => {
+      const y = 1 - (i / (n - 1)) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const th = Math.PI * (3 - Math.sqrt(5)) * i;
+      return [Math.cos(th) * r, y, Math.sin(th) * r];
+    });
+    let ax = 0.3;
+    let ay = 0;
+    let vx = 0.0012;
+    let vy = 0.004;
+    let running = false;
+    let raf = 0;
+
+    const draw = () => {
+      const R = host.clientWidth * 0.4;
+      const cx = Math.cos(ax), sx = Math.sin(ax), cy = Math.cos(ay), sy = Math.sin(ay);
+      tags.forEach((el, i) => {
+        const [x, y, z] = pts[i];
+        const x1 = x * cy + z * sy;
+        const z1 = -x * sy + z * cy;
+        const y2 = y * cx - z1 * sx;
+        const z2 = y * sx + z1 * cx;
+        const depth = (z2 + 1) / 2;
+        el.style.transform = `translate(-50%, -50%) translate3d(${x1 * R}px, ${y2 * R}px, 0) scale(${0.6 + depth * 0.55})`;
+        el.style.opacity = String(0.18 + depth * 0.82);
+        el.style.zIndex = String(Math.round(depth * 100));
+      });
+    };
+    const loop = () => {
+      ay += vy;
+      ax += vx;
+      draw();
+      raf = requestAnimationFrame(loop);
+    };
+    const setRunning = (on: boolean) => {
+      if (on === running) return;
+      running = on;
+      if (on && !reduce) loop();
+      else cancelAnimationFrame(raf);
+    };
+    host.addEventListener('pointermove', (e) => {
+      const r = host.getBoundingClientRect();
+      vy = ((e.clientX - r.left) / r.width - 0.5) * 0.02;
+      vx = -((e.clientY - r.top) / r.height - 0.5) * 0.02;
+    });
+    host.addEventListener('pointerleave', () => {
+      vx = 0.0012;
+      vy = 0.004;
+    });
+    const io = new IntersectionObserver(([e]) => setRunning(e.isIntersecting && desktop.matches));
+    io.observe(host);
+    draw();
+  }
+</script>
+
+<style>
+  .layout {
+    display: grid;
+    gap: 40px;
+    align-items: center;
+  }
+  .head .label {
+    margin-bottom: 20px;
+  }
+  .head .lede {
+    margin-top: 24px;
+    max-width: 40ch;
+  }
+  .sphere {
+    display: none;
+    position: relative;
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 560px;
+    justify-self: center;
+  }
+  .tag {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    color: var(--color-frost);
+    white-space: nowrap;
+    will-change: transform, opacity;
+    transition: color 0.2s;
+  }
+  .tag:hover {
+    color: var(--color-ice);
+  }
+  .marquee {
+    display: grid;
+    gap: 12px;
+    margin-top: 48px;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .track {
+    display: flex;
+    gap: 10px;
+    width: max-content;
+    animation: slide 38s linear infinite;
+  }
+  .track.reverse {
+    animation-direction: reverse;
+    animation-duration: 44s;
+  }
+  .track .chip {
+    font-size: 0.85rem;
+    padding: 0.5em 1em;
+  }
+  @keyframes slide {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (min-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr 1fr;
+    }
+    .sphere {
+      display: block;
+    }
+    .marquee {
+      display: none;
+    }
+  }
+</style>

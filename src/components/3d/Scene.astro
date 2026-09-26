@@ -1,0 +1,56 @@
+---
+interface Props {
+  name: 'northstar' | 'globe' | 'board' | 'radar';
+  class?: string;
+  label: string;
+}
+const { name, class: className = '', label } = Astro.props;
+---
+
+<div class:list={['scene-host', className]} data-scene={name} role="img" aria-label={label}>
+  <canvas></canvas>
+</div>
+
+<script>
+  import type { SceneFactory } from './engine';
+
+  const loaders: Record<string, () => Promise<{ default: SceneFactory }>> = {
+    northstar: () => import('./NorthStar'),
+    globe: () => import('./Globe'),
+    board: () => import('./Board'),
+    radar: () => import('./Radar'),
+  };
+
+  const hasWebGL = (() => {
+    try {
+      const c = document.createElement('canvas');
+      return !!(c.getContext('webgl2') || c.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  })();
+
+  const pending = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const host = entry.target as HTMLElement;
+        pending.unobserve(host);
+        const load = loaders[host.dataset.scene ?? ''];
+        if (load) Promise.all([import('./engine'), load()]).then(([engine, m]) => engine.mountScene(host, m.default));
+      }
+    },
+    { rootMargin: '300px' },
+  );
+
+  // Without WebGL the host keeps its gradient backdrop and three.js is never downloaded.
+  // With it, 3D waits until the page has loaded and gone idle, so text and images paint first.
+  const start = () =>
+    document.querySelectorAll<HTMLElement>('[data-scene]').forEach((el) =>
+      hasWebGL ? pending.observe(el) : el.classList.add('no-webgl'),
+    );
+  const whenIdle = () =>
+    'requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : setTimeout(start, 400);
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, { once: true });
+</script>

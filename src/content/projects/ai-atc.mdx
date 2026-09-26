@@ -1,0 +1,114 @@
+---
+title: AI_ATC
+category: Voice AI · aviation
+tagline: A self-hosted air traffic controller for X-Plane 12. You speak on the radio, and a local model answers in ICAO phraseology.
+summary: >-
+  AI_ATC replaces the simulator's scripted ATC with a controller that actually listens. A plugin streams the
+  aircraft's live state to a local server. The pilot speaks, and speech recognition, a specialist controller agent and
+  speech synthesis produce a realistic radio reply. Every instruction is checked against real navigation data and
+  safety rules before it is spoken. No cloud, no subscription, no per-minute cost.
+order: 3
+accent: aurora
+scene: radar
+logo: ../../assets/projects/ai-atc/logo.jpg
+metrics:
+  - value: '5'
+    label: specialist controllers, chosen by flight phase
+  - value: 2–4 s
+    label: target for a complete radio reply
+  - value: 0.61 s
+    label: speech-to-text per transmission (was 12.77 s)
+  - value: '0'
+    label: cloud services in the loop
+features:
+  - title: Voice in, voice out
+    body: Push-to-talk in the sim or the web portal. Speech is transcribed, answered and spoken back over COM1, all on the local GPU.
+  - title: Five specialist controllers
+    body: Clearance, Ground, Tower, Approach and Center agents, routed by frequency, request and flight phase.
+  - title: Grounded in real data
+    body: Retrieval over the simulator's navigation data, including SIDs, STARs and approaches, so instructions reference real procedures.
+  - title: Safety and readback checks
+    body: Replies are verified before they are spoken, pilot readbacks are checked against the clearance, and runway use is managed.
+  - title: Live map and weather
+    body: A web map with airport overlays and METAR colour coding, plus SimBrief import for flight plans.
+  - title: Runtime model switching
+    body: Swap between local models at runtime to trade latency against phraseology quality.
+stack:
+  - Python
+  - FastAPI
+  - Lua
+  - C++ (X-Plane SDK)
+  - Ollama
+  - Qwen 3.5
+  - Mistral 7B
+  - Whisper
+  - Kokoro TTS
+  - PostgreSQL
+  - Qdrant
+  - Docker
+---
+
+import Pipeline from '../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../components/project/CodeSnippet.astro';
+import RadioExchange from '../../components/samples/RadioExchange.astro';
+
+## How it works
+
+A radio reply has a two-to-four-second budget, so every stage is measured. Whisper tiny.en was chosen after
+benchmarking the same transmission across model sizes: all four produced the same intent accuracy, and tiny is 20×
+faster than medium.
+
+<Pipeline
+  title="Pilot transmission → controller reply"
+  caption="One round trip, entirely on the local machine."
+  stages={[
+    { label: 'Aircraft state', detail: 'The X-Plane plugin streams position, phase and radio state every second.', tag: 'C++ · Lua plugin' },
+    { label: 'Speech to text', detail: 'Push-to-talk audio is transcribed on the GPU.', tag: 'whisper tiny.en' },
+    {
+      label: 'Route to a controller',
+      detail: 'Frequency, keywords and flight phase pick the specialist agent.',
+      items: ['Clearance', 'Ground', 'Tower', 'Approach', 'Center'],
+    },
+    { label: 'Retrieve context', detail: 'Airport data, procedures and conversation history.', tag: 'qdrant + postgres' },
+    { label: 'Generate the reply', detail: 'ICAO-style phraseology from a local model.', tag: 'qwen 3.5' },
+    { label: 'Verify', detail: 'Safety rules, conflict detection and readback checks before anything is spoken.' },
+    { label: 'Speak', detail: 'Synthesised speech played back over the in-sim COM1 radio.', tag: 'kokoro' },
+  ]}
+/>
+
+## Sample output
+
+<RadioExchange />
+
+## Routing by flight phase
+
+When the frequency and keywords don't settle it, the router falls back to the flight phase, then to whether the
+aircraft is on the ground and how high it is.
+
+<CodeSnippet
+  file="fastapi/agents/router.py"
+  lang="python"
+  caption="The last fallback in the routing chain. Earlier checks use the controller that owns the aircraft, the tuned frequency and explicit keywords."
+  code={`
+phase = aircraft_state.get("phase", "cruise").lower()
+possible_agents = self.phase_agent_map.get(phase, ["center"])
+
+if len(possible_agents) > 1:
+    altitude = aircraft_state.get("altitude_msl", 0)
+    on_ground = aircraft_state.get("on_ground", False)
+
+    if on_ground:
+        if "clearance" in possible_agents:
+            return "clearance"
+        return "ground"
+    elif altitude < 18000:
+        if "approach" in possible_agents:
+            return "approach"
+        return "tower"
+    else:
+        if "center" in possible_agents:
+            return "center"
+
+return possible_agents[0]
+`}
+/>

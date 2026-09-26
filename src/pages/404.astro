@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found">
+  <section class="wrap nf">
+    <p class="label">404 · off course</p>
+    <h1 class="display">This page isn't on the chart.</h1>
+    <p class="lede">The link may be old, or the page may have moved.</p>
+    <a href="/" class="btn btn-primary">Back to the home page</a>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    min-height: 80svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+    padding-top: 72px;
+  }
+  h1 {
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    max-width: 14ch;
+  }
+  .btn {
+    align-self: flex-start;
+  }
+</style>

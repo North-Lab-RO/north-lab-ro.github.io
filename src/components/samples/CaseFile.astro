@@ -1,0 +1,191 @@
+---
+// Excerpt of a generated case ("The Silent Alarm"). The hidden solution is deliberately left out.
+const header = [
+  ['Case no.', '23-0121'],
+  ['Offence', 'Homicide'],
+  ['Era', '2020 · modern'],
+  ['Time budget', '90 min · 10 days'],
+];
+const suspects = [
+  ['Samuel Carter', '42', 'Business partner'],
+  ['Emily Thompson', '38', 'Personal assistant'],
+  ['David Miller', '50', 'Investor'],
+  ['Lisa Johnson', '35', 'Neighbour'],
+];
+const evidence = [
+  ['E-02', 'Blood stain on kitchen floor', 'Biological'],
+  ['E-03', 'Fibre on office chair', 'Trace'],
+  ['E-08', 'Doorbell camera footage', 'Digital'],
+];
+---
+
+<figure class="casefile" data-reveal>
+  <div class="folder">
+    <div class="tab label">Case file</div>
+    <header class="head">
+      <h3 class="title">The Silent Alarm</h3>
+      <dl class="meta">
+        {
+          header.map(([k, v]) => (
+            <div>
+              <dt class="label">{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </header>
+
+    <section class="brief">
+      <p class="label">Briefing</p>
+      <p>
+        On March 15, 2020, at approximately 08:30, a silent alarm was triggered at the residence of Richard Henderson.
+        Officers arrived to find Henderson deceased in his home office. No signs of forced entry or struggle were noted.
+        Neighbors report hearing a loud noise around 02:30.
+      </p>
+    </section>
+
+    <div class="cols">
+      <section>
+        <p class="label">Persons of interest</p>
+        <ul class="rows">
+          {
+            suspects.map(([name, age, role]) => (
+              <li>
+                <span>{name}</span>
+                <span class="muted">
+                  {age} · {role}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+      <section>
+        <p class="label">Evidence log (excerpt)</p>
+        <ul class="rows">
+          {
+            evidence.map(([no, name, cat]) => (
+              <li>
+                <span>
+                  <b class="no">{no}</b> {name}
+                </span>
+                <span class="muted">{cat}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+
+    <p class="sealed">
+      <span class="stamp">Solution sealed</span>
+      <span class="muted">Method, motive and proving evidence stay hidden until the team files its report.</span>
+    </p>
+  </div>
+  <figcaption class="muted">Excerpt from a real generated case. Written entirely by the local model, then validated before publishing.</figcaption>
+</figure>
+
+<style>
+  .casefile {
+    margin-block: 40px;
+  }
+  .folder {
+    position: relative;
+    display: grid;
+    gap: 24px;
+    padding: clamp(22px, 3vw, 34px);
+    padding-top: 36px;
+    border: 1px solid var(--color-line);
+    border-radius: 6px 20px 20px 20px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 27px, color-mix(in srgb, var(--color-line) 40%, transparent) 27px 28px),
+      var(--color-deep);
+  }
+  .tab {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    padding: 6px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: 6px 12px 0 0;
+    transform: translateY(-100%);
+    background: var(--color-deep);
+    color: var(--color-ember);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    letter-spacing: -0.02em;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 20px;
+    margin-top: 18px;
+  }
+  .meta dd {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+  .brief p:last-child {
+    margin-top: 8px;
+    max-width: 70ch;
+  }
+  .cols {
+    display: grid;
+    gap: 24px;
+  }
+  .rows {
+    margin-top: 8px;
+  }
+  .rows li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 12px;
+    padding-block: 9px;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 0.95rem;
+  }
+  .no {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.78rem;
+    color: var(--color-ember);
+    margin-right: 6px;
+  }
+  .sealed {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    font-size: 0.9rem;
+  }
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1.5px solid var(--color-ember);
+    color: var(--color-ember);
+    border-radius: 4px;
+    transform: rotate(-3deg);
+  }
+  figcaption {
+    margin-top: 12px;
+    font-size: 0.85rem;
+  }
+  @media (min-width: 720px) {
+    .meta {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .cols {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+    }
+  }
+</style>

@@ -1,0 +1,64 @@
+---
+# ─────────────────────────────────────────────────────────────
+#  NEW PROJECT TEMPLATE
+#  1. Copy this file to  src/content/projects/<slug>.mdx
+#     (the slug becomes the URL: /projects/<slug>/)
+#  2. Fill in the fields below.
+#  3. Put images in  src/assets/projects/<slug>/  and PDFs in  public/reports/
+#  Files starting with "_" are never published, so this template stays private.
+# ─────────────────────────────────────────────────────────────
+title: PROJECT NAME
+category: Short domain label          # e.g. "Document intelligence"
+tagline: One sentence that says what it does for the person using it.
+summary: >-
+  A short paragraph (3–5 sentences) shown at the top of the project page.
+order: 4                               # position in the Work list
+draft: true                            # set to false to publish
+accent: violet                         # ice | aurora | ember | violet
+scene: none                            # none | globe | board | radar
+# cover: ../../assets/projects/<slug>/cover.jpg   # used as card art when scene is "none"
+# coverAlt: Describe the cover image
+# logo: ../../assets/projects/<slug>/logo.png
+metrics:                               # the first three appear on the home card
+  - value: '0'
+    label: what this number measures
+features:
+  - title: Feature name
+    body: One or two sentences.
+stack:
+  - Python
+gallery: []
+#  - src: ../../assets/projects/<slug>/screen-1.jpg
+#    alt: What the image shows
+#    caption: Optional short caption
+reports: []
+#  - title: Sample report (PDF)
+#    description: What the reader will find in it
+#    file: my-report.pdf        # omit "file" to show a placeholder slot
+# credits: Third-party code or assets to acknowledge.
+---
+
+import Pipeline from '../../components/diagrams/Pipeline.astro';
+import CodeSnippet from '../../components/project/CodeSnippet.astro';
+
+## How it works
+
+A paragraph about the architecture.
+
+<Pipeline
+  title="Input → output"
+  stages={[
+    { label: 'First stage', detail: 'What happens here.', tag: 'tool or model' },
+    { label: 'Second stage', detail: 'What happens here.' },
+  ]}
+/>
+
+<CodeSnippet
+  file="path/in/repo.py"
+  lang="python"
+  caption="Why this excerpt matters."
+  code={`
+def example():
+    return 42
+`}
+/>

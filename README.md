@@ -1,1 +1,128 @@
-# northlab.github.io
+# North-Lab-RO
+
+**Private AI systems, built and run on our own hardware.**
+
+This repository is the source of the North-Lab-RO portfolio site: **https://north-lab-ro.github.io**
+
+| Project | Domain | What it does |
+|---|---|---|
+| [COUNSELOR](https://north-lab-ro.github.io/projects/counselor/) | News intelligence | Reads 41 outlets, groups coverage into stories and explains where the sources agree, with fact-checks computed from other outlets. |
+| [CASES](https://north-lab-ro.github.io/projects/cases/) | Generative game | A local model writes a complete detective case, and validators prove it can be solved before anyone plays it. |
+| [AI_ATC](https://north-lab-ro.github.io/projects/ai-atc/) | Voice AI · aviation | A self-hosted air traffic controller for X-Plane 12: speech in, ICAO phraseology out, entirely on-device. |
+
+---
+
+## How the projects work
+
+### COUNSELOR
+
+```mermaid
+flowchart LR
+    A[41 RSS feeds<br/>every 5 min] --> B[Extract & clean<br/>trafilatura]
+    B --> C[Embed<br/>BGE-M3]
+    C --> Q[(Qdrant)]
+    C --> D[Cluster into stories]
+    D --> E[Per-article analysis<br/>Qwen3 4B]
+    E --> F[Per-story analysis<br/>Qwen3 14B]
+    F --> G{Deliver}
+    G --> H[Push alerts]
+    G --> I[Briefings 07:00 + every 4 h]
+    G --> J[PDF reports]
+```
+
+### CASES
+
+```mermaid
+flowchart LR
+    subgraph GEN[Staged generation · Mistral Small 24B]
+        direction TB
+        S1[Premise] --> S2[Hidden truth] --> S3[Cast & locations] --> S4[Evidence & lab] --> S5[Interviews & documents] --> S6[Opening state]
+    end
+    GEN --> V{Validators<br/>structural · timeline · era<br/>fairness · solvability}
+    V -- fails --> R[Targeted repair<br/>up to 3×] --> GEN
+    V -- passes --> IMG[Render images<br/>SDXL · ComfyUI]
+    IMG --> ADM[Admin review] --> PLAY[Play · no GPU needed]
+```
+
+### AI_ATC
+
+```mermaid
+flowchart LR
+    XP[X-Plane 12 plugin<br/>state every 1 s] --> API[FastAPI server]
+    MIC[Push-to-talk] --> STT[Whisper tiny.en]
+    STT --> API
+    API --> RT{Router}
+    RT --> C1[Clearance]
+    RT --> C2[Ground]
+    RT --> C3[Tower]
+    RT --> C4[Approach]
+    RT --> C5[Center]
+    C1 & C2 & C3 & C4 & C5 --> RAG[(Nav data · Qdrant · PostgreSQL)]
+    RAG --> LLM[Local LLM · Qwen 3.5]
+    LLM --> VER[Safety & readback checks]
+    VER --> TTS[Kokoro TTS] --> COM[COM1 radio in sim]
+```
+
+---
+
+## About this site
+
+```mermaid
+flowchart TB
+    MDX[src/content/projects/*.mdx] --> COL[Content collection<br/>schema-validated]
+    COL --> HOME[Home page<br/>/]
+    COL --> PAGE[Project pages<br/>/projects/slug/]
+    ASSETS[src/assets/projects/*] --> IMG[astro:assets → WebP]
+    IMG --> PAGE
+    PAGE --> ISL[3D islands<br/>three.js loaded on demand]
+    HOME --> ISL
+    PUSH[git push main] --> GA[GitHub Actions<br/>withastro/action] --> GP[GitHub Pages]
+```
+
+- **Astro** static site. Every page is plain HTML with no framework runtime.
+- **three.js** scenes load only when they scroll into view. They cap the pixel ratio on phones, pause when off-screen and respect *reduced motion*.
+- **Tailwind CSS 4** for design tokens. Fonts are Unbounded, Hanken Grotesk and IBM Plex Mono.
+
+### Develop locally
+
+Requires **Node 22.12 or newer** (see `.nvmrc`).
+
+```bash
+npm install
+npm run dev       # http://localhost:4321
+npm run build     # static output in dist/
+npm run preview   # serve the built site
+```
+
+### Add a project
+
+1. Copy `src/content/projects/_template.mdx` to `src/content/projects/<slug>.mdx`. The slug becomes the URL `/projects/<slug>/`.
+2. Fill in the frontmatter: title, category, tagline, metrics, features, stack, and optionally `gallery`, `reports` and `scene`.
+3. Put images in `src/assets/projects/<slug>/`. They're converted to WebP at build time.
+4. Set `draft: false` and push. The card on the home page and the project page are generated automatically.
+
+`order` controls the position in the Work list. `accent` picks the project colour (`ice`, `aurora`, `ember`, `violet`). `scene` picks a 3D hero (`globe`, `board`, `radar`), or use `none` to show the cover image instead.
+
+To show a "next project" placeholder card on the home page, set `showComingSoon = true` in `src/config.ts`.
+
+### Add a PDF report
+
+Drop the file into `public/reports/`, then point a `reports` entry at it:
+
+```yaml
+reports:
+  - title: Daily briefing (PDF)
+    description: A full generated briefing.
+    file: counselor-daily-briefing.pdf
+```
+
+An entry without `file` shows a "Sample in preparation" slot.
+
+### Deploy
+
+Every push to `main` builds and deploys through `.github/workflows/deploy.yml`.
+One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+---
+
+Source code for the showcased projects is private and available on request.

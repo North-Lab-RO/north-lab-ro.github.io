@@ -1,0 +1,138 @@
+---
+import { nav } from '../config';
+import Wordmark from './Wordmark.astro';
+---
+
+<header class="nav" data-nav>
+  <div class="wrap nav-inner">
+    <a href="/" class="brand" aria-label="North-Lab-RO home">
+      <Wordmark />
+    </a>
+
+    <nav aria-label="Primary" class="links">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+
+    <button class="menu-btn" aria-expanded="false" aria-controls="mobile-menu" data-menu-btn>
+      <span class="sr-only">Menu</span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="sheet" data-menu hidden>
+    <nav aria-label="Mobile" class="wrap">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-nav]')!;
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]')!;
+  const menu = document.querySelector<HTMLElement>('[data-menu]')!;
+
+  const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const setOpen = (open: boolean) => {
+    btn.setAttribute('aria-expanded', String(open));
+    header.classList.toggle('is-open', open);
+    menu.hidden = !open;
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+  menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  window.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+</script>
+
+<style>
+  .nav {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    transition:
+      background-color 0.4s var(--ease-out),
+      border-color 0.4s var(--ease-out);
+    border-bottom: 1px solid transparent;
+  }
+  .nav.is-scrolled,
+  .nav.is-open {
+    background: color-mix(in srgb, var(--color-night) 78%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-color: color-mix(in srgb, var(--color-line) 70%, transparent);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .brand {
+    display: inline-flex;
+    color: var(--color-frost);
+  }
+  .links {
+    display: none;
+    gap: 36px;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+  .links a {
+    color: var(--color-mist);
+    transition: color 0.25s;
+  }
+  .links a:hover {
+    color: var(--color-frost);
+  }
+  .menu-btn {
+    display: grid;
+    place-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    cursor: pointer;
+  }
+  .bar {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--color-frost);
+    transition: transform 0.35s var(--ease-out);
+  }
+  .is-open .bar:first-of-type {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+  .is-open .bar:last-of-type {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+  .sheet {
+    height: calc(100dvh - 72px);
+    border-top: 1px solid var(--color-line);
+  }
+  .sheet nav {
+    display: flex;
+    flex-direction: column;
+    padding-top: 24px;
+  }
+  .sheet a {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--color-line);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 1.9rem;
+    letter-spacing: -0.02em;
+  }
+  @media (min-width: 768px) {
+    .links {
+      display: flex;
+    }
+    .menu-btn,
+    .sheet {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,123 @@
+---
+import { getProjects } from '../../lib';
+
+const projects = await getProjects();
+const byId = new Map(projects.map((p) => [p.id, p.data.title]));
+
+const capabilities = [
+  {
+    title: 'Local language models',
+    body: 'Model choice, quantisation and scheduling for a single GPU, so several models can share one card without blocking each other.',
+    proof: ['counselor', 'cases', 'ai-atc'],
+  },
+  {
+    title: 'Retrieval & vector search',
+    body: 'Embeddings, semantic clustering and retrieval over your own documents, stored in a self-hosted vector database.',
+    proof: ['counselor', 'ai-atc'],
+  },
+  {
+    title: 'Voice interfaces',
+    body: 'Speech-to-text, intent routing and speech synthesis tuned for latency. A spoken reply lands in 2–4 seconds.',
+    proof: ['ai-atc'],
+  },
+  {
+    title: 'Generative pipelines',
+    body: 'Multi-stage structured generation with schema-constrained JSON, plus image generation on the same GPU.',
+    proof: ['cases'],
+  },
+  {
+    title: 'Validation layers',
+    body: 'Deterministic checks between the model and the person: solvability proofs, grounded fact-checks and instruction verification.',
+    proof: ['counselor', 'cases', 'ai-atc'],
+  },
+  {
+    title: 'Self-hosted infrastructure',
+    body: 'Containerised stacks with job queues, workers, monitoring and backups, running on the owner’s own machine.',
+    proof: ['counselor', 'cases', 'ai-atc'],
+  },
+];
+---
+
+<section id="capabilities" class="section caps" aria-labelledby="caps-title">
+  <div class="wrap">
+    <header class="head">
+      <p class="label" data-reveal>Capabilities</p>
+      <h2 id="caps-title" class="h-section" data-reveal style="--delay:.06s">What we build, and where it already runs.</h2>
+    </header>
+
+    <ul class="grid">
+      {
+        capabilities.map((c, i) => (
+          <li class="cap panel" data-reveal style={`--delay:${(i % 3) * 0.07}s`}>
+            <h3 class="h-sub">{c.title}</h3>
+            <p class="muted">{c.body}</p>
+            <p class="proof">
+              <span class="label">Runs in</span>
+              {c.proof
+                .filter((id) => byId.has(id))
+                .map((id) => (
+                  <a href={`/projects/${id}/`} class="chip">
+                    {byId.get(id)}
+                  </a>
+                ))}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .head {
+    max-width: 780px;
+    margin-bottom: 56px;
+  }
+  .head .label {
+    margin-bottom: 20px;
+  }
+  .grid {
+    display: grid;
+    gap: 16px;
+  }
+  .cap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+    transition:
+      border-color 0.4s var(--ease-out),
+      transform 0.4s var(--ease-out);
+  }
+  .cap:hover {
+    border-color: color-mix(in srgb, var(--color-ice) 45%, var(--color-line));
+  }
+  .cap p.muted {
+    flex: 1;
+  }
+  .proof {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .proof .label {
+    font-size: 0.66rem;
+    margin-right: 4px;
+  }
+  .proof .chip:hover {
+    border-color: var(--color-ice);
+    color: var(--color-ice);
+  }
+  @media (min-width: 700px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

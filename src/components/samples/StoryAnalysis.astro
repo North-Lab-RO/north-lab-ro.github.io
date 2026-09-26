@@ -1,0 +1,228 @@
+---
+// Illustrative story: layout and fields mirror the app's story view; the event is invented.
+const sources = [0.18, 0.31, 0.42, 0.47, 0.5, 0.55, 0.61, 0.7, 0.84];
+const checks = [
+  { claim: 'Temperatures will reach 39 °C in the south', verdict: 'confirmat', en: 'confirmed · 3 outlets', tone: 'ok' },
+  { claim: 'Water restrictions start in two counties', verdict: 'o singură sursă', en: 'single source', tone: 'single' },
+  { claim: 'Schools will close on Friday', verdict: 'contestat', en: 'contested · 1 outlet disagrees', tone: 'bad' },
+];
+---
+
+<figure class="story" data-reveal>
+  <div class="frame">
+    <header class="top">
+      <span class="label">Story · 9 sources · 6 RO, 3 intl.</span>
+      <span class="chip importance">Importance 7.4</span>
+    </header>
+    <h3 class="title">Cod galben de caniculă prelungit în sudul țării</h3>
+    <p class="en muted">Heat warning extended across southern Romania</p>
+
+    <div class="summary">
+      <p lang="ro">
+        Avertizarea de caniculă a fost prelungită până duminică pentru 14 județe. Sursele sunt de acord asupra
+        temperaturilor și duratei, dar diferă privind măsurile pentru școli.
+      </p>
+      <p class="muted en-t">
+        The heat warning has been extended to Sunday for 14 counties. Sources agree on temperatures and duration, but
+        differ on measures for schools.
+      </p>
+    </div>
+
+    <div class="meters">
+      <div class="meter">
+        <p class="label">Bias spectrum</p>
+        <div class="spectrum" role="img" aria-label="Nine sources spread from left to right, clustered around the centre">
+          {sources.map((s) => <span class="dot" style={`left:${s * 100}%`} />)}
+        </div>
+        <div class="scale label"><span>Left</span><span>Centre</span><span>Right</span></div>
+      </div>
+      <div class="meter">
+        <p class="label">Consensus</p>
+        <div class="bar"><span style="width:78%"></span></div>
+        <p class="val"><strong>78%</strong> <span class="muted">high agreement</span></p>
+      </div>
+    </div>
+
+    <div class="kv">
+      <div>
+        <p class="label">What we know</p>
+        <ul>
+          <li>Warning covers 14 counties</li>
+          <li>Valid until Sunday, 22:00</li>
+        </ul>
+      </div>
+      <div>
+        <p class="label">Still unclear</p>
+        <ul>
+          <li>Whether schools will close</li>
+          <li>Impact on the power grid</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="checks">
+      <p class="label">Fact-check · verdicts computed from other outlets</p>
+      <ul>
+        {
+          checks.map((c) => (
+            <li>
+              <span class="claim">{c.claim}</span>
+              <span class={`verdict ${c.tone}`} lang="ro">
+                {c.verdict}
+              </span>
+              <span class="muted en-v">{c.en}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+  <figcaption class="muted">Illustrative sample. The fields and layout match the app's story view; the event is invented.</figcaption>
+</figure>
+
+<style>
+  .story {
+    margin-block: 40px;
+  }
+  .frame {
+    display: grid;
+    gap: 22px;
+    padding: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background: var(--color-deep);
+  }
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .importance {
+    color: var(--color-ice);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .en {
+    margin-top: -14px;
+    font-size: 0.9rem;
+  }
+  .summary {
+    display: grid;
+    gap: 6px;
+    padding-left: 16px;
+    border-left: 2px solid var(--color-ice);
+  }
+  .en-t {
+    font-size: 0.88rem;
+  }
+  .meters {
+    display: grid;
+    gap: 22px;
+  }
+  .meter .label {
+    margin-bottom: 10px;
+  }
+  .spectrum {
+    position: relative;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #6f86ff, #3a4a6e 50%, #ff8a6f);
+  }
+  .dot {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: var(--color-frost);
+    border: 2px solid var(--color-deep);
+  }
+  .scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.62rem;
+  }
+  .bar {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-line);
+    overflow: hidden;
+  }
+  .bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-ice), var(--color-aurora));
+  }
+  .val {
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  .kv {
+    display: grid;
+    gap: 18px;
+  }
+  .kv ul {
+    margin-top: 8px;
+    display: grid;
+    gap: 4px;
+  }
+  .kv li::before {
+    content: '— ';
+    color: var(--color-mist);
+  }
+  .checks ul {
+    display: grid;
+    margin-top: 10px;
+  }
+  .checks li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    align-items: center;
+    padding-block: 12px;
+    border-top: 1px solid var(--color-line);
+  }
+  .claim {
+    font-size: 0.95rem;
+  }
+  .verdict {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.3em 0.7em;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .verdict.ok {
+    color: var(--color-aurora);
+  }
+  .verdict.single {
+    color: var(--color-ice);
+  }
+  .verdict.bad {
+    color: var(--color-ember);
+  }
+  .en-v {
+    grid-column: 1 / -1;
+    font-size: 0.78rem;
+  }
+  figcaption {
+    margin-top: 12px;
+    font-size: 0.85rem;
+  }
+  @media (min-width: 720px) {
+    .meters,
+    .kv {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+  }
+</style>
