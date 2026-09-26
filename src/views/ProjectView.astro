@@ -243,6 +243,15 @@ const sceneLabels = {
   .prose :global(h2:first-child) {
     margin-top: 0;
   }
+  .prose :global(h3:not([class])) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-top: clamp(40px, 5vw, 64px);
+    margin-bottom: 12px;
+  }
   .prose :global(p) {
     max-width: 68ch;
     color: color-mix(in srgb, var(--color-frost) 85%, var(--color-mist));

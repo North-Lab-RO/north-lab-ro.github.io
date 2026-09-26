@@ -7,7 +7,8 @@ summary: >-
   single story and writes a balanced analysis for each one: a summary, where the sources sit on the bias spectrum,
   what they agree and disagree on, what is known versus still unclear, and which statements are fact and which are
   opinion. It ranks every story by importance, sends alerts for the ones that matter and delivers a briefing every
-  morning. Every model runs on one local machine; the only outbound traffic is the news feeds themselves.
+  morning. Every model runs on one local machine; outbound traffic goes only to news publishers, and to Reddit when
+  enabled.
 order: 1
 accent: ice
 scene: globe
@@ -33,7 +34,11 @@ features:
   - title: Alerts and briefings
     body: Importance-scored push alerts with a short "why it matters", a morning briefing at 07:00 and a rolling one through the day.
   - title: Globe, search and PDF reports
-    body: A 3D globe of coverage, full-text search, bookmarks, a report archive and downloadable PDF reports.
+    body: A 3D globe of coverage with country and capital names, full-text search, bookmarks, a report archive and downloadable PDF reports.
+  - title: Lead images, kept private
+    body: Story and article cards show the publisher's lead image, fetched and cached by the server, so your browser never contacts the publisher.
+  - title: Rising and falling stories
+    body: Every story is marked as rising or over, and a dedicated "Rising" panel shows what is gaining sources right now.
 stack:
   - Python
   - FastAPI
@@ -79,6 +84,7 @@ where many sources meet.
   stages={[
     { label: 'Fetch', detail: '41 RSS feeds polled every five minutes.', tag: 'feedparser' },
     { label: 'Extract & clean', detail: 'Full-text extraction, language detection and de-duplication.', tag: 'trafilatura' },
+    { label: 'Lead image', detail: 'Taken from RSS media tags or page metadata, fetched with a size cap, a type allow-list and an SSRF guard, then cached.', tag: 'image proxy' },
     { label: 'Embed', detail: 'Multilingual embeddings for every article, stored for similarity search.', tag: 'bge-m3 → qdrant' },
     { label: 'Cluster into stories', detail: 'Cosine similarity ≥ 0.78 within a ±72-hour window; a story stops accepting articles after 48 hours.' },
     { label: 'Per-article analysis', detail: 'Summary, bias estimate and headline translation for each article.', tag: 'qwen3 4B' },
@@ -156,6 +162,35 @@ ever reached was 65.6, so fixed 75/50/25 lines would have painted everything gre
     { tag: '21.3 / 24.5 GB', title: 'Three resident models', body: 'The 4B and 14B language models and the embedding model stay loaded together on a single 24 GB card.' },
     { tag: '17,062', title: 'Articles clustered', body: 'The archive the trend and importance statistics are computed over.' },
     { tag: '~90 s', title: 'A complete briefing', body: 'Thirteen stories across Romania and the world, with fact-checks, written in one pass.' },
+  ]}
+/>
+
+## Recent work
+
+Shipped in September 2026, in the order the code landed.
+
+<InfoGrid
+  items={[
+    { tag: 'shipped', title: 'Lead images through a private proxy', body: 'Captured from RSS media and page metadata, fetched with a size cap, a type allow-list and an SSRF guard that refuses private and carrier-grade NAT addresses, streamed and aborted mid-read if too large, cached on disk with LRU eviction and remembered misses, and served through the app’s own endpoint.' },
+    { tag: 'shipped', title: 'Typography for reading', body: 'Inter for the interface, Merriweather for article text and monospace kept for data: counts, timestamps, scores and globe labels.' },
+    { tag: 'shipped', title: 'Better Romanian', body: 'Romanian grammar rules taken from real model errors are part of every prompt, and a re-titling pass rewrites awkward headlines on the small model.' },
+    { tag: 'shipped', title: 'Rising and falling stories', body: 'Each story is marked as rising or over, and a “Rising” panel surfaces the stories gaining sources fastest.' },
+    { tag: 'shipped', title: 'Places named on the map', body: 'Country and capital names on both the flat map and the 3D globe.' },
+    { tag: 'shipped', title: 'Categories that hold', body: 'Exactly one geography per story (Romania, then Europe, then the rest of the world), enforced in code, and a category panel that filters the whole dashboard.' },
+    { tag: 'shipped', title: 'Reports by region', body: 'Each region’s section of a briefing is written from that region’s own stories, so Romania and the world each get real depth.' },
+    { tag: 'shipped', title: 'A pipeline that keeps up', body: 'The analysis backlog drains on its own and a stall is detected; a story is no longer re-analysed for every new article, which had been 31% of all model work.' },
+  ]}
+/>
+
+### In development
+
+Designed and approved; implementation is under way.
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: 'in development', title: 'Settings, and a VPN you can see', body: 'A settings page for integration credentials, encrypted at rest and write-only once saved. Public fetches go through a ProtonVPN WireGuard tunnel as a proxy, while internal traffic stays direct. If the tunnel is down, fetches wait instead of exposing the real address. Each integration reports working, failing or not configured, with an on-demand test.' },
+    { tag: 'in development', title: 'A reader alongside the control room', body: 'A three-pane reading view (sections, story list, story) next to the existing dashboard, with endless scrolling through stories, a layout built for phones and keyboard navigation.' },
   ]}
 />
 

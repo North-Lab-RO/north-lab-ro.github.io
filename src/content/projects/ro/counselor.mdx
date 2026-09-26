@@ -7,8 +7,8 @@ summary: >-
   singură poveste și scrie pentru fiecare o analiză echilibrată: un rezumat, unde se situează sursele pe spectrul
   politic, în ce privințe sunt de acord și unde diferă, ce se știe și ce este încă neclar, ce afirmații sunt fapte și
   care sunt opinii. Fiecare poveste primește un scor de importanță, cele relevante declanșează alerte, iar în fiecare
-  dimineață sosește o sinteză. Toate modelele rulează pe o singură mașină locală; singurul trafic spre exterior sunt
-  fluxurile de știri.
+  dimineață sosește o sinteză. Toate modelele rulează pe o singură mașină locală; traficul spre exterior merge doar
+  către publicațiile de știri și, când este activat, către Reddit.
 order: 1
 accent: ice
 scene: globe
@@ -34,7 +34,11 @@ features:
   - title: Alerte și sinteze
     body: Alerte push ordonate după importanță, cu o scurtă explicație „de ce contează”, o sinteză de dimineață la 07:00 și una actualizată pe parcursul zilei.
   - title: Glob, căutare și rapoarte PDF
-    body: Un glob 3D al relatărilor, căutare în tot textul, marcaje, o arhivă de rapoarte și rapoarte PDF descărcabile.
+    body: Un glob 3D al relatărilor, cu numele țărilor și ale capitalelor, căutare în tot textul, marcaje, o arhivă de rapoarte și rapoarte PDF descărcabile.
+  - title: Imagini principale, păstrate private
+    body: Cardurile poveștilor și ale articolelor arată imaginea principală a publicației, descărcată și stocată de server, astfel încât browserul tău nu contactează niciodată publicația.
+  - title: Povești în creștere și în declin
+    body: Fiecare poveste este marcată ca fiind în creștere sau încheiată, iar un panou dedicat, „În creștere”, arată ce câștigă surse chiar acum.
 stack:
   - Python
   - FastAPI
@@ -80,6 +84,7 @@ unul mai mare rulează doar acolo unde se întâlnesc multe surse.
   stages={[
     { label: 'Preluare', detail: '41 de fluxuri RSS interogate la fiecare cinci minute.', tag: 'feedparser' },
     { label: 'Extragere și curățare', detail: 'Extragerea textului integral, detectarea limbii și eliminarea duplicatelor.', tag: 'trafilatura' },
+    { label: 'Imaginea principală', detail: 'Preluată din etichetele media RSS sau din metadatele paginii, descărcată cu limită de mărime, listă de tipuri permise și protecție SSRF, apoi stocată.', tag: 'proxy de imagini' },
     { label: 'Embedding', detail: 'Vectori multilingvi pentru fiecare articol, stocați pentru căutare după similaritate.', tag: 'bge-m3 → qdrant' },
     { label: 'Grupare în povești', detail: 'Similaritate cosinus ≥ 0,78 într-o fereastră de ±72 de ore; după 48 de ore, o poveste nu mai acceptă articole.' },
     { label: 'Analiza fiecărui articol', detail: 'Rezumat, estimarea orientării și traducerea titlului pentru fiecare articol.', tag: 'qwen3 4B' },
@@ -157,6 +162,35 @@ vreodată a fost 65,6, așa că niște praguri fixe de 75/50/25 ar fi colorat to
     { tag: '21,3 / 24,5 GB', title: 'Trei modele rezidente', body: 'Modelele de limbaj de 4B și 14B și modelul de embedding rămân încărcate împreună pe o singură placă de 24 GB.' },
     { tag: '17.062', title: 'Articole grupate', body: 'Arhiva pe care sunt calculate statisticile de trend și de importanță.' },
     { tag: '~90 s', title: 'O sinteză completă', body: 'Treisprezece povești din România și din lume, cu verificări, scrise într-o singură trecere.' },
+  ]}
+/>
+
+## Lucrări recente
+
+Livrate în septembrie 2026, în ordinea în care au intrat în cod.
+
+<InfoGrid
+  items={[
+    { tag: 'livrat', title: 'Imagini principale printr-un proxy privat', body: 'Preluate din etichetele media RSS și din metadatele paginii, descărcate cu limită de mărime, listă de tipuri permise și o protecție SSRF care refuză adresele private și pe cele de tip NAT al operatorului, transferate în flux și oprite din citire dacă sunt prea mari, stocate pe disc cu eliminare LRU și cu memorarea ratărilor, apoi servite prin propriul endpoint al aplicației.' },
+    { tag: 'livrat', title: 'Tipografie pentru citit', body: 'Inter pentru interfață, Merriweather pentru textul articolelor și monospace păstrat pentru date: numărători, ore, scoruri și etichetele globului.' },
+    { tag: 'livrat', title: 'O română mai bună', body: 'Reguli de gramatică românească, extrase din greșelile reale ale modelului, fac parte din fiecare prompt, iar o etapă de reformulare rescrie titlurile stângace cu modelul mic.' },
+    { tag: 'livrat', title: 'Povești în creștere și în declin', body: 'Fiecare poveste este marcată ca fiind în creștere sau încheiată, iar panoul „În creștere” scoate în față poveștile care câștigă cel mai repede surse.' },
+    { tag: 'livrat', title: 'Locuri numite pe hartă', body: 'Numele țărilor și ale capitalelor, atât pe harta plană, cât și pe globul 3D.' },
+    { tag: 'livrat', title: 'Categorii care țin', body: 'O singură geografie pe poveste (România, apoi Europa, apoi restul lumii), impusă în cod, și un panou de categorii care filtrează întregul panou principal.' },
+    { tag: 'livrat', title: 'Rapoarte pe regiuni', body: 'Fiecare secțiune regională a unei sinteze este scrisă din poveștile acelei regiuni, astfel încât România și lumea primesc fiecare o analiză reală.' },
+    { tag: 'livrat', title: 'Un flux care ține pasul', body: 'Coada de analiză se golește singură, iar o blocare este detectată; o poveste nu mai este reanalizată la fiecare articol nou, ceea ce însemna 31% din toată munca modelelor.' },
+  ]}
+/>
+
+### În dezvoltare
+
+Proiectate și aprobate; implementarea este în curs.
+
+<InfoGrid
+  columns={2}
+  items={[
+    { tag: 'în dezvoltare', title: 'Setări și un VPN vizibil', body: 'O pagină de setări pentru datele de acces ale integrărilor, criptate și imposibil de citit înapoi după salvare. Descărcările publice trec printr-un tunel ProtonVPN WireGuard folosit ca proxy, iar traficul intern rămâne direct. Dacă tunelul cade, descărcările așteaptă în loc să expună adresa reală. Fiecare integrare arată dacă funcționează, dacă are erori sau dacă nu este configurată, cu un test la cerere.' },
+    { tag: 'în dezvoltare', title: 'Un cititor lângă camera de control', body: 'O vizualizare de citit în trei panouri (secțiuni, lista de povești, povestea), alături de panoul existent, cu derulare continuă prin povești, un aspect gândit pentru telefon și navigare din tastatură.' },
   ]}
 />
 
