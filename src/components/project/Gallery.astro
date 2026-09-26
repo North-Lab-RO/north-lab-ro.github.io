@@ -12,11 +12,13 @@ const { lang, items, note } = Astro.props;
 const tp = t(lang).project;
 // Phone screenshots are tall: they keep their own shape and sit side by side instead of being cropped square.
 const phones = items.length > 0 && items.every((it) => it.src.height > it.src.width * 1.3);
+// Desktop screenshots are shown whole, in an even grid, each with its caption.
+const screens = items.length > 0 && items.every((it) => it.src.width > it.src.height * 1.3);
 const large = await Promise.all(items.map((it) => getImage({ src: it.src, width: 1600, format: 'webp' })));
 ---
 
 <section class="gallery" aria-label={tp.gallery}>
-  <div class:list={['track', phones && 'phones']} data-reveal>
+  <div class:list={['track', phones && 'phones', screens && 'screens']} data-reveal>
     {
       items.map((it, i) => (
         <figure class="shot">
@@ -114,6 +116,13 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
   .phones .open img {
     aspect-ratio: auto;
   }
+  .screens {
+    grid-auto-columns: 86%;
+  }
+  .screens .open img {
+    aspect-ratio: 16 / 10;
+    object-position: top;
+  }
   figcaption {
     margin-top: 10px;
     font-size: 0.85rem;
@@ -210,6 +219,21 @@ const large = await Promise.all(items.map((it) => getImage({ src: it.src, width:
       grid-row: auto;
     }
     .phones .shot:first-child img {
+      height: auto;
+    }
+    .screens {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px 20px;
+    }
+    .screens .shot:first-child {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .screens .shot:first-child img {
+      aspect-ratio: 16 / 10;
+      height: auto;
+    }
+    .screens .shot:first-child .open {
       height: auto;
     }
   }

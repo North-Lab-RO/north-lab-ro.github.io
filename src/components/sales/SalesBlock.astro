@@ -16,21 +16,22 @@ const { lang, entry } = Astro.props;
 const d = entry.data;
 const s = t(lang).sales;
 
-// Descriptions for known gallery images, by file name; anything else gets a numbered fallback.
-const shotAlt: Record<string, Record<Lang, string>> = {
-  '08-phone-dashboard': { en: 'the Today dashboard on a phone', ro: 'panoul Astăzi pe telefon' },
-  '09-phone-story': { en: 'a story on a phone', ro: 'o poveste pe telefon' },
-};
 // Real screenshots: every image dropped into src/assets/projects/<slug>/screens/ appears here, in file-name order.
+// A screens/captions.json next to them ({ "<file name without extension>": { "en": {title, caption}, "ro": {...} } })
+// gives each one its alt text and caption; anything without an entry gets a numbered fallback.
 const shots = import.meta.glob<{ default: ImageMetadata }>('/src/assets/projects/*/screens/*.{png,jpg,jpeg,webp}', { eager: true });
+type ShotText = Record<Lang, { title: string; caption: string }>;
+const captionFiles = import.meta.glob<{ default: Record<string, ShotText> }>('/src/assets/projects/*/screens/captions.json', { eager: true });
+const captions = captionFiles[`/src/assets/projects/${entry.slug}/screens/captions.json`]?.default ?? {};
 const real = Object.entries(shots)
   .filter(([path]) => path.includes(`/projects/${entry.slug}/screens/`))
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([path, mod], i) => {
-    const known = shotAlt[path.split('/').pop()!.replace(/\.\w+$/, '')];
+    const known = captions[path.split('/').pop()!.replace(/\.\w+$/, '')]?.[lang];
     return {
       src: mod.default,
-      alt: known ? `${d.title}: ${known[lang]}` : lang === 'ro' ? `${d.title}: captură de ecran ${i + 1}` : `${d.title}: screenshot ${i + 1}`,
+      alt: known ? `${d.title}: ${known.title}` : lang === 'ro' ? `${d.title}: captură de ecran ${i + 1}` : `${d.title}: screenshot ${i + 1}`,
+      caption: known?.caption,
     };
   });
 // Language of each product's real interface; the note says so when it differs from the page.

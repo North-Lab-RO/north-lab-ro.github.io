@@ -1,0 +1,282 @@
+{
+  "01-today": {
+    "en": {
+      "title": "Today",
+      "caption": "Your morning at a glance: clocks, a live headline ticker, a globe of where the news is happening, and panels for alerts, trending stories and top headlines."
+    },
+    "ro": {
+      "title": "Astăzi",
+      "caption": "Dimineața ta dintr-o privire: ceasuri, banda live de titluri, un glob cu locurile unde se întâmplă știrile și panouri cu alerte, subiecte în tendințe și titluri principale."
+    }
+  },
+  "02-today-panels": {
+    "en": {
+      "title": "Today: more panels",
+      "caption": "Further down the dashboard: the current briefing, the stories gaining sources fastest, and what the AI engine is working on."
+    },
+    "ro": {
+      "title": "Astăzi: mai multe panouri",
+      "caption": "Mai jos pe panou: raportul curent, poveștile care câștigă cel mai repede surse noi și la ce lucrează motorul AI."
+    }
+  },
+  "03-story-top": {
+    "en": {
+      "title": "A story, top",
+      "caption": "One event told by nine outlets: which analysis steps ran, a summary in three lengths, how the sources lean, and how much they agree."
+    },
+    "ro": {
+      "title": "Povestea, sus",
+      "caption": "Un eveniment relatat de nouă publicații: ce etape de analiză au rulat, rezumatul în trei lungimi, cum se orientează sursele și cât de mult concordă."
+    }
+  },
+  "04-story-known": {
+    "en": {
+      "title": "What we know, and what we don't",
+      "caption": "Confirmed facts kept apart from open questions, and how outlets on the left, centre and right each frame the story."
+    },
+    "ro": {
+      "title": "Ce știm și ce nu știm",
+      "caption": "Faptele confirmate, separate de întrebările încă deschise, și felul în care publicațiile de stânga, de centru și de dreapta prezintă povestea."
+    }
+  },
+  "05-story-sources": {
+    "en": {
+      "title": "Public reaction, people and places",
+      "caption": "What people are saying online, with verbatim quotes, next to the people, organisations and places named in the coverage."
+    },
+    "ro": {
+      "title": "Reacția publicului, oameni și locuri",
+      "caption": "Ce spun oamenii online, cu citate exacte, lângă persoanele, organizațiile și locurile menționate în relatări."
+    }
+  },
+  "05b-story-sources": {
+    "en": {
+      "title": "Every article, and how the story evolved",
+      "caption": "Every article behind the story with its outlet, earlier versions of the summary, and related stories for context."
+    },
+    "ro": {
+      "title": "Toate articolele și evoluția poveștii",
+      "caption": "Toate articolele din spatele poveștii, cu publicația fiecăruia, versiunile anterioare ale rezumatului și povești legate, pentru context."
+    }
+  },
+  "06-map-globe": {
+    "en": {
+      "title": "Global monitor",
+      "caption": "The whole world on one screen: stories pinned where they happen, a choice of time window, the busiest countries and a live global feed."
+    },
+    "ro": {
+      "title": "Monitor global",
+      "caption": "Toată lumea pe un singur ecran: poveștile fixate acolo unde se petrec, fereastra de timp aleasă, țările cele mai active și fluxul global live."
+    }
+  },
+  "07-map-flat": {
+    "en": {
+      "title": "Flat map with a country's news",
+      "caption": "Switch the globe to a flat map, click a country and see its unread stories, each with a short summary and its importance."
+    },
+    "ro": {
+      "title": "Harta plană cu știrile unei țări",
+      "caption": "Treci de la glob la harta plană, dai clic pe o țară și vezi poveștile ei necitite, fiecare cu un scurt rezumat și nivelul de importanță."
+    }
+  },
+  "08-reports-list": {
+    "en": {
+      "title": "Reports",
+      "caption": "Every briefing in one archive, and a new one on demand: a morning report, a rolling update, or a report for any chosen day."
+    },
+    "ro": {
+      "title": "Rapoarte",
+      "caption": "Toate rapoartele într-o singură arhivă și unul nou la cerere: raport de dimineață, actualizare rulantă sau raport pentru orice zi aleasă."
+    }
+  },
+  "09-briefing-top": {
+    "en": {
+      "title": "Morning briefing",
+      "caption": "A citable morning briefing: its reference number, the period it covers, how many stories and outlets back it, and a summary of the last 24 hours."
+    },
+    "ro": {
+      "title": "Raportul de dimineață",
+      "caption": "Un raport de dimineață pe care îl poți cita: numărul de referință, perioada acoperită, câte povești și surse îl susțin și rezumatul ultimelor 24 de ore."
+    }
+  },
+  "10-briefing-deep": {
+    "en": {
+      "title": "Deep dives with evidence",
+      "caption": "Each deep dive explains what happened, why it matters and where sources disagree, backed by measured evidence: outlets, confidence and consensus."
+    },
+    "ro": {
+      "title": "Analize în detaliu, cu dovezi",
+      "caption": "Fiecare analiză explică ce s-a întâmplat, de ce contează și unde diferă sursele, cu dovezi măsurate: publicații, încredere și consens."
+    }
+  },
+  "11-briefing-factchecks": {
+    "en": {
+      "title": "Fact-checks",
+      "caption": "Key claims checked against the sources: confirmed, single-source, disputed or unverifiable, with who supports and who contradicts each one."
+    },
+    "ro": {
+      "title": "Verificarea faptelor",
+      "caption": "Afirmațiile importante, verificate în surse: confirmat, o singură sursă, contestat sau neverificabil, cu cine le susține și cine le contrazice."
+    }
+  },
+  "12-news": {
+    "en": {
+      "title": "News",
+      "caption": "Every article as it arrives, filtered by day and outlet, with an AI summary, a framing reading, and foreign headlines translated into Romanian."
+    },
+    "ro": {
+      "title": "Știri",
+      "caption": "Fiecare articol, pe măsură ce apare, filtrat după zi și publicație, cu rezumat AI, analiza încadrării și titlurile străine traduse în română."
+    }
+  },
+  "13-search": {
+    "en": {
+      "title": "Search",
+      "caption": "Search every story by keyword, person or organisation and get the matching stories with their sources and leaning."
+    },
+    "ro": {
+      "title": "Căutare",
+      "caption": "Cauți în toate poveștile după cuvânt-cheie, persoană sau organizație și primești poveștile potrivite, cu sursele și orientarea lor."
+    }
+  },
+  "14-saved": {
+    "en": {
+      "title": "Saved stories",
+      "caption": "Stories you saved and a read-later list, kept in your own library."
+    },
+    "ro": {
+      "title": "Povești salvate",
+      "caption": "Poveștile pe care le-ai salvat și lista de citit mai târziu, păstrate în biblioteca ta."
+    }
+  },
+  "15-alerts": {
+    "en": {
+      "title": "Alerts",
+      "caption": "Alerts are raised only for the stories that matter, each with a line on why it matters to you, and can reach you as browser notifications."
+    },
+    "ro": {
+      "title": "Alerte",
+      "caption": "Alertele apar doar pentru poveștile care contează, fiecare cu un rând despre de ce te privește, și pot ajunge la tine ca notificări în browser."
+    }
+  },
+  "16-ai": {
+    "en": {
+      "title": "What the AI is doing",
+      "caption": "A live view of the local AI: whether it is running, how long the queue is, the models in use and the jobs in progress."
+    },
+    "ro": {
+      "title": "Ce face AI-ul",
+      "caption": "O vedere live a AI-ului local: dacă rulează, cât de lungă e coada, ce modele folosește și ce sarcini sunt în lucru."
+    }
+  },
+  "17-ai-errors": {
+    "en": {
+      "title": "Analysis stages and errors",
+      "caption": "How far each analysis step has got across all stories, and a clear log of anything that failed."
+    },
+    "ro": {
+      "title": "Etape de analiză și erori",
+      "caption": "Cât a avansat fiecare etapă de analiză pe toate poveștile și un jurnal clar cu tot ce a eșuat."
+    }
+  },
+  "18-admin": {
+    "en": {
+      "title": "Sources administration",
+      "caption": "Pipeline counters, a one-click refresh with a per-feed report, and a box that adds any news site by its address."
+    },
+    "ro": {
+      "title": "Administrarea surselor",
+      "caption": "Contoarele procesării, actualizarea dintr-un clic cu raport pe fiecare flux și o casetă care adaugă orice site de știri după adresă."
+    }
+  },
+  "18b-admin-feeds": {
+    "en": {
+      "title": "Feed health",
+      "caption": "Every feed with its last result and failure count, so a broken source is spotted and fixed quickly."
+    },
+    "ro": {
+      "title": "Starea fluxurilor",
+      "caption": "Fiecare flux, cu ultimul rezultat și numărul de eșecuri, ca o sursă defectă să fie observată și reparată repede."
+    }
+  },
+  "19-sources": {
+    "en": {
+      "title": "A source's profile",
+      "caption": "Each outlet's leaning, credibility and publishing rhythm, with the stories it has covered recently."
+    },
+    "ro": {
+      "title": "Profilul unei surse",
+      "caption": "Orientarea, credibilitatea și ritmul de publicare al fiecărei publicații, cu poveștile pe care le-a acoperit recent."
+    }
+  },
+  "20-settings": {
+    "en": {
+      "title": "Settings",
+      "caption": "Connect Reddit for public reactions: keys are stored encrypted, shown only as a fingerprint, and tested with one click."
+    },
+    "ro": {
+      "title": "Setări",
+      "caption": "Conectezi Reddit pentru reacțiile publicului: cheile se păstrează criptate, apar doar ca amprentă și le testezi dintr-un clic."
+    }
+  },
+  "21-command": {
+    "en": {
+      "title": "Command palette",
+      "caption": "Press Ctrl+K anywhere to jump to a section or straight to a story."
+    },
+    "ro": {
+      "title": "Paleta de comenzi",
+      "caption": "Apeși Ctrl+K oriunde ca să sari la o secțiune sau direct la o poveste."
+    }
+  },
+  "22-story-overlay": {
+    "en": {
+      "title": "Story over the dashboard",
+      "caption": "Open a story without leaving the dashboard: it slides in from the side, and closing it takes you back to where you were."
+    },
+    "ro": {
+      "title": "Povestea peste panou",
+      "caption": "Deschizi o poveste fără să părăsești panoul: apare din lateral, iar când o închizi revii exact unde erai."
+    }
+  },
+  "23-sources-list": {
+    "en": {
+      "title": "Sources",
+      "caption": "All the outlets you follow, with their declared leaning, language, country and credibility score."
+    },
+    "ro": {
+      "title": "Surse",
+      "caption": "Toate publicațiile pe care le urmărești, cu orientarea declarată, limba, țara și scorul de credibilitate."
+    }
+  },
+  "24-article": {
+    "en": {
+      "title": "An article, translated",
+      "caption": "A foreign article with its headline translated into Romanian, an AI summary on top and the full text below."
+    },
+    "ro": {
+      "title": "Un articol, tradus",
+      "caption": "Un articol străin, cu titlul tradus în română, rezumatul AI deasupra și textul integral dedesubt."
+    }
+  },
+  "25-panel-picker": {
+    "en": {
+      "title": "Choose your panels",
+      "caption": "Build the dashboard you want from twenty panels, from alerts and fact-checks to feed health and live streams."
+    },
+    "ro": {
+      "title": "Alegi panourile",
+      "caption": "Îți construiești panoul dorit din douăzeci de panouri, de la alerte și verificări factuale la starea fluxurilor și transmisiuni live."
+    }
+  },
+  "26-workspace": {
+    "en": {
+      "title": "A second workspace",
+      "caption": "Keep several named workspaces side by side, such as one for monitoring with fact-checks, feed health and errors."
+    },
+    "ro": {
+      "title": "Un al doilea spațiu de lucru",
+      "caption": "Păstrezi mai multe spații de lucru cu nume, de exemplu unul de monitorizare, cu verificări factuale, starea fluxurilor și erori."
+    }
+  }
+}
