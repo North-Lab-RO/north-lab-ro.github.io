@@ -218,8 +218,10 @@ canvas {
 }
 
 /* ---- load-in for above-the-fold content: transform only, so it paints immediately ---- */
+/* backwards, not both: a transform animation that stays applied keeps a stacking context,
+   which would trap dropdowns (the demo menu) under the elements that follow */
 [data-rise] {
-  animation: rise 1.1s var(--ease-out) both;
+  animation: rise 1.1s var(--ease-out) backwards;
   animation-delay: var(--delay, 0s);
 }
 @keyframes rise {

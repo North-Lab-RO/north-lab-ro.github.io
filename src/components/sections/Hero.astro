@@ -44,6 +44,10 @@ const hasContact = Boolean(site.email || site.linkedin);
     padding-bottom: clamp(40px, 7vw, 88px);
     isolation: isolate;
   }
+  /* the open demo menu hangs below the hero; lift the hero over the next section */
+  .hero:has(:global(.demo[open])) {
+    z-index: 1;
+  }
   .hero :global(.hero-scene) {
     position: absolute;
     inset: 0;
