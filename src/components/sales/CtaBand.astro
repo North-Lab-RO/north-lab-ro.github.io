@@ -22,11 +22,6 @@ const hasContact = Boolean(site.email || site.linkedin);
         </div>
         <div class="actions">
           <DemoButton lang={lang} product={product} />
-          {site.email && site.linkedin && (
-            <a href={site.linkedin} class="btn btn-ghost" rel="noopener">
-              {t(lang).contact.linkedin} <span aria-hidden="true">↗</span>
-            </a>
-          )}
         </div>
       </div>
     </section>

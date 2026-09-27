@@ -27,7 +27,9 @@ export type SceneFactory = (ctx: SceneContext) => SceneInstance;
 
 const clamp = (v: number) => Math.max(-1, Math.min(1, v));
 const CALM_SPEED = 0.35;
-const DPR_STEPS = [2, 1.5, 1, 0.75];
+const DPR_STEPS = [2, 1.5, 1.25, 1];
+/** Frames the governor ignores after each start: the first ones include shader compiles and texture uploads. */
+const WARMUP_FRAMES = 90;
 
 export function mountScene(host: HTMLElement, factory: SceneFactory): () => void {
   const canvas = host.querySelector('canvas');
@@ -44,7 +46,8 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
   const small = window.innerWidth < 768;
   const lite = small || (navigator.hardwareConcurrency ?? 8) <= 4;
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let dpr = Math.min(window.devicePixelRatio, small ? 1.5 : 2);
+  // Phones have 3x screens: below 2 the scenes look soft. The governor only lowers this on a device that truly struggles.
+  let dpr = Math.min(window.devicePixelRatio, 2);
   renderer.setPixelRatio(dpr);
   renderer.setClearColor(0x000000, 0);
 
@@ -74,8 +77,13 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
   // Frame-time governor: a slow device first loses resolution, then frame rate. The scene never freezes.
   let minFrameMs = 0;
   let fps = 0;
+  let warmup = WARMUP_FRAMES;
   const samples: number[] = [];
   const govern = (ms: number) => {
+    if (warmup > 0) {
+      warmup--;
+      return;
+    }
     samples.push(ms);
     if (samples.length < 30) return;
     const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
@@ -130,6 +138,8 @@ export function mountScene(host: HTMLElement, factory: SceneFactory): () => void
   const start = () => {
     if (raf) return;
     last = performance.now();
+    warmup = WARMUP_FRAMES;
+    samples.length = 0;
     loop();
   };
   const stop = () => {

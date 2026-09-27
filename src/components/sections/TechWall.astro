@@ -6,13 +6,17 @@ interface Props {
 }
 const { lang } = Astro.props;
 const st = t(lang).stack;
-const stack = [
-  'Python', 'FastAPI', 'TypeScript', 'React', 'Next.js', 'Fastify', 'Prisma', 'PostgreSQL',
-  'Redis', 'Qdrant', 'Ollama', 'Qwen', 'Mistral', 'BGE-M3', 'Whisper', 'Kokoro', 'SDXL',
-  'ComfyUI', 'PaddleOCR', 'Celery', 'BullMQ', 'Docker', 'three.js', 'Lua', 'Vitest',
+// Three orbits around the customer's own machine: the models, what runs and stores them, and the apps built on top.
+const rings = [
+  { tone: 'aurora', r: 17, dur: 46, items: ['Qwen', 'Mistral', 'BGE-M3', 'Whisper', 'Kokoro', 'SDXL'] },
+  { tone: 'ice', r: 30, dur: 70, items: ['Ollama', 'ComfyUI', 'PaddleOCR', 'Qdrant', 'PostgreSQL', 'Redis', 'Celery', 'BullMQ'] },
+  {
+    tone: 'violet',
+    r: 42,
+    dur: 96,
+    items: ['Python', 'FastAPI', 'TypeScript', 'React', 'Next.js', 'Fastify', 'Prisma', 'Docker', 'three.js', 'Lua', 'Vitest'],
+  },
 ];
-const half = Math.ceil(stack.length / 2);
-const rows = [stack.slice(0, half), stack.slice(half)];
 ---
 
 <section id="stack" class="section tech" aria-labelledby="stack-title">
@@ -21,99 +25,52 @@ const rows = [stack.slice(0, half), stack.slice(half)];
       <p class="label" data-reveal>{st.label}</p>
       <h2 id="stack-title" class="h-section" data-reveal style="--delay:.06s">{st.title}</h2>
       <p class="lede" data-reveal style="--delay:.1s">{st.lede}</p>
+      <ul class="legend" data-reveal style="--delay:.14s">
+        {
+          rings.map((ring, i) => (
+            <li style={`--tone:var(--color-${ring.tone})`}>
+              <span class="dot" aria-hidden="true" />
+              {st.rings[i]}
+              <span class="sr-only">: {ring.items.join(', ')}</span>
+            </li>
+          ))
+        }
+      </ul>
     </header>
 
-    <div class="sphere" data-sphere aria-hidden="true">
-      {stack.map((t) => <span class="tag">{t}</span>)}
+    <div class="orbit" aria-hidden="true">
+      <div class="core">
+        <span class="pulse"></span>
+        <span class="pulse late"></span>
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="1.5" /><rect x="4" y="13" width="16" height="7" rx="1.5" /><path d="M8 7.5h.01M8 16.5h.01M12 7.5h4M12 16.5h4" /></svg>
+        <span class="core-label">{st.core}</span>
+      </div>
+      {
+        rings.map((ring, i) => (
+          <div
+            class:list={['orb-ring', i % 2 === 1 && 'ccw']}
+            style={`--r:${ring.r}cqw;--dur:${ring.dur}s;--tone:var(--color-${ring.tone})`}
+          >
+            {ring.items.map((item, k) => (
+              <span class="slot" style={`--a:${(360 / ring.items.length) * k + i * 17}deg`}>
+                <span class="tag">{item}</span>
+              </span>
+            ))}
+          </div>
+        ))
+      }
     </div>
   </div>
-
-  <div class="marquee" aria-hidden="true">
-    {
-      rows.map((row, r) => (
-        <div class:list={['track', r === 1 && 'reverse']}>
-          {[...row, ...row].map((t) => (
-            <span class="chip">{t}</span>
-          ))}
-        </div>
-      ))
-    }
-  </div>
-  <ul class="sr-only">
-    {stack.map((t) => <li>{t}</li>)}
-  </ul>
 </section>
 
-<script>
-  const host = document.querySelector<HTMLElement>('[data-sphere]');
-  const desktop = window.matchMedia('(min-width: 900px)');
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (host) {
-    const tags = [...host.querySelectorAll<HTMLElement>('.tag')];
-    const n = tags.length;
-    // Fibonacci points: an even spread of tags over the sphere.
-    const pts = tags.map((_, i) => {
-      const y = 1 - (i / (n - 1)) * 2;
-      const r = Math.sqrt(1 - y * y);
-      const th = Math.PI * (3 - Math.sqrt(5)) * i;
-      return [Math.cos(th) * r, y, Math.sin(th) * r];
-    });
-    let ax = 0.3;
-    let ay = 0;
-    // Reduced motion: the sphere still turns, just slowly.
-    const pace = reduce ? 0.35 : 1;
-    let vx = 0.0012 * pace;
-    let vy = 0.004 * pace;
-    let running = false;
-    let raf = 0;
-
-    const draw = () => {
-      const R = host.clientWidth * 0.4;
-      const cx = Math.cos(ax), sx = Math.sin(ax), cy = Math.cos(ay), sy = Math.sin(ay);
-      tags.forEach((el, i) => {
-        const [x, y, z] = pts[i];
-        const x1 = x * cy + z * sy;
-        const z1 = -x * sy + z * cy;
-        const y2 = y * cx - z1 * sx;
-        const z2 = y * sx + z1 * cx;
-        const depth = (z2 + 1) / 2;
-        el.style.transform = `translate(-50%, -50%) translate3d(${x1 * R}px, ${y2 * R}px, 0) scale(${0.6 + depth * 0.55})`;
-        el.style.opacity = String(0.18 + depth * 0.82);
-        el.style.zIndex = String(Math.round(depth * 100));
-      });
-    };
-    const loop = () => {
-      ay += vy;
-      ax += vx;
-      draw();
-      raf = requestAnimationFrame(loop);
-    };
-    const setRunning = (on: boolean) => {
-      if (on === running) return;
-      running = on;
-      if (on) loop();
-      else cancelAnimationFrame(raf);
-    };
-    if (!reduce) host.addEventListener('pointermove', (e) => {
-      const r = host.getBoundingClientRect();
-      vy = ((e.clientX - r.left) / r.width - 0.5) * 0.02;
-      vx = -((e.clientY - r.top) / r.height - 0.5) * 0.02;
-    });
-    host.addEventListener('pointerleave', () => {
-      vx = 0.0012 * pace;
-      vy = 0.004 * pace;
-    });
-    const io = new IntersectionObserver(([e]) => setRunning(e.isIntersecting && desktop.matches));
-    io.observe(host);
-    draw();
-  }
-</script>
-
 <style>
+  /* the turning rings' corners must never widen the page on a phone */
+  .tech {
+    overflow-x: clip;
+  }
   .layout {
     display: grid;
-    gap: 40px;
+    gap: 48px;
     align-items: center;
   }
   .head .label {
@@ -123,63 +80,154 @@ const rows = [stack.slice(0, half), stack.slice(half)];
     margin-top: 24px;
     max-width: 40ch;
   }
-  .sphere {
-    display: none;
+  .legend {
+    display: grid;
+    gap: 10px;
+    margin-top: 28px;
+    font-size: 0.9rem;
+    color: var(--color-mist);
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .legend .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--tone);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--tone) 60%, transparent);
+  }
+
+  /* ── the orbit: pure CSS, so it keeps turning whatever the page's scripts are doing ── */
+  .orbit {
     position: relative;
-    aspect-ratio: 1;
+    container-type: inline-size;
     width: 100%;
-    max-width: 560px;
+    max-width: 600px;
+    aspect-ratio: 1;
     justify-self: center;
   }
-  .tag {
+  .orb-ring {
+    position: absolute;
+    inset: 0;
+    animation: spin var(--dur) linear infinite;
+  }
+  .orb-ring::before {
+    content: '';
     position: absolute;
     left: 50%;
     top: 50%;
+    width: calc(var(--r) * 2);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    border: 1px dashed color-mix(in srgb, var(--tone) 32%, transparent);
+  }
+  .slot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a)));
+  }
+  .tag {
+    display: block;
+    translate: -50% -50%;
+    padding: 0.35em 0.75em;
+    border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-deep) 88%, transparent);
     font-family: var(--font-mono);
-    font-size: 1.05rem;
+    font-size: clamp(0.6rem, 2.1cqw, 0.84rem);
     color: var(--color-frost);
     white-space: nowrap;
-    will-change: transform, opacity;
-    transition: color 0.2s;
+    /* turns back as fast as its ring turns, so every name stays upright */
+    animation: spin var(--dur) linear infinite reverse;
   }
-  .tag:hover {
-    color: var(--color-ice);
-  }
-  .marquee {
-    display: grid;
-    gap: 12px;
-    margin-top: 48px;
-    overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  }
-  .track {
-    display: flex;
-    gap: 10px;
-    width: max-content;
-    animation: slide 38s linear infinite;
-  }
-  .track.reverse {
+  .ccw {
     animation-direction: reverse;
-    animation-duration: 44s;
   }
-  .track .chip {
-    font-size: 0.85rem;
-    padding: 0.5em 1em;
+  .ccw .tag {
+    animation-direction: normal;
   }
-  @keyframes slide {
+  /* a mouse can hold the orbit still to read it; on touch screens :hover sticks, so never there */
+  @media (hover: hover) and (pointer: fine) {
+    .orbit:hover .orb-ring,
+    .orbit:hover .tag {
+      animation-play-state: paused;
+    }
+  }
+  .core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    width: 21cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--color-ice) 55%, transparent);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-ice) 22%, var(--color-deep)), var(--color-deep) 70%);
+    box-shadow: 0 0 40px -6px color-mix(in srgb, var(--color-ice) 55%, transparent);
+  }
+  .core svg {
+    width: 34%;
+    fill: none;
+    stroke: var(--color-ice);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    translate: 0 -12%;
+  }
+  .core-label {
+    position: absolute;
+    top: 62%;
+    font-family: var(--font-mono);
+    font-size: clamp(0.45rem, 1.5cqw, 0.66rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ice);
+    white-space: nowrap;
+  }
+  .pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid var(--color-ice);
+    animation: ping 4s var(--ease-out) infinite;
+  }
+  .pulse.late {
+    animation-delay: 2s;
+  }
+  @keyframes spin {
     to {
-      transform: translateX(-50%);
+      rotate: 360deg;
+    }
+  }
+  @keyframes ping {
+    from {
+      opacity: 0.7;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 2.6;
+    }
+  }
+  /* Reduced motion: the same orbit, turning much more slowly. */
+  @media (prefers-reduced-motion: reduce) {
+    .orb-ring,
+    .tag {
+      animation-duration: calc(var(--dur) * 2.5);
+    }
+    .pulse {
+      animation-duration: 8s;
     }
   }
   @media (min-width: 900px) {
     .layout {
       grid-template-columns: 1fr 1fr;
-    }
-    .sphere {
-      display: block;
-    }
-    .marquee {
-      display: none;
     }
   }
 </style>

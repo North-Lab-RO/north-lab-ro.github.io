@@ -99,6 +99,9 @@ export function disposeTree(root: Object3D) {
 
 export const hex = (css: string) => new Color(css);
 
+/** Resolution multiplier for canvas-drawn textures: 2 on high-density screens, 1 elsewhere. */
+export const textureScale = () => (window.devicePixelRatio > 1.5 ? 2 : 1);
+
 export interface LabelStyle {
   color?: string;
   border?: string;
@@ -122,11 +125,15 @@ export function makeLabel(text: string, style: LabelStyle = {}): Label {
   const W = style.wide ? 1024 : 512;
   const H = 96;
   const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
+  // Twice the pixels on sharp screens, so chips stay crisp when a phone shows them large.
+  const S = textureScale();
+  c.width = W * S;
+  c.height = H * S;
   const g = c.getContext('2d')!;
+  g.scale(S, S);
   const tex = new CanvasTexture(c);
   tex.colorSpace = SRGBColorSpace;
+  tex.anisotropy = 4;
   const sprite = new Sprite(
     new SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: !style.overlay }),
   );

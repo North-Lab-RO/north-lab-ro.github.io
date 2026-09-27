@@ -12,7 +12,7 @@ const { lang } = Astro.props;
 const p = t(lang).projects;
 const all = await getProjects(lang);
 // The products with a live 3D scene are featured large; the others share the grid below.
-const homeFeatured = ['counselor', 'athena', 'ai-atc'];
+const homeFeatured = ['counselor', 'athena', 'banky', 'ai-atc'];
 const featured = homeFeatured.map((slug) => all.find((pr) => pr.slug === slug)).filter((pr) => pr !== undefined);
 const rest = all.filter((pr) => !homeFeatured.includes(pr.slug));
 ---
@@ -29,7 +29,7 @@ const rest = all.filter((pr) => !homeFeatured.includes(pr.slug));
       {featured.map((pr, i) => <FeaturedProject lang={lang} project={pr} flip={i % 2 === 1} flagship={i === 0} />)}
     </div>
 
-    <ul class="grid">
+    <ul class:list={['grid', rest.length + (showComingSoon ? 1 : 0) === 1 && 'solo']}>
       {
         rest.map((pr, i) => (
           <li class="card" style={`--accent:${accentVar[pr.data.accent]};--delay:${i * 0.08}s`} data-reveal>
@@ -207,6 +207,33 @@ const rest = all.filter((pr) => !homeFeatured.includes(pr.slug));
   @media (min-width: 760px) {
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    /* a single product left in the grid: full width, picture beside the text */
+    .grid.solo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .solo .card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      grid-template-rows: 1fr repeat(6, auto) 1fr;
+      column-gap: clamp(28px, 4vw, 56px);
+    }
+    .solo .visual-wrap {
+      grid-row: 1 / -1;
+      margin-bottom: 0;
+      align-self: center;
+    }
+    .solo .card > :not(.visual-wrap, .link) {
+      grid-column: 2;
+    }
+    .solo .cat { grid-row: 2; }
+    .solo .title { grid-row: 3; }
+    .solo .tagline { grid-row: 4; }
+    .solo .for { grid-row: 5; }
+    .solo .metrics { grid-row: 6; }
+    .solo .more { grid-row: 7; }
+    .solo .more {
+      justify-self: start;
     }
   }
   .features {
